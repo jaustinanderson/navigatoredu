@@ -1,6 +1,6 @@
 # NavigatorEdu ⚓
 
-![CI](https://github.com/YOUR_USERNAME/navigatoredu/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/jaustinanderson/navigatoredu/actions/workflows/ci.yml/badge.svg)
 
 A full-stack reference and training web app for a **fictional** knowledge
 domain — the celestial-navigation practices of the invented *Tidewatch
