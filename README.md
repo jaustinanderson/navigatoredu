@@ -81,7 +81,44 @@ uvicorn backend.app.main:app --reload
 - API docs: <http://127.0.0.1:8000/docs>
 
 First run auto-seeds an empty database; the explicit seed script is for
-re-importing after you edit `seed.json` (it upserts, so re-running is safe).
+re-importing after you edit a seed file (it upserts, so re-running is safe).
+
+## Content packs (SEED_PATH)
+
+The entire application is content-agnostic: all domain content lives in a
+single JSON "content pack," selected with the `SEED_PATH` environment
+variable. Two packs ship with the repo:
+
+| Pack | File | Domain |
+|------|------|--------|
+| Tidewatch Guild (default) | `data/seed.json` | fictional celestial navigation |
+| ArchiveGuild | `data/seed_archiveguild.json` | fictional archive apprenticeship |
+
+Run with the default pack:
+
+```bash
+python -m backend.app.seed
+uvicorn backend.app.main:app --reload
+```
+
+Run with the ArchiveGuild pack — zero code changes:
+
+```bash
+rm -f data/navigatoredu.db          # start from a clean database
+SEED_PATH=data/seed_archiveguild.json python -m backend.app.seed
+SEED_PATH=data/seed_archiveguild.json uvicorn backend.app.main:app --reload
+```
+
+Same routes, same frontend, same tests — different product. Note that the
+seed script upserts by primary key and both packs use the same ID scheme, so
+switch packs on a fresh database rather than seeding one over the other.
+
+With Docker:
+
+```bash
+docker compose down -v              # reset the persisted volume
+SEED_PATH=data/seed_archiveguild.json docker compose up --build
+```
 
 ## Docker
 
@@ -91,7 +128,8 @@ docker compose up --build
 
 That's the whole story: the image bundles the app and `seed.json`, the
 database auto-seeds on first start, and a named volume (`navigatoredu-data`)
-persists it across restarts. The container runs as a non-root user and has a
+persists it across restarts. Set `SEED_PATH` to choose a content pack (see
+above); reset the volume with `docker compose down -v` when switching. The container runs as a non-root user and has a
 healthcheck against the API. Plain Docker, if you prefer:
 
 ```bash
@@ -123,7 +161,7 @@ See [screenshots/README.md](screenshots/README.md) for the capture checklist.
 
 - SQLite FTS5 search once the corpus outgrows linear scan
 - Quiz sessions with persisted attempt history
-- Content authoring CLI (validate + lint `seed.json`)
+- Content authoring CLI (validate + lint content packs)
 - Postgres profile in docker-compose for a production-shaped variant
 
 ## Docs

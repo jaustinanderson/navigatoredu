@@ -12,7 +12,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the application.
 COPY backend/ backend/
 COPY frontend/ frontend/
-COPY data/seed.json data/seed.json
+COPY data/ data/
 
 # The SQLite file lives in /app/data; compose mounts a volume here so the
 # database persists across container restarts. First run auto-seeds it.

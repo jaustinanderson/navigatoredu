@@ -3,6 +3,11 @@ services:
     build: .
     ports:
       - "8000:8000"
+    environment:
+      # Select a content pack (defaults to the Tidewatch Guild pack).
+      # Note: the database persists in the volume; when switching packs,
+      # reset it first:  docker compose down -v
+      - SEED_PATH=${SEED_PATH:-data/seed.json}
     volumes:
       # Persist the SQLite database across restarts. seed.json ships in the
       # image; the DB auto-seeds on first run.

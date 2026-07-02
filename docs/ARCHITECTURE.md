@@ -85,13 +85,26 @@ Search is hybrid: category filtering happens in SQL; free-text matching over
 title/summary/tags happens in Python after the query. The upgrade path, if
 the corpus grows, is SQLite FTS5 — noted in the code where it would go.
 
-## Seed process
+## Content packs and the seed process
 
-`data/seed.json` is the single content source of truth. It is human-readable,
+All domain content lives in a self-contained JSON **content pack**. The
+active pack is chosen by the `SEED_PATH` environment variable, resolved at
+call time in `seed.get_seed_path()` (defaulting to `data/seed.json`).
+Relative paths resolve against the project root, so the same value works
+locally and in the container.
+
+Two packs ship in `data/`: the Tidewatch Guild (celestial navigation) and
+the ArchiveGuild (archive apprenticeship). They share one schema; switching
+packs changes every page of the product without touching a line of code.
+That is the strongest available proof that the models, routes, and frontend
+encode *structure*, not content. Packs share an ID scheme, so switch on a
+fresh database — the upserting seed would otherwise merge two domains.
+
+The active pack is the single content source of truth. It is human-readable,
 diff-friendly, and reviewable in a GitHub PR — properties a binary `.db`
 file lacks.
 
-`python -m backend.app.seed`:
+`python -m backend.app.seed` (optionally with `SEED_PATH=...`):
 
 1. Creates tables if missing.
 2. Iterates collections in FK-safe order (disclaimers and categories first).
@@ -142,7 +155,9 @@ healthcheck polls `/api/v1/categories`.
 
 ## Extension points
 
-- **New content:** edit `seed.json`, re-run the seed script. No code changes.
+- **New content:** edit a pack, re-run the seed script. No code changes.
+- **New domain:** write one new content pack and point `SEED_PATH` at it —
+  the app re-skins entirely. Tested in `backend/tests/test_seed_path.py`.
 - **New entity:** add a model, a seed collection entry, and a router — the
   three-file pattern is consistent across the codebase.
 - **Postgres:** change the connection URL in `db.py`; SQLModel/SQLAlchemy

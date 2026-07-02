@@ -1,0 +1,220 @@
+{
+  "meta": {
+    "app": "NavigatorEdu",
+    "domain": "ArchiveGuild — historical-archive apprenticeship (fictional)",
+    "is_synthetic": true,
+    "version": "0.4.0"
+  },
+  "disclaimers": [
+    {
+      "id": "d1",
+      "applies_to": "global",
+      "text": "All content is fictional and synthetic, created for a portfolio/education demo. The ArchiveGuild, its collections, and its procedures are invented. Do not use for real archival, conservation, or records-management work."
+    }
+  ],
+  "categories": [
+    {
+      "id": "cat-materials",
+      "name": "Materials & Handling",
+      "slug": "materials-handling",
+      "description": "Fictional guild guidance on the physical media apprentices encounter and how to handle them.",
+      "parent_id": null
+    },
+    {
+      "id": "cat-catalog",
+      "name": "Cataloguing",
+      "slug": "cataloguing",
+      "description": "The invented Ledger-Mark system for describing and shelving items.",
+      "parent_id": null
+    },
+    {
+      "id": "cat-provenance",
+      "name": "Provenance & Appraisal",
+      "slug": "provenance-appraisal",
+      "description": "Fictional procedures for tracing an item's origin and deciding what enters the archive.",
+      "parent_id": null
+    }
+  ],
+  "reference_items": [
+    {
+      "id": "ref-001",
+      "category_id": "cat-materials",
+      "title": "Foldwane Paper",
+      "summary": "The guild's most common — and most fragile — document stock.",
+      "body_md": "**Foldwane** is a fictional rag-pulp paper used across the archive's older holdings. It embrittles along fold lines, hence the name.\n\n### Handling rules\n- Support the full sheet with both hands or a carrier board.\n- Never reverse an existing fold; flattening is a conservator's job.\n- Pencil only within two meters of unsleeved Foldwane.\n\n### Identification\n- Faint chain lines visible when backlit.\n- A dry, slightly waxy surface feel (gloves required).\n\nEstimated safe handling per session: 20 minutes before rest, to limit flexing.",
+      "tags": ["material", "paper", "handling"],
+      "difficulty": "beginner",
+      "disclaimer_id": "d1",
+      "is_synthetic": true
+    },
+    {
+      "id": "ref-002",
+      "category_id": "cat-materials",
+      "title": "The Humidity Ledger",
+      "summary": "The daily log that governs whether the stacks open at all.",
+      "body_md": "Each vault keeps a **Humidity Ledger** beside its door. Apprentices record two readings per shift from the wall hygrometer.\n\n- Target band: 42–48 RH on the guild scale.\n- One out-of-band reading: note it and re-check within the hour.\n- Two consecutive out-of-band readings: the vault closes and the Keeper is notified.\n\nThe ledger is never corrected with strike-throughs alone; corrections carry the recorder's mark and the reason.",
+      "tags": ["environment", "logging"],
+      "difficulty": "beginner",
+      "disclaimer_id": "d1",
+      "is_synthetic": true
+    },
+    {
+      "id": "ref-003",
+      "category_id": "cat-catalog",
+      "title": "Ledger-Mark Call Numbers",
+      "summary": "The guild's four-part shelving code: Vault · Case · Shelf · Item.",
+      "body_md": "A **Ledger-Mark** uniquely locates every item, e.g. `V3.C12.S4.i077`:\n\n| Part | Meaning |\n|------|--------|\n| `V3` | Vault three |\n| `C12` | Case twelve within the vault |\n| `S4` | Shelf four within the case |\n| `i077` | Item 77 on that shelf |\n\nMarks are assigned once and never reused, even after deaccession — a retired mark stays retired so old citations keep meaning something.",
+      "tags": ["cataloguing", "call-number"],
+      "difficulty": "beginner",
+      "disclaimer_id": "d1",
+      "is_synthetic": true
+    },
+    {
+      "id": "ref-004",
+      "category_id": "cat-catalog",
+      "title": "Description Levels",
+      "summary": "Collection, series, and item: how much detail each level earns.",
+      "body_md": "The guild describes holdings at three levels, spending effort where readers need it:\n\n1. **Collection** — one summary card: origin, span of years, extent.\n2. **Series** — groupings by function (correspondence, accounts, maps).\n3. **Item** — full cards only for high-use or fragile pieces.\n\nRule of thumb taught to apprentices: *describe to the level a stranger needs to find it, not the level your curiosity enjoys.*",
+      "tags": ["cataloguing", "description"],
+      "difficulty": "intermediate",
+      "disclaimer_id": "d1",
+      "is_synthetic": true
+    },
+    {
+      "id": "ref-005",
+      "category_id": "cat-provenance",
+      "title": "The Chain-of-Custody Card",
+      "summary": "The single card that follows an item from donor to shelf.",
+      "body_md": "Every accession travels with a **Chain-of-Custody Card** recording each hand it passes through.\n\n### Required entries\n1. Source statement (who offered it, in their own words).\n2. Receiving apprentice's mark and date.\n3. Every transfer between rooms or people, however brief.\n\n### Why it matters\nA gap in the chain doesn't make an item worthless — it makes it *uncertain*, and uncertainty must be recorded on the description card rather than smoothed over.\n\nCommon failure: batching transfers at day's end from memory. The card is filled in at the moment of transfer, or the transfer waits.",
+      "tags": ["provenance", "procedure"],
+      "difficulty": "intermediate",
+      "disclaimer_id": "d1",
+      "is_synthetic": true
+    }
+  ],
+  "training_notes": [
+    {
+      "id": "tn-001",
+      "module": "Foundations",
+      "order": 1,
+      "title": "Original order beats tidy order",
+      "body_md": "Apprentices' first instinct is to sort: alphabetize the letters, date-order the receipts. The guild teaches the opposite reflex.\n\nThe *arrangement* a creator left behind is itself evidence — which papers they kept together, what they bundled, what they buried. Impose your own order and that evidence is gone for good.\n\n- Preserve the found sequence; describe it rather than fix it.\n- Rehousing may change containers, never sequence.\n- If the found order is genuine chaos, record that too — chaos is information.",
+      "related_item_ids": ["ref-004"]
+    },
+    {
+      "id": "tn-002",
+      "module": "Foundations",
+      "order": 2,
+      "title": "Handle less, look longer",
+      "body_md": "Most damage in the fictional guild's loss ledger comes not from accidents but from *routine* handling — small flexes repeated hundreds of times.\n\nThe discipline: plan the examination before touching the item. Decide what you need to learn, get lighting and supports ready, then make one careful pass instead of five casual ones.\n\nThis pairs with the Foldwane handling limits: the material rules tell you *how* to touch; this note is about touching less at all.",
+      "related_item_ids": ["ref-001"]
+    },
+    {
+      "id": "tn-003",
+      "module": "Recordkeeping",
+      "order": 1,
+      "title": "Logs are promises to the future",
+      "body_md": "The Humidity Ledger and the Chain-of-Custody Card share one design principle: they are written for a reader who isn't there yet.\n\nA future Keeper reconstructing a mold outbreak, or a researcher questioning an item's origin, will trust the archive exactly as far as its logs are honest — including honest about mistakes.\n\nHence the correction rule: never erase, always annotate. A visible correction builds trust; an invisible one, if discovered, destroys it.",
+      "related_item_ids": ["ref-002", "ref-005"]
+    }
+  ],
+  "practice_cases": [
+    {
+      "id": "case-001",
+      "category_id": "cat-provenance",
+      "title": "The Undocumented Trunk",
+      "scenario_md": "A donor delivers a trunk of Foldwane letters said to come from the fictional Marrowgate trading house. The donor's note says only 'from my grandmother's attic.' There is no chain-of-custody documentation, but the letters reference Marrowgate ship names that match the archive's existing Marrowgate series.",
+      "guided_steps": [
+        "Open a Chain-of-Custody Card now — the chain starts at receipt, even if history before receipt is unknown.",
+        "Record the donor's statement verbatim as the source statement; do not paraphrase it into something more certain.",
+        "Note the corroborating detail (ship names matching the existing series) as supporting evidence, clearly marked as inference rather than documentation.",
+        "Describe the collection with an explicit provenance-uncertainty note rather than silently shelving it beside the documented Marrowgate series."
+      ],
+      "expected_outcome_md": "**Accession with recorded uncertainty.** The trunk enters the archive with a custody chain that honestly begins at the door, a verbatim source statement, and a description card that separates documented fact from plausible inference. Key judgment: uncertainty is captured, not hidden — and not inflated into false certainty by the convenient ship-name match.",
+      "difficulty": "intermediate",
+      "is_synthetic": true
+    },
+    {
+      "id": "case-002",
+      "category_id": "cat-materials",
+      "title": "Two Bad Readings",
+      "scenario_md": "During your morning shift in Vault 3 you log a hygrometer reading of 51 RH — above the 42–48 band. You re-check within the hour: 52 RH. A visiting scholar is scheduled to consult a Foldwane series from this vault in twenty minutes, and rescheduling them is costly.",
+      "guided_steps": [
+        "Apply the ledger rule mechanically: two consecutive out-of-band readings close the vault. The rule exists precisely for moments when closing is inconvenient.",
+        "Record both readings and the closure in the Humidity Ledger with your mark — the log must show the rule firing, not just the outcome.",
+        "Notify the Keeper immediately; the scholar's visit is the Keeper's trade-off to make, not the apprentice's.",
+        "Do not move the Foldwane series out of the vault as a workaround; transferring fragile stock into an unlogged environment compounds the risk."
+      ],
+      "expected_outcome_md": "**Vault closed, Keeper notified, visit rescheduled or relocated by someone with authority to accept the risk.** Key judgment: environmental rules are designed to be boring and absolute; the apprentice's job is to make the condition visible fast, not to weigh exceptions under pressure.",
+      "difficulty": "advanced",
+      "is_synthetic": true
+    }
+  ],
+  "quiz_questions": [
+    {
+      "id": "q-001",
+      "category_id": "cat-materials",
+      "question": "Foldwane paper earns its name because it:",
+      "options": [
+        "Folds cleanly for storage",
+        "Embrittles along fold lines",
+        "Repels moisture when folded",
+        "Was invented by the Foldwane family"
+      ],
+      "correct_index": 1,
+      "explanation": "Foldwane's defining weakness is embrittlement along folds, which drives its handling rules.",
+      "source_item_id": "ref-001"
+    },
+    {
+      "id": "q-002",
+      "category_id": "cat-materials",
+      "question": "Two consecutive out-of-band readings in the Humidity Ledger mean:",
+      "options": [
+        "Log them and continue the shift",
+        "Average them and record the mean",
+        "The vault closes and the Keeper is notified",
+        "The hygrometer is replaced"
+      ],
+      "correct_index": 2,
+      "explanation": "One bad reading triggers a re-check; two consecutive bad readings close the vault and escalate to the Keeper.",
+      "source_item_id": "ref-002"
+    },
+    {
+      "id": "q-003",
+      "category_id": "cat-catalog",
+      "question": "In the Ledger-Mark `V3.C12.S4.i077`, `C12` identifies the:",
+      "options": ["Collection", "Case within the vault", "Century of origin", "Conservator"],
+      "correct_index": 1,
+      "explanation": "The four parts read Vault · Case · Shelf · Item; C12 is case twelve within vault three.",
+      "source_item_id": "ref-003"
+    },
+    {
+      "id": "q-004",
+      "category_id": "cat-catalog",
+      "question": "Why are retired Ledger-Marks never reused?",
+      "options": [
+        "Superstition within the guild",
+        "So old citations continue to refer to exactly one thing",
+        "Reuse would confuse the shelving robots",
+        "Marks legally belong to donors"
+      ],
+      "correct_index": 1,
+      "explanation": "A call number that once pointed at an item must never later point at a different one; stable references outlive the items themselves.",
+      "source_item_id": "ref-003"
+    },
+    {
+      "id": "q-005",
+      "category_id": "cat-provenance",
+      "question": "A gap in an item's chain of custody should be handled by:",
+      "options": [
+        "Rejecting the accession outright",
+        "Reconstructing the likely chain from context and recording it as fact",
+        "Recording the uncertainty explicitly on the description card",
+        "Leaving the custody card blank"
+      ],
+      "correct_index": 2,
+      "explanation": "Gaps make provenance uncertain, not worthless; the guild's rule is to record uncertainty honestly rather than smooth it over or inflate inference into documentation.",
+      "source_item_id": "ref-005"
+    }
+  ]
+}

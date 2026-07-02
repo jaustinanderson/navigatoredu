@@ -17,8 +17,18 @@ domain, so the engineering is evaluable without any proprietary or sensitive
 content.
 
 Choosing a **fictional domain is a feature, not a dodge**: it proves the
-architecture is domain-agnostic. Swapping `seed.json` re-skins the entire
-application without touching code.
+architecture is domain-agnostic. And the repo now proves it concretely: two
+complete content packs (celestial navigation and archive apprenticeship)
+drive the same code, switched by one environment variable. This is the
+difference between *claiming* separation of content and structure and
+*demonstrating* it — a reviewer can run both products from one codebase in
+under a minute.
+
+Why this matters beyond the demo: content-agnostic design is the load-bearing
+idea in real product families (LMS platforms, documentation systems,
+white-label apps). Showing you can identify the invariant structure beneath
+a domain — and keep it out of your code — is an architecture skill, not a
+content trick.
 
 ## Skills evidenced, mapped to the code
 
@@ -27,7 +37,7 @@ application without touching code.
 | REST API design | Versioned prefix, list/detail response shaping, correct 400/404 usage |
 | Data modeling | Six related entities with FKs; deliberate JSON-column trade-off, documented |
 | Security thinking | Quiz answers never leave the server; server-side scoring; HTML-escaped rendering |
-| Testing discipline | 17 tests on an isolated in-memory DB via dependency override — no mocks |
+| Testing discipline | 26 tests on isolated in-memory DBs via dependency override — no mocks |
 | Data pipelines | Idempotent seed script; human-reviewable JSON as source of truth |
 | Documentation | README, ARCHITECTURE.md, this case study; OpenAPI for free |
 | Operations basics | Docker (non-root user, layer caching), compose volume + healthcheck, GitHub Actions CI |
@@ -71,8 +81,10 @@ application without touching code.
 - **FTS5 search** — the documented upgrade path once content grows.
 - **Content authoring CLI** — validate/lint `seed.json` before import;
   demonstrates pipeline thinking.
-- **Second fictional domain** — the single strongest proof that the
-  architecture is content-agnostic: one new `seed.json`, zero code changes.
+- ~~**Second fictional domain**~~ — shipped: the ArchiveGuild pack proves
+  content-agnosticism (one new JSON file, zero code changes).
+- **Third-party pack tooling** — a JSON-schema validator for packs would
+  turn "content pack" into a real, documented interface.
 
 ## Honest limitations (know these before an interviewer finds them)
 
