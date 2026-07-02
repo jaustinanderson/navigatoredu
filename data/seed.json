@@ -1,0 +1,248 @@
+{
+  "meta": {
+    "app": "NavigatorEdu",
+    "domain": "Tidewatch Guild — celestial navigation (fictional)",
+    "is_synthetic": true,
+    "version": "0.3.0"
+  },
+  "disclaimers": [
+    {
+      "id": "d1",
+      "applies_to": "global",
+      "text": "All content is fictional and synthetic, created for a portfolio/education demo. Do not use for real navigation, training, or operational decisions."
+    }
+  ],
+  "categories": [
+    {
+      "id": "cat-instruments",
+      "name": "Instruments",
+      "slug": "instruments",
+      "description": "Fictional guild instruments used to take sightings and readings.",
+      "parent_id": null
+    },
+    {
+      "id": "cat-sky",
+      "name": "Sky References",
+      "slug": "sky-references",
+      "description": "Invented stars and constellations of the Tidewatch sky charts.",
+      "parent_id": null
+    },
+    {
+      "id": "cat-procedures",
+      "name": "Procedures",
+      "slug": "procedures",
+      "description": "Standard fictional routines for plotting a position at sea.",
+      "parent_id": null
+    }
+  ],
+  "reference_items": [
+    {
+      "id": "ref-001",
+      "category_id": "cat-instruments",
+      "title": "Meridian Astrolabe Mk. II",
+      "summary": "The guild's standard sighting instrument for measuring star altitude.",
+      "body_md": "The **Meridian Astrolabe Mk. II** is a fictional brass instrument with a rotating alidade and a 90-degree altitude arc.\n\n### Key parts\n- **Alidade** — the sighting arm, aligned with the target star.\n- **Altitude arc** — graduated in half-degrees.\n- **Damping ring** — steadies the reading in swell.\n\n### Reading procedure\n1. Suspend the astrolabe from its ring at eye level.\n2. Rotate the alidade until the star sits in both sight vanes.\n3. Read the altitude where the alidade crosses the arc.\n\nTypical reading error for a trained navigator: ±0.5°.",
+      "tags": [
+        "instrument",
+        "altitude",
+        "sighting"
+      ],
+      "difficulty": "beginner",
+      "disclaimer_id": "d1",
+      "is_synthetic": true
+    },
+    {
+      "id": "ref-002",
+      "category_id": "cat-instruments",
+      "title": "Tide Chronometer",
+      "summary": "A sealed clock rated against the guild's reference meridian.",
+      "body_md": "The **Tide Chronometer** keeps Guild Reference Time (GRT). Position math depends on knowing GRT to within a few seconds.\n\n- Wound once per watch cycle.\n- Rate error logged daily in the deck journal.\n- Never reset at sea; corrections are applied on paper.",
+      "tags": [
+        "instrument",
+        "time"
+      ],
+      "difficulty": "beginner",
+      "disclaimer_id": "d1",
+      "is_synthetic": true
+    },
+    {
+      "id": "ref-003",
+      "category_id": "cat-sky",
+      "title": "The Lodestar Vela",
+      "summary": "The fixed northern anchor star of the Tidewatch charts.",
+      "body_md": "**Vela** is the fictional pole star of this system. Its altitude above the horizon approximately equals the observer's latitude.\n\n- Magnitude class: 1 (bright).\n- Identified by the two 'Pointer' stars of the Kite constellation.\n- Usable on any clear night in the northern hemisphere of the fictional world.",
+      "tags": [
+        "star",
+        "latitude"
+      ],
+      "difficulty": "beginner",
+      "disclaimer_id": "d1",
+      "is_synthetic": true
+    },
+    {
+      "id": "ref-004",
+      "category_id": "cat-sky",
+      "title": "The Kite Constellation",
+      "summary": "A four-star diamond used to locate Vela and estimate time.",
+      "body_md": "The **Kite** is a diamond of four second-magnitude stars. The long axis points toward Vela.\n\nBecause the Kite rotates around Vela once per sidereal day, its orientation doubles as a rough night clock: guild tables convert Kite angle to approximate GRT.",
+      "tags": [
+        "constellation",
+        "timekeeping"
+      ],
+      "difficulty": "intermediate",
+      "disclaimer_id": "d1",
+      "is_synthetic": true
+    },
+    {
+      "id": "ref-005",
+      "category_id": "cat-procedures",
+      "title": "Noon Sight Routine",
+      "summary": "The standard midday latitude fix using the sun's highest altitude.",
+      "body_md": "### Steps\n1. Begin sightings ~10 minutes before predicted local noon.\n2. Take repeated altitude readings; the maximum is the **meridian altitude**.\n3. Apply the daily declination correction from the Guild Almanac.\n4. Latitude = 90° − meridian altitude + declination.\n\n### Common errors\n- Stopping sightings too early and missing the true maximum.\n- Forgetting the instrument's index correction.",
+      "tags": [
+        "procedure",
+        "latitude",
+        "sun"
+      ],
+      "difficulty": "intermediate",
+      "disclaimer_id": "d1",
+      "is_synthetic": true
+    }
+  ],
+  "training_notes": [
+    {
+      "id": "tn-001",
+      "module": "Foundations",
+      "order": 1,
+      "title": "Why pole-star altitude equals latitude",
+      "body_md": "For a star fixed directly above the pole, simple geometry links what you see to where you are: the angle between the horizon and the star equals your angular distance from the equator.\n\n- At the fictional north pole, Vela sits overhead (altitude 90°) — latitude 90°.\n- At the equator, Vela sits on the horizon (altitude 0°) — latitude 0°.\n- Everywhere between, altitude tracks latitude one-for-one.\n\nThis is why a single clear sighting of Vela gives a latitude fix with no almanac and no clock.",
+      "related_item_ids": [
+        "ref-003"
+      ]
+    },
+    {
+      "id": "tn-002",
+      "module": "Foundations",
+      "order": 2,
+      "title": "Reading an instrument you don't fully trust",
+      "body_md": "Every guild instrument carries a known **index correction** — a small fixed error measured in port and etched into the deck journal.\n\nThe habit to build: *never* correct in your head while sighting. Record the raw reading, then apply corrections on paper in a fixed order:\n\n1. Raw reading\n2. Index correction\n3. Any almanac correction\n\nSeparating observation from arithmetic is what makes a sight auditable later.",
+      "related_item_ids": [
+        "ref-001",
+        "ref-005"
+      ]
+    },
+    {
+      "id": "tn-003",
+      "module": "Timekeeping",
+      "order": 1,
+      "title": "Time is a position instrument",
+      "body_md": "Latitude comes from angles alone, but **longitude requires time**. Comparing local noon with Guild Reference Time converts a time difference into an east-west position.\n\nThat is why the Tide Chronometer is treated as carefully as the astrolabe — and why the Kite constellation, doubling as a rough night clock, matters when the chronometer fails.",
+      "related_item_ids": [
+        "ref-002",
+        "ref-004"
+      ]
+    }
+  ],
+  "practice_cases": [
+    {
+      "id": "case-001",
+      "category_id": "cat-procedures",
+      "title": "Overcast Noon",
+      "scenario_md": "You are the watch navigator on the fictional vessel *Sable Tern*. Cloud cover breaks only briefly around midday. You capture three sun altitudes: 61.2°, 61.6°, 61.5°. The Guild Almanac declination correction for today is +4.0°. Your astrolabe's index correction is −0.2°.",
+      "guided_steps": [
+        "Pick the meridian altitude: the highest reading (61.6°).",
+        "Apply the index correction: 61.6° − 0.2° = 61.4°.",
+        "Apply the latitude formula: 90° − 61.4° + 4.0°."
+      ],
+      "expected_outcome_md": "**Latitude ≈ 32.6° N.** Key judgment: with a broken sight series, treat the highest credible reading as the meridian altitude and note the added uncertainty in the deck journal.",
+      "difficulty": "intermediate",
+      "is_synthetic": true
+    },
+    {
+      "id": "case-002",
+      "category_id": "cat-sky",
+      "title": "Clock Down, Stars Up",
+      "scenario_md": "The Tide Chronometer stopped during a storm. It is now a clear night. You can see the Kite constellation tilted 45° clockwise from its charted midnight position.",
+      "guided_steps": [
+        "Recall that the Kite rotates once per sidereal day around Vela.",
+        "Convert the 45° offset to time: 45/360 of a day ≈ 3 hours.",
+        "Clockwise past midnight position means after midnight: estimate ~03:00 GRT."
+      ],
+      "expected_outcome_md": "**Approximate time: 03:00 GRT.** This restores a rough time base until the chronometer can be re-rated in port.",
+      "difficulty": "advanced",
+      "is_synthetic": true
+    }
+  ],
+  "quiz_questions": [
+    {
+      "id": "q-001",
+      "category_id": "cat-sky",
+      "question": "In the Tidewatch system, the altitude of the star Vela approximately equals the observer's:",
+      "options": [
+        "Longitude",
+        "Latitude",
+        "Compass heading",
+        "Local time"
+      ],
+      "correct_index": 1,
+      "explanation": "Vela is the fictional pole star; a pole star's altitude equals the observer's latitude.",
+      "source_item_id": "ref-003"
+    },
+    {
+      "id": "q-002",
+      "category_id": "cat-instruments",
+      "question": "Why is the Tide Chronometer never reset at sea?",
+      "options": [
+        "Resetting drains its spring",
+        "Corrections are applied on paper to preserve a known rate error",
+        "Guild law forbids touching it",
+        "It resets itself at noon"
+      ],
+      "correct_index": 1,
+      "explanation": "A steady, logged rate error is more useful than an unpredictable reset; corrections are applied in the journal.",
+      "source_item_id": "ref-002"
+    },
+    {
+      "id": "q-003",
+      "category_id": "cat-procedures",
+      "question": "In the Noon Sight Routine, latitude is computed as:",
+      "options": [
+        "90° − meridian altitude + declination",
+        "meridian altitude − 90°",
+        "declination − meridian altitude",
+        "90° + meridian altitude − declination"
+      ],
+      "correct_index": 0,
+      "explanation": "The routine defines latitude = 90° − meridian altitude + declination correction.",
+      "source_item_id": "ref-005"
+    },
+    {
+      "id": "q-004",
+      "category_id": "cat-procedures",
+      "question": "A common error during the noon sight is:",
+      "options": [
+        "Taking too many readings",
+        "Stopping sightings before the sun reaches its true maximum altitude",
+        "Using the chronometer",
+        "Standing on the port side"
+      ],
+      "correct_index": 1,
+      "explanation": "Ending the series early risks recording a pre-maximum altitude and biasing the latitude fix.",
+      "source_item_id": "ref-005"
+    },
+    {
+      "id": "q-005",
+      "category_id": "cat-sky",
+      "question": "The Kite constellation can serve as a rough night clock because it:",
+      "options": [
+        "Changes color hourly",
+        "Rotates around Vela once per sidereal day",
+        "Rises exactly at midnight",
+        "Points at the moon"
+      ],
+      "correct_index": 1,
+      "explanation": "Its steady rotation lets guild tables map its angle to approximate Guild Reference Time.",
+      "source_item_id": "ref-004"
+    }
+  ]
+}

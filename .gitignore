@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+
+# Local database (rebuilt from data/seed.json)
+data/navigatoredu.db
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store

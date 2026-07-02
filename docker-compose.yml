@@ -1,0 +1,17 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      # Persist the SQLite database across restarts. seed.json ships in the
+      # image; the DB auto-seeds on first run.
+      - navigatoredu-data:/app/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/categories')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  navigatoredu-data:
