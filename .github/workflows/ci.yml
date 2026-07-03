@@ -20,3 +20,8 @@ jobs:
 
       - name: Run tests
         run: python -m pytest -v
+
+      - name: Validate content packs
+        run: |
+          python -m backend.app.validate_pack data/seed.json
+          python -m backend.app.validate_pack data/seed_archiveguild.json

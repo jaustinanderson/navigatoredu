@@ -38,7 +38,7 @@ content trick.
 | Data modeling | Six related entities with FKs; deliberate JSON-column trade-off, documented |
 | Security thinking | Quiz answers never leave the server; server-side scoring; HTML-escaped rendering |
 | Testing discipline | 26 tests on isolated in-memory DBs via dependency override — no mocks |
-| Data pipelines | Idempotent seed script; human-reviewable JSON as source of truth |
+| Data pipelines | Idempotent seed script; human-reviewable JSON as source of truth; CLI validator gating CI |
 | Documentation | README, ARCHITECTURE.md, this case study; OpenAPI for free |
 | Operations basics | Docker (non-root user, layer caching), compose volume + healthcheck, GitHub Actions CI |
 | Product judgment | Reveal-as-you-go practice cases; disclaimer system built into the schema |
@@ -83,8 +83,25 @@ content trick.
   demonstrates pipeline thinking.
 - ~~**Second fictional domain**~~ — shipped: the ArchiveGuild pack proves
   content-agnosticism (one new JSON file, zero code changes).
-- **Third-party pack tooling** — a JSON-schema validator for packs would
-  turn "content pack" into a real, documented interface.
+- ~~**Pack validation tooling**~~ — shipped: `validate_pack` runs in CI, so
+  the pack format is now an enforced interface.
+- **Pack scaffolding** — a `new_pack` generator emitting a valid skeleton
+  would complete the authoring toolchain.
+
+## Why validation matters here
+
+In any reusable education or informatics system, content outlives code and
+is edited by people who never read the code. Every content edit is then a
+deploy — and unvalidated content fails at the worst possible time: at import,
+or silently at runtime (a quiz whose `correct_index` points past its options
+is a bug users find for you).
+
+The validator moves those failures to the earliest possible moment, with
+errors written for content authors ("quiz_questions 'q-003': correct_index 7
+out of range for 4 options"), and CI runs it on every push. The transferable
+skill on display: treating data contracts with the same rigor as code
+contracts. This is the same discipline behind schema registries, API
+contract tests, and ETL data-quality gates in production systems.
 
 ## Honest limitations (know these before an interviewer finds them)
 

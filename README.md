@@ -120,6 +120,20 @@ docker compose down -v              # reset the persisted volume
 SEED_PATH=data/seed_archiveguild.json docker compose up --build
 ```
 
+### Validating a pack
+
+Every pack can be checked before import — structure, required fields, unique
+IDs, foreign references, and quiz-answer sanity:
+
+```bash
+python -m backend.app.validate_pack data/seed.json
+python -m backend.app.validate_pack data/seed_archiveguild.json
+```
+
+Exit code 0 means valid; problems are listed with record IDs. CI validates
+both shipped packs on every push, so a content edit that breaks a reference
+fails the build just like a code regression would.
+
 ## Docker
 
 ```bash
@@ -149,8 +163,9 @@ real queries, zero mocks, and your development database is never touched.
 
 ## CI
 
-`.github/workflows/ci.yml` runs the full pytest suite on every push and pull
-request (Ubuntu, Python 3.12, cached pip). Update the badge URL at the top of
+`.github/workflows/ci.yml` runs the full pytest suite **and validates both
+content packs** on every push and pull request (Ubuntu, Python 3.12, cached
+pip). Content is checked in CI because content is part of the contract. Update the badge URL at the top of
 this file with your GitHub username after pushing.
 
 ## Screenshots
@@ -161,7 +176,6 @@ See [screenshots/README.md](screenshots/README.md) for the capture checklist.
 
 - SQLite FTS5 search once the corpus outgrows linear scan
 - Quiz sessions with persisted attempt history
-- Content authoring CLI (validate + lint content packs)
 - Postgres profile in docker-compose for a production-shaped variant
 
 ## Docs

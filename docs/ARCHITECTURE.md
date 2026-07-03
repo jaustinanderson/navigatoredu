@@ -113,6 +113,30 @@ file lacks.
 
 The generated `data/navigatoredu.db` is git-ignored; anyone can rebuild it.
 
+## Content-pack validation
+
+`backend/app/validate_pack.py` makes the pack format a real, enforced
+interface rather than a convention. It checks — without touching the
+database:
+
+1. File exists and parses as JSON.
+2. All six collections are present and are lists.
+3. Every record has its required fields; IDs are unique per collection.
+4. Foreign references resolve: items → categories/disclaimers, cases and
+   questions → categories, questions → source items, training notes →
+   related items.
+5. Quiz sanity: options non-empty, `correct_index` in range.
+
+The validator collects *all* problems before reporting (a content author
+fixes one list, not one error per run) and exits 0/1/2 for valid /
+invalid / unreadable. CI runs it against both shipped packs, so content
+regressions fail the build exactly like code regressions.
+
+Design note: validation is hand-rolled rather than JSON Schema. At six
+collections it reads clearer, produces friendlier errors, and adds no
+dependency; the docstring names JSON Schema as the upgrade path if the
+format grows.
+
 ## API route reference
 
 | Method | Route                     | Purpose |
@@ -156,8 +180,9 @@ healthcheck polls `/api/v1/categories`.
 ## Extension points
 
 - **New content:** edit a pack, re-run the seed script. No code changes.
-- **New domain:** write one new content pack and point `SEED_PATH` at it —
-  the app re-skins entirely. Tested in `backend/tests/test_seed_path.py`.
+- **New domain:** write one new content pack, run the validator, point
+  `SEED_PATH` at it — the app re-skins entirely. Tested in
+  `backend/tests/test_seed_path.py`.
 - **New entity:** add a model, a seed collection entry, and a router — the
   three-file pattern is consistent across the codebase.
 - **Postgres:** change the connection URL in `db.py`; SQLModel/SQLAlchemy
