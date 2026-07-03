@@ -124,8 +124,26 @@ SEED_PATH=data/seed_cytofish_synthetic.json uvicorn backend.app.main:app --reloa
 > domain while keeping every safety boundary in the *content*, not the code.
 
 Same routes, same frontend, same tests — different product. Note that the
-seed script upserts by primary key and both packs use the same ID scheme, so
+seed script upserts by primary key and the packs share an ID scheme, so
 switch packs on a fresh database rather than seeding one over the other.
+
+### Active pack metadata (demo mode)
+
+Every pack carries a governed `metadata` object (`pack_id`, `pack_name`,
+`pack_version`, `pack_description`, `domain_type`, `synthetic_only`,
+`intended_use`, `safety_notes`). On seeding, it is written to a single-row
+`PackMetadata` table and served at `GET /api/v1/pack-metadata`. The home page
+and the top banner display the active pack, so a viewer always knows which
+domain is loaded and that it is synthetic-only:
+
+```
+Active content pack: CytoFISH Navigator Synthetic Pack — synthetic demo only.
+```
+
+The validator **requires** this metadata (see below), so a pack cannot ship
+without declaring what it is and affirming `synthetic_only: true`. For a full
+local walkthrough of all three packs, see
+[docs/DEMO_GUIDE.md](docs/DEMO_GUIDE.md).
 
 With Docker:
 
@@ -136,8 +154,8 @@ SEED_PATH=data/seed_archiveguild.json docker compose up --build
 
 ### Validating a pack
 
-Every pack can be checked before import — structure, required fields, unique
-IDs, foreign references, and quiz-answer sanity:
+Every pack can be checked before import — governance **metadata**, structure,
+required fields, unique IDs, foreign references, and quiz-answer sanity:
 
 ```bash
 python -m backend.app.validate_pack data/seed.json
@@ -198,6 +216,8 @@ See [screenshots/README.md](screenshots/README.md) for the capture checklist.
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — how it's built and why
 - [docs/PORTFOLIO_CASE_STUDY.md](docs/PORTFOLIO_CASE_STUDY.md) — how to
   present this project professionally
+- [docs/DEMO_GUIDE.md](docs/DEMO_GUIDE.md) — local walkthrough of all three
+  content packs and what to screenshot
 
 ## License
 

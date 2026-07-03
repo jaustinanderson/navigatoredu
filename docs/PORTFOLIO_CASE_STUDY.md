@@ -56,7 +56,8 @@ screening for.
 | Security thinking | Quiz answers never leave the server; server-side scoring; HTML-escaped rendering |
 | Testing discipline | 26 tests on isolated in-memory DBs via dependency override — no mocks |
 | Data pipelines | Idempotent seed script; human-reviewable JSON as source of truth; CLI validator gating CI |
-| Documentation | README, ARCHITECTURE.md, this case study; OpenAPI for free |
+| Documentation | README, ARCHITECTURE.md, DEMO_GUIDE.md, this case study; OpenAPI for free |
+| Content governance | Required per-pack metadata, validated in CI; active pack surfaced in API + UI |
 | Operations basics | Docker (non-root user, layer caching), compose volume + healthcheck, GitHub Actions CI |
 | Product judgment | Reveal-as-you-go practice cases; disclaimer system built into the schema |
 
@@ -106,6 +107,23 @@ screening for.
   specialized, safety-sensitive domain fits the generic architecture unchanged.
 - **Pack scaffolding** — a `new_pack` generator emitting a valid skeleton
   would complete the authoring toolchain.
+
+## Why metadata + governance matter here
+
+The metadata milestone turns "which content is loaded?" from tribal knowledge
+into an enforced, queryable fact. Every pack must declare `pack_id`,
+`pack_name`, `intended_use`, and affirm `synthetic_only: true`, or the
+validator fails the build. The active pack is then exposed via
+`GET /api/v1/pack-metadata` and shown in the UI banner.
+
+Why an interviewer should care: in real informatics and content-driven
+systems, *provenance and intended-use labelling* are governance requirements,
+not niceties. Knowing — at runtime, from the system itself — exactly which
+content set is live, what it is for, and whether it is cleared for real use is
+the same discipline behind dataset datasheets, model cards, and data-catalog
+lineage. Encoding "this is synthetic, this is its intended use" into the
+content contract and enforcing it in CI is a small, concrete demonstration of
+that instinct.
 
 ## Why validation matters here
 

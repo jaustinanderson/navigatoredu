@@ -61,3 +61,22 @@ class QuizQuestion(SQLModel, table=True):
     correct_index: int
     explanation: str
     source_item_id: str = Field(foreign_key="referenceitem.id")
+
+
+class PackMetadata(SQLModel, table=True):
+    """Single-row table describing the content pack currently loaded in the DB.
+
+    Storing metadata in the database (rather than re-reading SEED_PATH at
+    request time) means the API reports exactly what was seeded, survives
+    restarts, and stays consistent with every other endpoint's data source.
+    The fixed primary key enforces the single-row invariant via upsert.
+    """
+    id: int = Field(default=1, primary_key=True)
+    pack_id: str
+    pack_name: str
+    pack_version: str
+    pack_description: str
+    domain_type: str
+    synthetic_only: bool
+    intended_use: str
+    safety_notes: str

@@ -33,9 +33,42 @@ REQUIRED_FIELDS: dict[str, set[str]] = {
     },
 }
 
+# Metadata object: every governed pack must describe itself.
+METADATA_REQUIRED_FIELDS: set[str] = {
+    "pack_id", "pack_name", "pack_version", "pack_description",
+    "domain_type", "synthetic_only", "intended_use", "safety_notes",
+}
+# Fields that must be present AND non-empty (not just declared).
+METADATA_NONEMPTY_FIELDS: set[str] = {"pack_id", "pack_name", "intended_use"}
+
 
 def _ids(records: list[dict]) -> set[str]:
     return {r["id"] for r in records if isinstance(r, dict) and "id" in r}
+
+
+def _validate_metadata(data: dict) -> list[str]:
+    """Structural + governance checks on the pack's metadata object."""
+    errors: list[str] = []
+    meta = data.get("metadata")
+    if meta is None:
+        return ["missing top-level key: 'metadata'"]
+    if not isinstance(meta, dict):
+        return ["'metadata' must be an object"]
+
+    missing = METADATA_REQUIRED_FIELDS - meta.keys()
+    if missing:
+        errors.append(f"metadata: missing fields {sorted(missing)}")
+
+    for field in METADATA_NONEMPTY_FIELDS:
+        value = meta.get(field)
+        if field in meta and (value is None or str(value).strip() == ""):
+            errors.append(f"metadata: '{field}' must be present and non-empty")
+
+    # Governance invariant: this project ships synthetic-only content.
+    if "synthetic_only" in meta and meta["synthetic_only"] is not True:
+        errors.append("metadata: 'synthetic_only' must be true")
+
+    return errors
 
 
 def validate_pack(path: Path | str) -> list[str]:
@@ -43,6 +76,9 @@ def validate_pack(path: Path | str) -> list[str]:
     path = Path(path)
     errors: list[str] = []
     data = json.loads(path.read_text(encoding="utf-8"))  # may raise; CLI handles
+
+    # 0. Metadata governance object
+    errors.extend(_validate_metadata(data))
 
     # 1. Top-level structure
     for key in REQUIRED_FIELDS:

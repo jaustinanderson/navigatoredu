@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 
 from ..db import get_session
-from ..models import Category, Disclaimer, ReferenceItem
+from ..models import Category, Disclaimer, PackMetadata, ReferenceItem
 
 router = APIRouter(prefix="/api/v1", tags=["reference"])
 
@@ -49,3 +49,12 @@ def get_item(item_id: str, session: Session = Depends(get_session)):
 @router.get("/disclaimers")
 def list_disclaimers(session: Session = Depends(get_session)):
     return session.exec(select(Disclaimer)).all()
+
+
+@router.get("/pack-metadata")
+def get_pack_metadata(session: Session = Depends(get_session)):
+    """Metadata for the content pack currently loaded in the database."""
+    meta = session.get(PackMetadata, 1)
+    if not meta:
+        raise HTTPException(404, "No pack metadata loaded")
+    return meta

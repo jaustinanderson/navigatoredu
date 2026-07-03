@@ -116,3 +116,22 @@ class TestTraining:
         for n in notes:
             assert n["related_item_ids"]
             assert set(n["related_item_ids"]) <= item_ids
+
+
+class TestPackMetadata:
+    def test_endpoint_returns_active_pack(self, client):
+        r = client.get("/api/v1/pack-metadata")
+        assert r.status_code == 200
+        meta = r.json()
+        # The default fixture seeds seed.json (Tidewatch).
+        assert meta["pack_id"] == "tidewatch"
+        assert meta["pack_name"] == "Tidewatch Guild Navigator"
+        assert meta["synthetic_only"] is True
+
+    def test_endpoint_exposes_all_governance_fields(self, client):
+        meta = client.get("/api/v1/pack-metadata").json()
+        for field in (
+            "pack_id", "pack_name", "pack_version", "pack_description",
+            "domain_type", "synthetic_only", "intended_use", "safety_notes",
+        ):
+            assert field in meta and meta[field] not in (None, "")

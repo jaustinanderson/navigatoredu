@@ -1,4 +1,14 @@
 {
+  "metadata": {
+    "pack_id": "tidewatch",
+    "pack_name": "Tidewatch Guild Navigator",
+    "pack_version": "0.6.0",
+    "pack_description": "A fictional celestial-navigation reference and training pack for the invented Tidewatch Guild.",
+    "domain_type": "fictional_worldbuilding",
+    "synthetic_only": true,
+    "intended_use": "Portfolio and education demonstration only. Illustrates the platform with a purely invented domain.",
+    "safety_notes": "All content is fictional. Not suitable for real navigation, training, or operational decisions."
+  },
   "meta": {
     "app": "NavigatorEdu",
     "domain": "Tidewatch Guild — celestial navigation (fictional)",

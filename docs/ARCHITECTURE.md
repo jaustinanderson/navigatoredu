@@ -144,6 +144,32 @@ collections it reads clearer, produces friendlier errors, and adds no
 dependency; the docstring names JSON Schema as the upgrade path if the
 format grows.
 
+## Active-pack metadata
+
+Each pack carries a governed `metadata` object (`pack_id`, `pack_name`,
+`pack_version`, `pack_description`, `domain_type`, `synthetic_only`,
+`intended_use`, `safety_notes`). The validator requires it, so no pack ships
+without declaring what it is.
+
+**Storage design.** On seeding, the metadata is written to a single-row
+`PackMetadata` table (fixed primary key `id=1`, upserted like every other
+record). `GET /api/v1/pack-metadata` reads that row.
+
+*Why a table rather than reading `SEED_PATH` at request time?* Three reasons,
+and one honest tradeoff:
+
+- The API reports exactly what was **seeded**, not what an env var happens to
+  say now — the two can drift (someone changes `SEED_PATH` after seeding).
+- It survives restarts and needs no separate state file.
+- It keeps the metadata endpoint identical in shape to every other endpoint:
+  a session query against a table.
+
+The tradeoff: the metadata is only as current as the last seed. That is
+exactly the property we want here — the app describes the loaded database, and
+re-seeding is the deliberate act that updates it. The single-row invariant is
+enforced by the fixed primary key: re-seeding upserts row 1 rather than
+accumulating rows.
+
 ## API route reference
 
 | Method | Route                     | Purpose |
@@ -153,6 +179,7 @@ format grows.
 | GET    | `/api/v1/items/{id}`      | Full item incl. markdown body |
 | GET    | `/api/v1/disclaimers`     | Safety/synthetic-content notices |
 | GET    | `/api/v1/training`        | Training notes, ordered by module + lesson |
+| GET    | `/api/v1/pack-metadata`   | Active content pack's governance metadata |
 | GET    | `/api/v1/cases`           | Practice cases (answers omitted) |
 | GET    | `/api/v1/cases/{id}`      | Full case incl. guided steps + outcome |
 | GET    | `/api/v1/quiz`            | Questions (answers omitted); `?category=` |

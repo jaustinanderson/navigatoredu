@@ -17,7 +17,7 @@
 
 <!-- Synthetic-content banner -->
 <div class="bg-deep text-white text-xs text-center py-1.5 px-3">
-  Portfolio demo — all content is fictional and synthetic. Not for real-world use.
+  <span id="pack-banner">Portfolio demo — all content is fictional and synthetic. Not for real-world use.</span>
 </div>
 
 <header class="border-b border-slate-200 bg-white">
@@ -34,7 +34,7 @@
 <main id="app" class="max-w-4xl mx-auto px-4 py-8 w-full flex-1"></main>
 
 <footer class="text-center text-xs text-slate-400 py-6">
-  NavigatorEdu v0.1.0 · fictional Tidewatch Guild domain · MIT-style demo
+  NavigatorEdu v0.1.0 · synthetic content-pack demo · MIT-style demo
 </footer>
 
 <script>
@@ -75,11 +75,17 @@ const card = inner => `<div class="bg-white border border-slate-200 rounded-lg p
 const views = {
 
   async home() {
-    const cats = await api('/categories');
+    const [cats, meta] = await Promise.all([api('/categories'), api('/pack-metadata')]);
     return `
-      <h1 class="text-2xl font-semibold text-deep mb-1">Tidewatch Guild Reference</h1>
-      <p class="text-slate-600 mb-6">A fictional celestial-navigation training library. Browse the
-      reference, work practice cases, then test yourself in quiz mode.</p>
+      <div class="mb-6 rounded-lg border border-slate-200 bg-white px-4 py-3">
+        <p class="text-xs uppercase tracking-wide text-brass">Active content pack</p>
+        <p class="font-semibold text-deep">${meta.pack_name}</p>
+        <p class="text-sm text-slate-500 mt-0.5">${meta.pack_description}</p>
+        <p class="text-xs text-slate-400 mt-2">${meta.safety_notes}</p>
+      </div>
+      <h1 class="text-2xl font-semibold text-deep mb-1">${meta.pack_name}</h1>
+      <p class="text-slate-600 mb-6">Browse the reference, work practice cases,
+      review the training modules, then test yourself in quiz mode.</p>
       <div class="grid sm:grid-cols-2 gap-3 mb-8">
         ${card(`<a href="#/categories" class="font-medium text-deep">📚 Reference</a><p class="text-sm text-slate-500 mt-1">Searchable items across ${cats.length} categories.</p>`)}
         ${card(`<a href="#/cases" class="font-medium text-deep">🧭 Practice cases</a><p class="text-sm text-slate-500 mt-1">Scenarios with guided reveal-as-you-go answers.</p>`)}
@@ -277,7 +283,20 @@ async function route() {
   }
   window.scrollTo(0, 0);
 }
+// Populate the persistent top banner with the active pack (runs once).
+async function loadPackBanner() {
+  try {
+    const meta = await api('/pack-metadata');
+    const el = document.getElementById('pack-banner');
+    if (el) {
+      el.textContent =
+        `Active content pack: ${meta.pack_name} — synthetic demo only. Not for real-world use.`;
+    }
+  } catch { /* leave the static fallback text in place */ }
+}
+
 window.addEventListener('hashchange', route);
+loadPackBanner();
 route();
 </script>
 </body>

@@ -159,3 +159,9 @@ class TestCytoFishPack:
         )
         assert r.status_code == 200
         assert r.json()["score"] == 1
+
+    def test_metadata_endpoint_reflects_loaded_pack(self, cytofish_client):
+        meta = cytofish_client.get("/api/v1/pack-metadata").json()
+        assert meta["pack_id"] == "cytofish_synthetic"
+        assert meta["synthetic_only"] is True
+        assert meta["domain_type"] == "synthetic_biomedical_education"

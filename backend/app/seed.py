@@ -20,11 +20,18 @@ from .db import create_tables, engine
 from .models import (
     Category,
     Disclaimer,
+    PackMetadata,
     PracticeCase,
     QuizQuestion,
     ReferenceItem,
     TrainingNote,
 )
+
+METADATA_KEY = "metadata"
+METADATA_FIELDS = [
+    "pack_id", "pack_name", "pack_version", "pack_description",
+    "domain_type", "synthetic_only", "intended_use", "safety_notes",
+]
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_SEED_PATH = PROJECT_ROOT / "data" / "seed.json"
@@ -61,6 +68,13 @@ def seed(session: Session, seed_path: Path | None = None) -> dict[str, int]:
         for row in rows:
             session.merge(model(**row))  # merge = upsert by primary key
         counts[key] = len(rows)
+
+    # Upsert the single metadata row (id=1) describing this pack.
+    meta = data.get(METADATA_KEY, {})
+    if meta:
+        session.merge(PackMetadata(id=1, **{f: meta[f] for f in METADATA_FIELDS}))
+        counts[METADATA_KEY] = 1
+
     session.commit()
     return counts
 

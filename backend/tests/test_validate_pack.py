@@ -106,3 +106,41 @@ class TestBrokenPacks:
         assert main([write_pack(tmp_path, data)]) == 1
         out = capsys.readouterr().out
         assert "INVALID" in out and "2 problem(s)" in out
+
+
+class TestMetadataValidation:
+    def test_missing_metadata_fails(self, tmp_path):
+        data = load_default()
+        del data["metadata"]
+        errors = validate_pack(write_pack(tmp_path, data))
+        assert any("missing top-level key: 'metadata'" in e for e in errors)
+
+    def test_missing_metadata_field_fails(self, tmp_path):
+        data = load_default()
+        del data["metadata"]["pack_id"]
+        errors = validate_pack(write_pack(tmp_path, data))
+        assert any("metadata: missing fields" in e and "pack_id" in e for e in errors)
+
+    def test_synthetic_only_must_be_true(self, tmp_path):
+        data = load_default()
+        data["metadata"]["synthetic_only"] = False
+        errors = validate_pack(write_pack(tmp_path, data))
+        assert any("'synthetic_only' must be true" in e for e in errors)
+
+    def test_blank_intended_use_fails(self, tmp_path):
+        data = load_default()
+        data["metadata"]["intended_use"] = "   "
+        errors = validate_pack(write_pack(tmp_path, data))
+        assert any("'intended_use' must be present and non-empty" in e for e in errors)
+
+    def test_blank_pack_name_fails(self, tmp_path):
+        data = load_default()
+        data["metadata"]["pack_name"] = ""
+        errors = validate_pack(write_pack(tmp_path, data))
+        assert any("'pack_name' must be present and non-empty" in e for e in errors)
+
+    def test_all_shipped_packs_have_valid_metadata(self):
+        # Redundant with the parametrized sweep, but states the governance
+        # guarantee explicitly: every shipped pack carries valid metadata.
+        for pack in ALL_PACKS:
+            assert validate_pack(pack) == []
