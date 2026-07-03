@@ -92,6 +92,33 @@ An animated GIF of switching packs (home page before/after a reseed) is the
 single most convincing artifact for this project — it shows the whole
 content-agnostic thesis in one loop.
 
+## Bonus beat: scaffold a brand-new pack live
+
+For a technical audience, showing the *authoring* story lands well — it proves
+the content-agnostic thesis isn't just three prepared files but a repeatable
+workflow.
+
+```bash
+# 1. Scaffold a valid, safe-by-default pack in one command.
+python -m backend.app.new_pack demo_pack
+
+# 2. It passes the validator immediately — before any content is written.
+python -m backend.app.validate_pack data/seed_demo_pack.json   # -> OK
+
+# 3. Seed a fresh database from it and run.
+rm -f data/navigatoredu.db
+SEED_PATH=data/seed_demo_pack.json python -m backend.app.seed
+SEED_PATH=data/seed_demo_pack.json uvicorn backend.app.main:app --reload
+```
+
+Open <http://127.0.0.1:8000>: the banner and home card name the new
+`Demo Pack`, and every section renders the placeholder starter records. The
+narration: *"A new domain starts from a valid, governed skeleton — I only
+replace the TODO records; I never rebuild the contract."* Delete the throwaway
+file afterward (`rm data/seed_demo_pack.json`) so it doesn't get committed.
+
+Full authoring workflow and schema: [CONTENT_AUTHORING.md](CONTENT_AUTHORING.md).
+
 ## Safety reminder for the CytoFISH pack
 
 The CytoFISH pack is **synthetic educational content only**: no patient

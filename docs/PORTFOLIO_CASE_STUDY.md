@@ -54,9 +54,9 @@ screening for.
 | REST API design | Versioned prefix, list/detail response shaping, correct 400/404 usage |
 | Data modeling | Six related entities with FKs; deliberate JSON-column trade-off, documented |
 | Security thinking | Quiz answers never leave the server; server-side scoring; HTML-escaped rendering |
-| Testing discipline | 26 tests on isolated in-memory DBs via dependency override — no mocks |
-| Data pipelines | Idempotent seed script; human-reviewable JSON as source of truth; CLI validator gating CI |
-| Documentation | README, ARCHITECTURE.md, DEMO_GUIDE.md, this case study; OpenAPI for free |
+| Testing discipline | 87 tests on isolated in-memory DBs via dependency override — no mocks |
+| Data pipelines | Idempotent seed script; human-reviewable JSON as source of truth; CLI validator gating CI; `new_pack` scaffolder for safe-by-default authoring |
+| Documentation | README, ARCHITECTURE.md, CONTENT_AUTHORING.md, DEMO_GUIDE.md, this case study; OpenAPI for free |
 | Content governance | Required per-pack metadata, validated in CI; active pack surfaced in API + UI |
 | Operations basics | Docker (non-root user, layer caching), compose volume + healthcheck, GitHub Actions CI |
 | Product judgment | Reveal-as-you-go practice cases; disclaimer system built into the schema |
@@ -105,8 +105,9 @@ screening for.
   the pack format is now an enforced interface.
 - ~~**Domain specialization**~~ — shipped: the CytoFISH pack proves a
   specialized, safety-sensitive domain fits the generic architecture unchanged.
-- **Pack scaffolding** — a `new_pack` generator emitting a valid skeleton
-  would complete the authoring toolchain.
+- ~~**Pack scaffolding**~~ — shipped: `new_pack` emits a valid, safe-by-default
+  skeleton, so a new pack starts green instead of hand-copied — completing the
+  content authoring toolchain.
 
 ## Why metadata + governance matter here
 
@@ -139,6 +140,25 @@ out of range for 4 options"), and CI runs it on every push. The transferable
 skill on display: treating data contracts with the same rigor as code
 contracts. This is the same discipline behind schema registries, API
 contract tests, and ETL data-quality gates in production systems.
+
+## Why authoring tooling matters here
+
+A validator tells an author when a pack is *wrong*. A scaffolder makes the
+*right* pack the path of least resistance. `new_pack` emits a minimal,
+fully-wired pack that is valid on creation and safe-by-default —
+`synthetic_only: true`, educational-demo-only intended use, and safety notes
+forbidding real or operational use, all baked in before the author types a
+word.
+
+Why an interviewer should care: this is "make the safe thing the easy thing"
+applied to a data pipeline. Instead of trusting every author to remember the
+governance fields and reconstruct the referential contract by hand, the system
+hands them a green, governed baseline and lets them add content on top. That is
+the same instinct behind project scaffolds, secure-by-default templates, and
+paved-path tooling in real engineering orgs — reducing the chance of an unsafe
+or invalid artifact by making the default output correct. Paired with the
+CI-gated validator, it closes the loop: easy to start right, impossible to ship
+wrong.
 
 ## Honest limitations (know these before an interviewer finds them)
 

@@ -144,6 +144,44 @@ collections it reads clearer, produces friendlier errors, and adds no
 dependency; the docstring names JSON Schema as the upgrade path if the
 format grows.
 
+## Content-pack authoring (new_pack)
+
+`backend/app/new_pack.py` scaffolds a new pack from a valid skeleton, so an
+author never hand-copies an existing domain's file (and never forgets a
+governance field in the process):
+
+```bash
+python -m backend.app.new_pack demo_pack   # -> data/seed_demo_pack.json
+```
+
+The design mirrors the validator's philosophy — make the contract impossible
+to get subtly wrong:
+
+- **Green from birth.** `build_skeleton()` emits a minimal but *fully-wired*
+  graph: one category, disclaimer, reference item, training note, practice
+  case, and quiz question, with every foreign key resolving and the quiz
+  answerable. The output passes `validate_pack` immediately, so `create →
+  validate → seed → run` works before the author writes any content. A test
+  asserts this end-to-end (scaffold, then validate == []).
+- **Safe by default.** The metadata is generated with `synthetic_only: true`,
+  an `intended_use` that says educational-demo-only, and `safety_notes`
+  forbidding real records/cases and operational/clinical use. Safety is baked
+  into the scaffold, not left to the author to remember.
+- **Slugs are constrained.** The slug becomes both the filename and the
+  `pack_id`, so it is validated against `^[a-z][a-z0-9_]*$` (with a length
+  cap) before anything is written — bad input fails cleanly with exit code 2
+  and no file.
+- **No accidental clobber.** An existing target is refused (exit 1) unless
+  `--force` is passed; the flag is the only way to overwrite.
+- **Testable seam.** `new_pack(slug, data_dir=...)` takes an injectable output
+  directory, and the module-level `DATA_DIR` is resolved at call time, so the
+  CLI is redirected to a temp directory in tests. The suite therefore
+  exercises real file creation without ever leaving a `data/seed_demo_pack.json`
+  behind — which is what keeps CI's working tree clean.
+
+Exit codes match the validator's convention (0 success, 1 refused, 2 bad
+usage/slug), so the two CLIs compose predictably in scripts.
+
 ## Active-pack metadata
 
 Each pack carries a governed `metadata` object (`pack_id`, `pack_name`,
@@ -214,9 +252,11 @@ healthcheck polls `/api/v1/categories`.
 ## Extension points
 
 - **New content:** edit a pack, re-run the seed script. No code changes.
-- **New domain:** write one new content pack, run the validator, point
-  `SEED_PATH` at it — the app re-skins entirely. Tested in
-  `backend/tests/test_seed_path.py`.
+- **New domain:** scaffold a pack with `python -m backend.app.new_pack
+  <slug>`, edit the placeholder records, run the validator, and point
+  `SEED_PATH` at it — the app re-skins entirely. Authoring workflow in
+  [CONTENT_AUTHORING.md](CONTENT_AUTHORING.md); tested in
+  `backend/tests/test_seed_path.py` and `backend/tests/test_new_pack.py`.
 - **New entity:** add a model, a seed collection entry, and a router — the
   three-file pattern is consistent across the codebase.
 - **Postgres:** change the connection URL in `db.py`; SQLModel/SQLAlchemy

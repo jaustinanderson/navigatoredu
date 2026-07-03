@@ -87,7 +87,7 @@ re-importing after you edit a seed file (it upserts, so re-running is safe).
 
 The entire application is content-agnostic: all domain content lives in a
 single JSON "content pack," selected with the `SEED_PATH` environment
-variable. Two packs ship with the repo:
+variable. Three packs ship with the repo:
 
 | Pack | File | Domain |
 |------|------|--------|
@@ -164,8 +164,28 @@ python -m backend.app.validate_pack data/seed_cytofish_synthetic.json
 ```
 
 Exit code 0 means valid; problems are listed with record IDs. CI validates
-both shipped packs on every push, so a content edit that breaks a reference
+every shipped pack on every push, so a content edit that breaks a reference
 fails the build just like a code regression would.
+
+### Authoring a new pack (new_pack)
+
+Start a new pack from a valid skeleton rather than hand-copying an existing
+one — the scaffolder emits a minimal, fully-wired pack that passes the
+validator immediately and ships with safety defaults baked in:
+
+```bash
+python -m backend.app.new_pack demo_pack        # writes data/seed_demo_pack.json
+python -m backend.app.new_pack demo_pack --force # regenerate (overwrite)
+```
+
+The slug names both the file and the `pack_id` (lowercase letters, digits,
+underscores; must start with a letter). The generated pack has
+`synthetic_only: true`, an `intended_use` that says educational demo only, and
+`safety_notes` stating no real records, no real cases, and no operational or
+clinical use — so a new domain begins valid, governed, and safe-by-default.
+Then edit the `TODO` placeholder records, validate, seed, and run. The full
+workflow and pack schema are in
+[docs/CONTENT_AUTHORING.md](docs/CONTENT_AUTHORING.md).
 
 ## Docker
 
@@ -187,7 +207,7 @@ docker run -p 8000:8000 navigatoredu
 ## Tests
 
 ```bash
-python -m pytest        # 17 tests
+python -m pytest        # 87 tests
 ```
 
 Tests run against an **isolated in-memory SQLite database** seeded from the
@@ -196,8 +216,8 @@ real queries, zero mocks, and your development database is never touched.
 
 ## CI
 
-`.github/workflows/ci.yml` runs the full pytest suite **and validates both
-content packs** on every push and pull request (Ubuntu, Python 3.12, cached
+`.github/workflows/ci.yml` runs the full pytest suite **and validates every
+content pack** on every push and pull request (Ubuntu, Python 3.12, cached
 pip). Content is checked in CI because content is part of the contract. Update the badge URL at the top of
 this file with your GitHub username after pushing.
 
@@ -211,11 +231,17 @@ See [screenshots/README.md](screenshots/README.md) for the capture checklist.
 - Quiz sessions with persisted attempt history
 - Postgres profile in docker-compose for a production-shaped variant
 
+Shipped: content-agnostic `SEED_PATH` packs, a CI-gated pack validator,
+per-pack governance metadata, and a `new_pack` scaffolder — the content
+authoring toolchain is now complete end to end.
+
 ## Docs
 
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — how it's built and why
 - [docs/PORTFOLIO_CASE_STUDY.md](docs/PORTFOLIO_CASE_STUDY.md) — how to
   present this project professionally
+- [docs/CONTENT_AUTHORING.md](docs/CONTENT_AUTHORING.md) — pack schema and
+  the create → validate → seed → run authoring workflow
 - [docs/DEMO_GUIDE.md](docs/DEMO_GUIDE.md) — local walkthrough of all three
   content packs and what to screenshot
 
