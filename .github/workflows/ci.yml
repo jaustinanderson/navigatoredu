@@ -25,3 +25,4 @@ jobs:
         run: |
           python -m backend.app.validate_pack data/seed.json
           python -m backend.app.validate_pack data/seed_archiveguild.json
+          python -m backend.app.validate_pack data/seed_cytofish_synthetic.json

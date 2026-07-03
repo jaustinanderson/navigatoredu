@@ -1,0 +1,404 @@
+{
+  "meta": {
+    "app": "NavigatorEdu",
+    "domain": "CytoFISH Navigator — synthetic FISH/cytogenetics education (fictional)",
+    "is_synthetic": true,
+    "version": "0.5.0"
+  },
+  "disclaimers": [
+    {
+      "id": "d1",
+      "applies_to": "global",
+      "text": "Educational and portfolio demonstration only. All content is fully synthetic and fictional. This pack contains no patient information, no real cases, no accession numbers, no laboratory protocols, and no diagnostic guidance. Nothing here is validated for clinical, diagnostic, or laboratory use, and it must not be used to interpret real results or make real decisions."
+    },
+    {
+      "id": "d2",
+      "applies_to": "category",
+      "text": "Signal patterns, case names, and outcomes in this pack are invented to teach general concepts and reasoning habits. They are not derived from real specimens and do not represent any real disease, probe product, or laboratory workflow."
+    }
+  ],
+  "categories": [
+    {
+      "id": "cat-panel-foundations",
+      "name": "Panel Foundations",
+      "slug": "panel-foundations",
+      "description": "What a synthetic FISH panel is, at a conceptual level, and how educational panels are organized in this demo.",
+      "parent_id": null
+    },
+    {
+      "id": "cat-probe-signal",
+      "name": "Probe and Signal Concepts",
+      "slug": "probe-signal-concepts",
+      "description": "Conceptual categories of probes and the idealized signal patterns used for teaching pattern-reasoning.",
+      "parent_id": null
+    },
+    {
+      "id": "cat-quality-review",
+      "name": "Quality and Review Awareness",
+      "slug": "quality-review-awareness",
+      "description": "Educational habits: review checkpoints, uncertainty awareness, escalation, and documentation discipline.",
+      "parent_id": null
+    },
+    {
+      "id": "cat-synthetic-practice",
+      "name": "Synthetic Practice Cases",
+      "slug": "synthetic-practice-cases",
+      "description": "Fully fictional practice scenarios for building pattern-recognition and escalation reasoning. No real interpretation.",
+      "parent_id": null
+    }
+  ],
+  "reference_items": [
+    {
+      "id": "ref-001",
+      "category_id": "cat-panel-foundations",
+      "title": "What a FISH Panel Is (Conceptually)",
+      "summary": "A high-level, educational description of how a fluorescence in situ hybridization panel is organized.",
+      "body_md": "A **FISH panel**, in this synthetic teaching model, is a grouped set of fluorescent probes chosen to answer a specific question about chromosomal structure or count.\n\nAt a conceptual level:\n\n- Each **probe** targets a defined region and fluoresces a color when bound.\n- A **panel** bundles several probes so related questions are examined together.\n- An analyst reviews **signal patterns** across many cells, not a single cell in isolation.\n\nThis pack teaches the *reasoning shape* of panel review — grouping, pattern, and consensus across cells — without any real protocol, product, or diagnostic content.",
+      "tags": ["panel", "foundations", "concept"],
+      "difficulty": "beginner",
+      "disclaimer_id": "d1",
+      "is_synthetic": true
+    },
+    {
+      "id": "ref-002",
+      "category_id": "cat-panel-foundations",
+      "title": "Educational Panel Layout",
+      "summary": "How the synthetic panels in this demo are structured for teaching.",
+      "body_md": "The demo organizes each synthetic panel into three teaching layers:\n\n1. **Purpose** — the general concept the panel illustrates (e.g. counting vs. rearrangement).\n2. **Probe set** — an abstract list of probe *roles*, never real probe products.\n3. **Expected teaching pattern** — an idealized normal pattern used as a reference point for discussion.\n\nThe goal is fluency with the *structure* of panel reasoning. Numbers and patterns are illustrative and invented.",
+      "tags": ["panel", "structure"],
+      "difficulty": "beginner",
+      "disclaimer_id": "d2",
+      "is_synthetic": true
+    },
+    {
+      "id": "ref-003",
+      "category_id": "cat-probe-signal",
+      "title": "Enumeration Probe Concept",
+      "summary": "The idea of counting signals to reason about chromosome or region copy number.",
+      "body_md": "An **enumeration probe** concept is about *counting*: how many copies of a target region appear in a cell.\n\nIn this synthetic model:\n\n- A commonly taught reference pattern is **two signals per cell** for a paired region.\n- Counts consistently above or below the reference pattern are what an analyst learns to *notice* — not to interpret clinically here.\n\nTeaching emphasis: counting is done across many cells, and a single unusual cell is a prompt to keep looking, not a conclusion.",
+      "tags": ["probe", "enumeration", "counting"],
+      "difficulty": "beginner",
+      "disclaimer_id": "d2",
+      "is_synthetic": true
+    },
+    {
+      "id": "ref-004",
+      "category_id": "cat-probe-signal",
+      "title": "Break-Apart Probe Concept",
+      "summary": "How a single split signal conceptually flags a possible rearrangement.",
+      "body_md": "A **break-apart** probe concept uses two differently colored probes placed on either side of a region of interest.\n\nIdealized teaching patterns:\n\n- **Together (fused colors)** → the region is conceptually intact in this synthetic model.\n- **Split apart** → conceptually suggests the region may be separated.\n\nThis pack uses break-apart purely to teach the *visual logic* of \"together vs. split.\" It makes no claim about what any real split would mean.",
+      "tags": ["probe", "break-apart", "rearrangement"],
+      "difficulty": "intermediate",
+      "disclaimer_id": "d2",
+      "is_synthetic": true
+    },
+    {
+      "id": "ref-005",
+      "category_id": "cat-probe-signal",
+      "title": "Fusion Probe Concept",
+      "summary": "How two separate signals coming together conceptually flags a possible fusion.",
+      "body_md": "A **fusion** probe concept is the mirror image of break-apart: two probes of different colors that are normally *separate* and are examined for whether they conceptually **come together**.\n\nIdealized teaching patterns:\n\n- **Separate signals** → the reference teaching pattern.\n- **Overlapping/adjacent signals** → conceptually prompts a closer look in this synthetic model.\n\nThe teaching point is the contrast with break-apart: same idea of \"relationship between two colors,\" opposite normal expectation.",
+      "tags": ["probe", "fusion", "concept"],
+      "difficulty": "intermediate",
+      "disclaimer_id": "d2",
+      "is_synthetic": true
+    },
+    {
+      "id": "ref-006",
+      "category_id": "cat-probe-signal",
+      "title": "Normal vs Abnormal Pattern Reasoning (Synthetic)",
+      "summary": "Why reasoning happens across a population of cells, not one cell.",
+      "body_md": "In this synthetic model, an analyst compares observed signal patterns against an **idealized reference pattern** — but always across many cells.\n\nKey educational habits:\n\n- Establish what the reference (\"expected\") pattern is before scoring.\n- Treat scattered oddities differently from a **consistent** deviation across many cells.\n- Record what was counted and how many cells were reviewed.\n\nThe recurring lesson: *consistency across cells* is what turns an observation into something worth escalating — and even then, escalation here means \"have it reviewed,\" never \"diagnose.\"",
+      "tags": ["pattern", "reasoning", "review"],
+      "difficulty": "intermediate",
+      "disclaimer_id": "d2",
+      "is_synthetic": true
+    },
+    {
+      "id": "ref-007",
+      "category_id": "cat-quality-review",
+      "title": "Reflex Logic as an Educational Concept",
+      "summary": "The general idea of 'if you observe X, the next educational step is Y'.",
+      "body_md": "**Reflex logic**, taught abstractly, is simply structured *if-then* thinking: an observation triggers a predefined next educational step.\n\nSynthetic example of the *shape* (not a real rule):\n\n- *If* an enumeration pattern looks consistently unusual across cells, *then* the teaching workflow says: pause, recount, and flag for review.\n\nThe value for learners is the discipline of deciding next steps **in advance**, so decisions under uncertainty follow a plan rather than improvisation. No real reflex rules are provided.",
+      "tags": ["reflex", "workflow", "concept"],
+      "difficulty": "intermediate",
+      "disclaimer_id": "d2",
+      "is_synthetic": true
+    },
+    {
+      "id": "ref-008",
+      "category_id": "cat-quality-review",
+      "title": "Review Checkpoints",
+      "summary": "Educational checkpoints that structure a careful synthetic review.",
+      "body_md": "This demo teaches three lightweight **review checkpoints**:\n\n1. **Before scoring** — confirm which reference pattern applies and how many cells to review.\n2. **During scoring** — watch for consistency vs. scattered noise; keep a running count.\n3. **Before finishing** — ask \"does anything here warrant a second reviewer?\"\n\nCheckpoints are a habit, not a protocol. They exist to make uncertainty *visible* and slow down the moment where mistakes usually happen: rushing the finish.",
+      "tags": ["review", "quality", "checkpoints"],
+      "difficulty": "beginner",
+      "disclaimer_id": "d2",
+      "is_synthetic": true
+    },
+    {
+      "id": "ref-009",
+      "category_id": "cat-quality-review",
+      "title": "Uncertainty and Escalation Awareness",
+      "summary": "Recognizing the limits of one's own review and knowing when to hand off.",
+      "body_md": "A central educational habit: **name uncertainty instead of resolving it prematurely.**\n\nIn this synthetic model, escalation means *routing for review by someone more experienced* — never making or implying a diagnosis.\n\nSignals that a learner should escalate (all synthetic, all about the *habit*):\n\n- The pattern is ambiguous and staring longer isn't helping.\n- The observation is consistent but outside what the learner is trained to score.\n- Two plausible readings exist and nothing decides between them.\n\nEscalating early is framed as competence, not failure.",
+      "tags": ["uncertainty", "escalation", "awareness"],
+      "difficulty": "intermediate",
+      "disclaimer_id": "d2",
+      "is_synthetic": true
+    },
+    {
+      "id": "ref-010",
+      "category_id": "cat-quality-review",
+      "title": "Documentation Discipline",
+      "summary": "Recording what was reviewed so the reasoning is reconstructable.",
+      "body_md": "Documentation discipline in this demo means writing down enough that another person could **reconstruct the review**:\n\n- Which reference pattern was used.\n- How many cells were reviewed and what was counted.\n- What was uncertain, and what was escalated (and to whom, in a real setting).\n\nAs in the other packs in this project, the rule is *annotate, don't erase*: corrections carry a reason. A review nobody can reconstruct is, for teaching purposes, a review that didn't happen.",
+      "tags": ["documentation", "discipline", "review"],
+      "difficulty": "beginner",
+      "disclaimer_id": "d2",
+      "is_synthetic": true
+    },
+    {
+      "id": "ref-011",
+      "category_id": "cat-synthetic-practice",
+      "title": "Synthetic Case Review Workflow",
+      "summary": "The end-to-end shape of working a fictional practice case in this pack.",
+      "body_md": "Every synthetic practice case (`SYN-FISH-###`) follows the same teaching workflow:\n\n1. **Frame** — identify which probe concept and reference pattern apply.\n2. **Observe** — read the described (invented) signal pattern across cells.\n3. **Reason** — decide whether it matches the reference, deviates consistently, or is ambiguous.\n4. **Act (educationally)** — recount, document, and/or escalate for review.\n\nNo case asks the learner to diagnose. Every case ends at *the appropriate educational next step*, which is often \"escalate for review\" or \"document the uncertainty.\"",
+      "tags": ["workflow", "practice", "synthetic"],
+      "difficulty": "beginner",
+      "disclaimer_id": "d1",
+      "is_synthetic": true
+    }
+  ],
+  "training_notes": [
+    {
+      "id": "tn-001",
+      "module": "Panel Foundations",
+      "order": 1,
+      "title": "Panels are questions, not verdicts",
+      "body_md": "A useful mental model: a synthetic FISH panel is a *structured question* about chromosomal structure or count, assembled from probes.\n\nThe analyst's job in this teaching model is to read patterns carefully and decide the appropriate next educational step — not to deliver a verdict. Keeping 'question, not verdict' in mind is what keeps a learner in the habit of escalating uncertainty rather than forcing a conclusion.",
+      "related_item_ids": ["ref-001", "ref-002"]
+    },
+    {
+      "id": "tn-002",
+      "module": "Probe and Signal Concepts",
+      "order": 1,
+      "title": "Two colors, two opposite expectations",
+      "body_md": "Break-apart and fusion concepts are easiest to learn as a pair, because they invert the same idea.\n\n- **Break-apart:** colors normally *together*; you watch for a **split**.\n- **Fusion:** colors normally *apart*; you watch for them **coming together**.\n\nThe transferable skill is stating the *reference expectation* before you look. If you don't know what 'normal' means for the probe concept in front of you, you're not ready to score it yet.",
+      "related_item_ids": ["ref-004", "ref-005"]
+    },
+    {
+      "id": "tn-003",
+      "module": "Probe and Signal Concepts",
+      "order": 2,
+      "title": "Count across cells, not within one",
+      "body_md": "Enumeration reasoning lives at the level of the *population* of cells, not the single striking cell.\n\nOne unusual cell is noise until it repeats. The teaching habit: establish how many cells you'll review before you start, then let consistency — not the first surprising cell — drive whether something is worth escalating.",
+      "related_item_ids": ["ref-003", "ref-006"]
+    },
+    {
+      "id": "tn-004",
+      "module": "Quality and Review Awareness",
+      "order": 1,
+      "title": "Decide the next step before you're under pressure",
+      "body_md": "Reflex logic and review checkpoints share one purpose: pre-committing to what you'll do, so a hard moment doesn't force an improvised call.\n\n'If the pattern is consistently unusual, I recount and flag for review' is decided *now*, calmly — not in the middle of an ambiguous case. Pre-made decisions are what let a learner escalate without hesitation.",
+      "related_item_ids": ["ref-007", "ref-008"]
+    },
+    {
+      "id": "tn-005",
+      "module": "Quality and Review Awareness",
+      "order": 2,
+      "title": "Escalation is a skill, not an admission",
+      "body_md": "The habit this pack most wants to build: treat 'I need this reviewed' as a *competent* move.\n\nNaming uncertainty and routing it to the right reviewer is exactly what careful analysts do. Documentation discipline supports this — an escalation is only useful if the next person can reconstruct what you saw and why you paused.",
+      "related_item_ids": ["ref-009", "ref-010"]
+    }
+  ],
+  "practice_cases": [
+    {
+      "id": "case-001",
+      "category_id": "cat-synthetic-practice",
+      "title": "SYN-FISH-001: The Reassuring Majority",
+      "scenario_md": "**Synthetic teaching case.** You review an invented enumeration scenario. The reference teaching pattern is two signals per cell. Across 50 fictional cells, 48 show the expected two-signal pattern; 2 show a single signal.",
+      "guided_steps": [
+        "Restate the reference pattern before judging: two signals per cell is 'expected' here.",
+        "Weigh consistency: 48 of 50 match; the 2 outliers are scattered, not a consistent deviation.",
+        "Recall that isolated outliers are common in synthetic teaching data and are a prompt to keep counting, not a conclusion.",
+        "Choose the educational next step: document the counts and the two outliers; no escalation is indicated by this synthetic pattern alone."
+      ],
+      "expected_outcome_md": "**Teaching outcome: document and move on.** The dominant pattern matches the reference, and a small number of scattered outliers is expected noise in this synthetic model. Key habit: the decision rests on *consistency across cells*, and the analyst records the outliers rather than hiding them. No interpretation beyond 'matches the expected teaching pattern' is made.",
+      "difficulty": "beginner",
+      "is_synthetic": true
+    },
+    {
+      "id": "case-002",
+      "category_id": "cat-synthetic-practice",
+      "title": "SYN-FISH-002: A Consistent Surprise",
+      "scenario_md": "**Synthetic teaching case.** Using a break-apart *concept*, the reference teaching pattern is 'colors together.' Across 60 fictional cells, roughly 40 show a consistent 'split' appearance rather than the together pattern.",
+      "guided_steps": [
+        "State the reference expectation for a break-apart concept: colors together.",
+        "Notice this is not scattered noise — a consistent split across a large share of cells is a *consistent deviation*.",
+        "Apply the educational reflex: pause, recount to confirm the pattern is real and not a scoring artifact.",
+        "Choose the next step: this is an escalation-for-review situation in the teaching workflow — flag it and document what was seen."
+      ],
+      "expected_outcome_md": "**Teaching outcome: recount, then escalate for review.** A consistent deviation across many cells is exactly the synthetic pattern that should trigger the 'flag for review' habit. Crucially, the learner escalates and documents — they do **not** interpret what the split means. Escalation here is the competent, correct endpoint.",
+      "difficulty": "intermediate",
+      "is_synthetic": true
+    },
+    {
+      "id": "case-003",
+      "category_id": "cat-synthetic-practice",
+      "title": "SYN-FISH-003: Genuinely Ambiguous",
+      "scenario_md": "**Synthetic teaching case.** Using a fusion *concept* (colors normally apart), you review 45 fictional cells. About half look clearly separate; the rest are borderline — signals close together but not clearly overlapping. Staring longer isn't resolving it.",
+      "guided_steps": [
+        "Name the difficulty honestly: this is ambiguous, not obviously normal or abnormal.",
+        "Resist forcing a call; recall that 'name uncertainty instead of resolving it prematurely' is the taught habit.",
+        "Check the escalation triggers: ambiguous pattern + longer review not helping = escalate.",
+        "Document both plausible readings and what was uncertain, then route for review."
+      ],
+      "expected_outcome_md": "**Teaching outcome: escalate on uncertainty.** The learning objective is recognizing when *not* to decide. Two plausible readings with nothing to separate them is a textbook synthetic escalation case. The learner's success is measured by clear documentation of the ambiguity and an early handoff — never by picking an answer.",
+      "difficulty": "advanced",
+      "is_synthetic": true
+    }
+  ],
+  "quiz_questions": [
+    {
+      "id": "q-001",
+      "category_id": "cat-panel-foundations",
+      "question": "In this synthetic teaching model, a FISH panel is best described as:",
+      "options": [
+        "A single test that outputs a diagnosis",
+        "A grouped set of probes used to examine related structural or count questions",
+        "A laboratory protocol for preparing specimens",
+        "A list of accession numbers"
+      ],
+      "correct_index": 1,
+      "explanation": "The pack teaches a panel as a grouped set of probes examining related questions across many cells — a conceptual model, not a diagnostic test or protocol.",
+      "source_item_id": "ref-001"
+    },
+    {
+      "id": "q-002",
+      "category_id": "cat-probe-signal",
+      "question": "Conceptually, an enumeration probe is mainly about:",
+      "options": [
+        "Counting how many copies of a target region appear",
+        "Measuring fluorescence brightness",
+        "Diagnosing a specific condition",
+        "Splitting two colors apart"
+      ],
+      "correct_index": 0,
+      "explanation": "Enumeration is the 'counting' concept; interpretation beyond counting is deliberately out of scope in this educational pack.",
+      "source_item_id": "ref-003"
+    },
+    {
+      "id": "q-003",
+      "category_id": "cat-probe-signal",
+      "question": "For a break-apart probe concept, the reference ('expected') teaching pattern is:",
+      "options": [
+        "Two colors split apart",
+        "Two colors together",
+        "A single color only",
+        "No signal at all"
+      ],
+      "correct_index": 1,
+      "explanation": "Break-apart teaches 'together = reference pattern, split = look closer.' Fusion inverts this expectation.",
+      "source_item_id": "ref-004"
+    },
+    {
+      "id": "q-004",
+      "category_id": "cat-probe-signal",
+      "question": "A fusion probe concept differs from break-apart because its reference pattern is:",
+      "options": [
+        "Colors together, watching for a split",
+        "Colors apart, watching for them coming together",
+        "Identical to break-apart",
+        "Based only on counting"
+      ],
+      "correct_index": 1,
+      "explanation": "Fusion normally shows separate colors; the learner watches for them coming together — the mirror image of break-apart.",
+      "source_item_id": "ref-005"
+    },
+    {
+      "id": "q-005",
+      "category_id": "cat-probe-signal",
+      "question": "In synthetic pattern reasoning, what most turns an observation into something worth escalating?",
+      "options": [
+        "A single striking cell",
+        "The brightest signal in the field",
+        "Consistency of the pattern across many cells",
+        "The order in which cells were reviewed"
+      ],
+      "correct_index": 2,
+      "explanation": "Consistency across many cells — not one dramatic cell — is what the pack teaches as the trigger to keep looking and consider review.",
+      "source_item_id": "ref-006"
+    },
+    {
+      "id": "q-006",
+      "category_id": "cat-quality-review",
+      "question": "Reflex logic, taught as an educational concept, is essentially:",
+      "options": [
+        "A real rule you must apply to specimens",
+        "Structured if-then thinking that pre-decides the next educational step",
+        "A way to speed up scoring by skipping cells",
+        "A diagnostic algorithm"
+      ],
+      "correct_index": 1,
+      "explanation": "The pack presents reflex logic abstractly as pre-committed if-then steps, explicitly not as real reflex rules or diagnostic algorithms.",
+      "source_item_id": "ref-007"
+    },
+    {
+      "id": "q-007",
+      "category_id": "cat-quality-review",
+      "question": "In this pack, 'escalation' means:",
+      "options": [
+        "Making a diagnosis quickly",
+        "Routing the case for review by someone more experienced",
+        "Discarding the case",
+        "Increasing the number of probes"
+      ],
+      "correct_index": 1,
+      "explanation": "Escalation is consistently defined as routing for review — never diagnosing. Escalating early is framed as competence.",
+      "source_item_id": "ref-009"
+    },
+    {
+      "id": "q-008",
+      "category_id": "cat-quality-review",
+      "question": "The pack's documentation rule is best summarized as:",
+      "options": [
+        "Erase mistakes so the record looks clean",
+        "Record only the final answer",
+        "Annotate rather than erase, so the review can be reconstructed",
+        "Documentation is optional for synthetic cases"
+      ],
+      "correct_index": 2,
+      "explanation": "As in the project's other packs, the rule is annotate-don't-erase: a review nobody can reconstruct effectively didn't happen.",
+      "source_item_id": "ref-010"
+    },
+    {
+      "id": "q-009",
+      "category_id": "cat-synthetic-practice",
+      "question": "When a synthetic pattern is genuinely ambiguous and longer review isn't helping, the taught next step is to:",
+      "options": [
+        "Pick the more likely reading and move on",
+        "Name the uncertainty, document both readings, and escalate for review",
+        "Ignore the ambiguous cells",
+        "Restart the whole panel"
+      ],
+      "correct_index": 1,
+      "explanation": "Recognizing when not to decide — and escalating with clear documentation — is the core learning objective of the ambiguous practice case.",
+      "source_item_id": "ref-009"
+    },
+    {
+      "id": "q-010",
+      "category_id": "cat-synthetic-practice",
+      "question": "Across the synthetic practice cases, a learner's success is measured by:",
+      "options": [
+        "Reaching a correct diagnosis",
+        "Choosing the appropriate educational next step (recount, document, or escalate)",
+        "Reviewing cases as fast as possible",
+        "Avoiding escalation whenever possible"
+      ],
+      "correct_index": 1,
+      "explanation": "Every case ends at an educational next step, not a diagnosis; appropriate escalation and documentation are the measures of success.",
+      "source_item_id": "ref-011"
+    }
+  ]
+}

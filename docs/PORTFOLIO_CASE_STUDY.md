@@ -30,6 +30,23 @@ white-label apps). Showing you can identify the invariant structure beneath
 a domain — and keep it out of your code — is an architecture skill, not a
 content trick.
 
+### Specialization without coupling
+
+The third pack, **CytoFISH Navigator**, is the strongest form of this
+argument. It is a *specialized, safety-sensitive* domain — synthetic
+cytogenetics/FISH education — yet it required **zero code changes**: same
+models, same routes, same validator, same frontend. The domain knowledge
+lives in content; the engineering stays generic.
+
+It also demonstrates handling a domain where *what you leave out* matters as
+much as what you include. Every safety boundary — no PHI, no real cases, no
+accession numbers, no protocols, no diagnostic or sign-out language — is
+enforced in the content and stated in the pack's own disclaimers, not bolted
+onto the code. For any employer in health, legal, finance, or another
+regulated space, that instinct — put the domain's safety rules where the
+domain lives, and keep the platform neutral — is exactly the judgment they're
+screening for.
+
 ## Skills evidenced, mapped to the code
 
 | Skill | Where a reviewer sees it |
@@ -85,6 +102,8 @@ content trick.
   content-agnosticism (one new JSON file, zero code changes).
 - ~~**Pack validation tooling**~~ — shipped: `validate_pack` runs in CI, so
   the pack format is now an enforced interface.
+- ~~**Domain specialization**~~ — shipped: the CytoFISH pack proves a
+  specialized, safety-sensitive domain fits the generic architecture unchanged.
 - **Pack scaffolding** — a `new_pack` generator emitting a valid skeleton
   would complete the authoring toolchain.
 

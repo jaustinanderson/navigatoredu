@@ -11,6 +11,10 @@ from backend.app.seed import DEFAULT_SEED_PATH, PROJECT_ROOT
 from backend.app.validate_pack import main, validate_pack
 
 ARCHIVE_PACK = PROJECT_ROOT / "data" / "seed_archiveguild.json"
+CYTOFISH_PACK = PROJECT_ROOT / "data" / "seed_cytofish_synthetic.json"
+
+# Every seed*.json pack shipped in data/ — new packs are picked up automatically.
+ALL_PACKS = sorted((PROJECT_ROOT / "data").glob("seed*.json"))
 
 
 def load_default() -> dict:
@@ -24,11 +28,16 @@ def write_pack(tmp_path, data) -> str:
 
 
 class TestShippedPacks:
-    def test_default_pack_is_valid(self):
-        assert validate_pack(DEFAULT_SEED_PATH) == []
+    def test_at_least_three_packs_present(self):
+        # Guards against a pack going missing; the milestone ships three.
+        assert len(ALL_PACKS) >= 3
 
-    def test_archiveguild_pack_is_valid(self):
-        assert validate_pack(ARCHIVE_PACK) == []
+    @pytest.mark.parametrize("pack", ALL_PACKS, ids=lambda p: p.name)
+    def test_shipped_pack_is_valid(self, pack):
+        assert validate_pack(pack) == []
+
+    def test_cytofish_pack_is_valid(self):
+        assert validate_pack(CYTOFISH_PACK) == []
 
     def test_cli_exit_code_zero_on_valid(self, capsys):
         assert main([str(DEFAULT_SEED_PATH)]) == 0

@@ -93,6 +93,7 @@ variable. Two packs ship with the repo:
 |------|------|--------|
 | Tidewatch Guild (default) | `data/seed.json` | fictional celestial navigation |
 | ArchiveGuild | `data/seed_archiveguild.json` | fictional archive apprenticeship |
+| CytoFISH Navigator | `data/seed_cytofish_synthetic.json` | synthetic FISH/cytogenetics **education** (no real/clinical content) |
 
 Run with the default pack:
 
@@ -108,6 +109,19 @@ rm -f data/navigatoredu.db          # start from a clean database
 SEED_PATH=data/seed_archiveguild.json python -m backend.app.seed
 SEED_PATH=data/seed_archiveguild.json uvicorn backend.app.main:app --reload
 ```
+
+Or the synthetic CytoFISH education pack:
+
+```bash
+rm -f data/navigatoredu.db
+SEED_PATH=data/seed_cytofish_synthetic.json python -m backend.app.seed
+SEED_PATH=data/seed_cytofish_synthetic.json uvicorn backend.app.main:app --reload
+```
+
+> The CytoFISH pack is **synthetic educational content only** — no patient
+> information, no real cases, no protocols, and no diagnostic guidance. It
+> demonstrates that the architecture can host a specialized, safety-sensitive
+> domain while keeping every safety boundary in the *content*, not the code.
 
 Same routes, same frontend, same tests — different product. Note that the
 seed script upserts by primary key and both packs use the same ID scheme, so
@@ -128,6 +142,7 @@ IDs, foreign references, and quiz-answer sanity:
 ```bash
 python -m backend.app.validate_pack data/seed.json
 python -m backend.app.validate_pack data/seed_archiveguild.json
+python -m backend.app.validate_pack data/seed_cytofish_synthetic.json
 ```
 
 Exit code 0 means valid; problems are listed with record IDs. CI validates

@@ -93,9 +93,16 @@ call time in `seed.get_seed_path()` (defaulting to `data/seed.json`).
 Relative paths resolve against the project root, so the same value works
 locally and in the container.
 
-Two packs ship in `data/`: the Tidewatch Guild (celestial navigation) and
-the ArchiveGuild (archive apprenticeship). They share one schema; switching
-packs changes every page of the product without touching a line of code.
+Three packs ship in `data/`: the Tidewatch Guild (celestial navigation),
+the ArchiveGuild (archive apprenticeship), and CytoFISH Navigator (synthetic
+FISH/cytogenetics *education*). They share one schema; switching packs changes
+every page of the product without touching a line of code.
+
+The CytoFISH pack is notable as a *specialized, safety-sensitive* domain: it
+demonstrates that domain expertise can be encoded entirely in content while
+every safety boundary (no PHI, no real cases, no diagnostic language) lives in
+the pack and its disclaimers — never in the application code. The validator
+and the pack tests are what let the project host such a domain confidently.
 That is the strongest available proof that the models, routes, and frontend
 encode *structure*, not content. Packs share an ID scheme, so switch on a
 fresh database — the upserting seed would otherwise merge two domains.
