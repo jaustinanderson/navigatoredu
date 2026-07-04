@@ -3,38 +3,61 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>NavigatorEdu — Tidewatch Guild (Demo)</title>
+<title>NavigatorEdu — content-pack education platform (demo)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
   tailwind.config = {
-    theme: { extend: { colors: {
-      ink: '#101828', deep: '#12314f', brass: '#b98a2f', foam: '#f6f8fa'
-    }}}
+    theme: { extend: {
+      colors: {
+        ink:   '#1a2432',   /* body text */
+        deep:  '#12314f',   /* primary navy */
+        brass: '#b98a2f',   /* accent — decorative / large text only */
+        brassink: '#8a6420',/* accent for small text & links (AA on white) */
+        foam:  '#f4f6f8',   /* page background */
+      },
+      fontFamily: {
+        display: ['"Source Serif 4"', 'Georgia', 'serif'],
+      },
+    }}
   };
 </script>
+<style>
+  /* Visible keyboard focus everywhere, without adding noise for mouse users. */
+  :focus-visible { outline: 2px solid #8a6420; outline-offset: 2px; border-radius: 4px; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+  }
+</style>
 </head>
 <body class="bg-foam text-ink min-h-screen flex flex-col">
 
-<!-- Synthetic-content banner -->
+<a href="#app" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:bg-white focus:px-3 focus:py-1.5 focus:text-sm focus:rounded-md focus:shadow">
+  Skip to content
+</a>
+
+<!-- Synthetic-content banner: static fallback, replaced with the active pack. -->
 <div class="bg-deep text-white text-xs text-center py-1.5 px-3">
   <span id="pack-banner">Portfolio demo — all content is fictional and synthetic. Not for real-world use.</span>
 </div>
 
-<header class="border-b border-slate-200 bg-white">
-  <nav class="max-w-4xl mx-auto px-4 py-3 flex flex-wrap items-center gap-x-6 gap-y-2">
-    <a href="#/" class="font-semibold text-deep tracking-tight">⚓ NavigatorEdu</a>
-    <a href="#/categories" class="text-sm hover:text-brass">Categories</a>
-    <a href="#/cases" class="text-sm hover:text-brass">Practice Cases</a>
-    <a href="#/training" class="text-sm hover:text-brass">Training</a>
-    <a href="#/quiz" class="text-sm hover:text-brass">Quiz</a>
-    <a href="/docs" class="text-sm text-slate-400 hover:text-brass ml-auto">API docs</a>
+<header class="border-b border-slate-200 bg-white sticky top-0 z-10">
+  <nav aria-label="Main" class="max-w-4xl mx-auto px-4 py-3 flex flex-wrap items-center gap-x-5 gap-y-2">
+    <a href="#/" data-nav="home" class="font-display font-bold text-lg text-deep tracking-tight mr-1">⚓ NavigatorEdu</a>
+    <a href="#/categories" data-nav="categories" class="nav-link text-sm text-slate-600 hover:text-brassink py-0.5 border-b-2 border-transparent">Reference</a>
+    <a href="#/cases" data-nav="cases" class="nav-link text-sm text-slate-600 hover:text-brassink py-0.5 border-b-2 border-transparent">Practice cases</a>
+    <a href="#/training" data-nav="training" class="nav-link text-sm text-slate-600 hover:text-brassink py-0.5 border-b-2 border-transparent">Training</a>
+    <a href="#/quiz" data-nav="quiz" class="nav-link text-sm text-slate-600 hover:text-brassink py-0.5 border-b-2 border-transparent">Quiz</a>
+    <a href="/docs" class="text-xs text-slate-400 hover:text-brassink ml-auto" title="OpenAPI documentation">API docs ↗</a>
   </nav>
 </header>
 
-<main id="app" class="max-w-4xl mx-auto px-4 py-8 w-full flex-1"></main>
+<main id="app" class="max-w-4xl mx-auto px-4 py-10 w-full flex-1" aria-live="polite"></main>
 
-<footer class="text-center text-xs text-slate-400 py-6">
-  NavigatorEdu v0.1.0 · synthetic content-pack demo · MIT-style demo
+<footer class="border-t border-slate-200 bg-white text-center text-xs text-slate-500 py-6 mt-8">
+  NavigatorEdu · Synthetic content-pack education platform · Portfolio demo
 </footer>
 
 <script>
@@ -67,52 +90,173 @@ function md(src){
   return html;
 }
 
-const tagPill = t => `<span class="text-[11px] font-mono bg-slate-100 text-slate-500 rounded px-1.5 py-0.5">${t}</span>`;
-const diffPill = d => `<span class="text-[11px] uppercase tracking-wide text-brass">${d}</span>`;
-const card = inner => `<div class="bg-white border border-slate-200 rounded-lg p-4 hover:border-brass transition-colors">${inner}</div>`;
+// -------------- Small shared pieces --------------
+// Plain-text preview of a markdown field: strip simple markers, then truncate.
+// Runs on already-plain text, so no HTML is involved (esc() happens at render).
+function plainPreview(src, max = 140) {
+  const text = src
+    .replace(/^#{1,3}\s+/gm, '')        // headings
+    .replace(/\*\*(.+?)\*\*/g, '$1')     // bold
+    .replace(/\*(.+?)\*/g, '$1')         // italics
+    .replace(/^[-*]\s+/gm, '')           // list bullets
+    .replace(/^\d+\.\s+/gm, '')          // numbered lists
+    .replace(/\s+/g, ' ')
+    .trim();
+  return text.length > max ? esc(text.slice(0, max)) + '…' : esc(text);
+}
+
+const tagPill  = t => `<span class="text-[11px] font-mono bg-slate-100 text-slate-600 rounded px-1.5 py-0.5">${t}</span>`;
+const diffPill = d => `<span class="text-[11px] uppercase tracking-wide font-medium text-brassink">${d}</span>`;
+const synthPill = () =>
+  `<span class="inline-flex items-center gap-1 text-[11px] uppercase tracking-wide font-medium bg-slate-100 text-slate-600 rounded-full px-2 py-0.5">
+     <span class="w-1.5 h-1.5 rounded-full bg-brass" aria-hidden="true"></span>Synthetic
+   </span>`;
+
+// A card whose whole surface is one click target (single primary link inside).
+const linkCard = (href, inner, label) => `
+  <a href="${href}" aria-label="${label}"
+     class="block bg-white border border-slate-200 rounded-lg p-4 hover:border-brass hover:shadow-sm transition-all">
+    ${inner}
+  </a>`;
+
+const loadingView = () => `
+  <div class="py-16 text-center" role="status">
+    <p class="text-sm text-slate-500">Loading…</p>
+  </div>`;
+
+const emptyState = (what, hint) => `
+  <div class="bg-white border border-dashed border-slate-300 rounded-lg px-6 py-10 text-center">
+    <p class="text-sm text-slate-600">${what}</p>
+    ${hint ? `<p class="text-xs text-slate-500 mt-1.5">${hint}</p>` : ''}
+  </div>`;
+
+const errorView = (e) => `
+  <div class="bg-white border border-red-200 rounded-lg px-6 py-8 text-center">
+    <p class="text-sm font-medium text-red-800">Could not load data (${esc(e.message)}).</p>
+    <p class="text-xs text-slate-600 mt-1.5">
+      Check that the API is running, then
+      <a href="${location.hash || '#/'}" onclick="route()" class="text-brassink underline">try again</a>.
+    </p>
+  </div>`;
+
+// -------------- The pack manifest card (home-page signature element) --------------
+function manifestCard(meta) {
+  const row = (label, value) => `
+    <div class="grid sm:grid-cols-[8.5rem_1fr] gap-x-4 gap-y-0.5 py-2.5 border-t border-slate-100">
+      <dt class="text-[11px] uppercase tracking-wide text-slate-500 pt-0.5">${label}</dt>
+      <dd class="text-sm text-ink leading-relaxed">${esc(value)}</dd>
+    </div>`;
+  return `
+    <section aria-label="Active content pack" class="bg-white border border-slate-200 rounded-lg overflow-hidden">
+      <div class="px-5 pt-4 pb-3">
+        <div class="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <p class="text-[11px] uppercase tracking-wide text-brassink">Active content pack</p>
+            <h2 class="font-display font-semibold text-xl text-deep mt-0.5">${esc(meta.pack_name)}</h2>
+          </div>
+          ${synthPill()}
+        </div>
+        <p class="text-sm text-slate-600 mt-1.5">${esc(meta.pack_description)}</p>
+        <p class="font-mono text-[11px] text-slate-500 mt-2">
+          ${esc(meta.pack_id)} · v${esc(meta.pack_version)}${meta.domain_type ? ' · ' + esc(meta.domain_type) : ''}
+        </p>
+      </div>
+      <dl class="px-5 pb-4">
+        ${row('Intended use', meta.intended_use)}
+        ${row('Safety notes', meta.safety_notes)}
+      </dl>
+    </section>`;
+}
 
 // ---------------- Views ----------------
 const views = {
 
   async home() {
     const [cats, meta] = await Promise.all([api('/categories'), api('/pack-metadata')]);
+    const step = (n, href, title, desc) => `
+      <li class="flex gap-3">
+        <span class="flex-none w-6 h-6 rounded-full bg-deep text-white text-xs flex items-center justify-center font-mono" aria-hidden="true">${n}</span>
+        <p class="text-sm text-slate-700 leading-relaxed">
+          <a href="${href}" class="font-medium text-deep hover:text-brassink underline decoration-slate-300 underline-offset-2">${title}</a>
+          — ${desc}
+        </p>
+      </li>`;
     return `
-      <div class="mb-6 rounded-lg border border-slate-200 bg-white px-4 py-3">
-        <p class="text-xs uppercase tracking-wide text-brass">Active content pack</p>
-        <p class="font-semibold text-deep">${meta.pack_name}</p>
-        <p class="text-sm text-slate-500 mt-0.5">${meta.pack_description}</p>
-        <p class="text-xs text-slate-400 mt-2">${meta.safety_notes}</p>
-      </div>
-      <h1 class="text-2xl font-semibold text-deep mb-1">${meta.pack_name}</h1>
-      <p class="text-slate-600 mb-6">Browse the reference, work practice cases,
-      review the training modules, then test yourself in quiz mode.</p>
-      <div class="grid sm:grid-cols-2 gap-3 mb-8">
-        ${card(`<a href="#/categories" class="font-medium text-deep">📚 Reference</a><p class="text-sm text-slate-500 mt-1">Searchable items across ${cats.length} categories.</p>`)}
-        ${card(`<a href="#/cases" class="font-medium text-deep">🧭 Practice cases</a><p class="text-sm text-slate-500 mt-1">Scenarios with guided reveal-as-you-go answers.</p>`)}
-        ${card(`<a href="#/training" class="font-medium text-deep">🎓 Training modules</a><p class="text-sm text-slate-500 mt-1">Short conceptual lessons grouped by module.</p>`)}
-        ${card(`<a href="#/quiz" class="font-medium text-deep">✅ Quiz</a><p class="text-sm text-slate-500 mt-1">Server-scored questions with explanations.</p>`)}
-      </div>`;
+      <h1 class="font-display font-bold text-3xl text-deep tracking-tight">NavigatorEdu</h1>
+      <p class="text-slate-600 mt-2 mb-6 max-w-2xl leading-relaxed">
+        A learning platform where the entire knowledge domain is a swappable,
+        validated JSON content pack: reference library, training modules,
+        guided practice cases, and a server-scored quiz — all driven by the
+        pack below. Every record is fictional and synthetic.
+      </p>
+
+      ${manifestCard(meta)}
+
+      <section aria-label="Reviewer walkthrough" class="mt-8">
+        <h2 class="font-display font-semibold text-lg text-deep">Reviewer walkthrough</h2>
+        <p class="text-sm text-slate-500 mt-0.5 mb-4">The 60-second demo path, in order:</p>
+        <ol class="space-y-3">
+          ${step(1, '#/categories', 'Browse the reference', `searchable, categorized items across ${cats.length} categories.`)}
+          ${step(2, '#/cases', 'Review a practice case', 'guided steps reveal one at a time, ending in the expected outcome.')}
+          ${step(3, '#/training', 'Study the training modules', 'short ordered lessons, cross-linked to reference items.')}
+          ${step(4, '#/quiz', 'Take the quiz', 'answers are scored server-side and never appear in the page source.')}
+          ${step(5, '/docs', 'Inspect the API docs', 'the same data over a versioned REST API, self-documented via OpenAPI.')}
+        </ol>
+      </section>
+
+      <section aria-label="Sections" class="grid sm:grid-cols-2 gap-3 mt-8">
+        ${linkCard('#/categories', `
+          <p class="font-medium text-deep">📚 Reference</p>
+          <p class="text-sm text-slate-500 mt-1">Searchable items across ${cats.length} categories.</p>`, 'Reference library')}
+        ${linkCard('#/cases', `
+          <p class="font-medium text-deep">🧭 Practice cases</p>
+          <p class="text-sm text-slate-500 mt-1">Scenarios with guided reveal-as-you-go answers.</p>`, 'Practice cases')}
+        ${linkCard('#/training', `
+          <p class="font-medium text-deep">🎓 Training modules</p>
+          <p class="text-sm text-slate-500 mt-1">Short conceptual lessons grouped by module.</p>`, 'Training modules')}
+        ${linkCard('#/quiz', `
+          <p class="font-medium text-deep">✅ Quiz</p>
+          <p class="text-sm text-slate-500 mt-1">Server-scored questions with explanations.</p>`, 'Quiz')}
+      </section>`;
   },
 
   async categories() {
     const [cats, items] = await Promise.all([api('/categories'), api('/items')]);
     const byCat = id => items.filter(i => i.category_id === id);
+    if (!cats.length) return `
+      <h1 class="font-display font-semibold text-2xl text-deep mb-4">Reference</h1>
+      ${emptyState('No categories in the active content pack yet.',
+                   'Seed a pack with <code>python -m backend.app.seed</code>, then reload.')}`;
+    const chip = (label, target) => `
+      <button data-filter="${target}"
+        class="filter-chip text-xs rounded-full border border-slate-300 bg-white px-3 py-1 text-slate-600 hover:border-brass hover:text-brassink transition-colors"
+        aria-pressed="false">${label}</button>`;
     return `
-      <h1 class="text-xl font-semibold text-deep mb-1">Categories</h1>
-      <input id="search" placeholder="Search reference items…" 
-        class="w-full border border-slate-300 rounded-md px-3 py-2 my-4 text-sm bg-white focus:outline-none focus:border-brass"/>
+      <h1 class="font-display font-semibold text-2xl text-deep">Reference</h1>
+      <p class="text-sm text-slate-500 mt-0.5 mb-4">Search across every item, or filter by category.</p>
+
+      <label for="search" class="sr-only">Search reference items</label>
+      <input id="search" type="search" placeholder="Search titles, summaries, and tags…"
+        class="w-full border border-slate-300 rounded-md px-3 py-2 mb-3 text-sm bg-white placeholder:text-slate-400 focus:outline-none focus:border-brass"/>
       <div id="search-results"></div>
-      <div class="space-y-6">
+
+      <div class="flex flex-wrap gap-1.5 mb-6" role="group" aria-label="Filter by category">
+        ${chip('All categories', 'all')}
+        ${cats.map(c => chip(c.name, c.id)).join('')}
+      </div>
+
+      <div class="space-y-8">
         ${cats.map(c => `
-          <section>
-            <h2 class="font-medium text-deep">${c.name}</h2>
-            <p class="text-sm text-slate-500 mb-2">${c.description}</p>
+          <section data-cat-section="${c.id}">
+            <h2 class="font-display font-semibold text-lg text-deep">${c.name}</h2>
+            <p class="text-sm text-slate-500 mb-3">${c.description}</p>
             <div class="grid sm:grid-cols-2 gap-3">
-              ${byCat(c.id).map(i => card(`
-                <a href="#/item/${i.id}" class="font-medium text-deep">${i.title}</a>
+              ${byCat(c.id).length ? byCat(c.id).map(i => linkCard('#/item/' + i.id, `
+                <p class="font-medium text-deep">${i.title}</p>
                 <p class="text-sm text-slate-500 mt-1">${i.summary}</p>
-                <div class="flex gap-1.5 mt-2 items-center">${diffPill(i.difficulty)} ${i.tags.map(tagPill).join('')}</div>
-              `)).join('')}
+                <div class="flex flex-wrap gap-1.5 mt-2.5 items-center">${diffPill(i.difficulty)} ${i.tags.map(tagPill).join('')}</div>
+              `, i.title)).join('')
+              : `<p class="text-sm text-slate-500 sm:col-span-2">No items in this category yet.</p>`}
             </div>
           </section>`).join('')}
       </div>`;
@@ -121,113 +265,167 @@ const views = {
   async item(id) {
     const i = await api('/items/' + id);
     return `
-      <a href="#/categories" class="text-sm text-slate-400 hover:text-brass">← Categories</a>
-      <h1 class="text-xl font-semibold text-deep mt-2">${i.title}</h1>
-      <div class="flex gap-1.5 mt-1 items-center">${diffPill(i.difficulty)} ${i.tags.map(tagPill).join('')}</div>
-      <article class="mt-4 bg-white border border-slate-200 rounded-lg p-5 leading-relaxed">${md(i.body_md)}</article>`;
+      <nav aria-label="Breadcrumb" class="text-sm">
+        <a href="#/categories" class="text-slate-500 hover:text-brassink">← Reference</a>
+      </nav>
+      <h1 class="font-display font-semibold text-2xl text-deep mt-3">${i.title}</h1>
+      <div class="flex flex-wrap gap-1.5 mt-2 items-center">${diffPill(i.difficulty)} ${i.tags.map(tagPill).join('')}</div>
+      <article class="mt-5 bg-white border border-slate-200 rounded-lg p-6 leading-relaxed">${md(i.body_md)}</article>`;
   },
 
   async cases() {
     const cs = await api('/cases');
     return `
-      <h1 class="text-xl font-semibold text-deep mb-4">Practice cases</h1>
-      <div class="space-y-3">
-        ${cs.map(c => card(`
-          <a href="#/case/${c.id}" class="font-medium text-deep">${c.title}</a>
-          <span class="ml-2">${diffPill(c.difficulty)}</span>
-          <p class="text-sm text-slate-500 mt-1">${c.scenario_md.slice(0, 140)}…</p>
-        `)).join('')}
-      </div>`;
+      <h1 class="font-display font-semibold text-2xl text-deep">Practice cases</h1>
+      <p class="text-sm text-slate-500 mt-0.5 mb-5">
+        Fully synthetic scenarios. Open a case, then reveal the guided steps one at a time.
+      </p>
+      ${cs.length ? `<div class="space-y-3">
+        ${cs.map(c => linkCard('#/case/' + c.id, `
+          <div class="flex items-start justify-between gap-3">
+            <p class="font-medium text-deep">${c.title}</p>
+            ${diffPill(c.difficulty)}
+          </div>
+          <p class="text-sm text-slate-500 mt-1">${plainPreview(c.scenario_md)}</p>
+        `, c.title)).join('')}
+      </div>`
+      : emptyState('No practice cases in the active content pack yet.')}`;
   },
 
   async case(id) {
     const c = await api('/cases/' + id);
     window._case = c;
+    const total = c.guided_steps.length;
     return `
-      <a href="#/cases" class="text-sm text-slate-400 hover:text-brass">← Cases</a>
-      <h1 class="text-xl font-semibold text-deep mt-2">${c.title} <span class="ml-1">${diffPill(c.difficulty)}</span></h1>
-      <div class="mt-4 bg-white border border-slate-200 rounded-lg p-5">${md(c.scenario_md)}</div>
+      <nav aria-label="Breadcrumb" class="text-sm">
+        <a href="#/cases" class="text-slate-500 hover:text-brassink">← Practice cases</a>
+      </nav>
+      <div class="flex items-center gap-2.5 mt-3 flex-wrap">
+        <h1 class="font-display font-semibold text-2xl text-deep">${c.title}</h1>
+        ${diffPill(c.difficulty)} ${synthPill()}
+      </div>
+      <div class="mt-4 bg-white border border-slate-200 rounded-lg p-6 leading-relaxed">${md(c.scenario_md)}</div>
       <div id="steps" class="mt-4 space-y-2"></div>
-      <button onclick="revealStep()" class="mt-4 bg-deep text-white text-sm rounded-md px-4 py-2 hover:bg-brass transition-colors">
-        Reveal next step
+      <button id="reveal-btn" onclick="revealStep(this)"
+        class="mt-4 bg-deep text-white text-sm font-medium rounded-md px-4 py-2 hover:bg-brassink transition-colors">
+        Reveal step 1 of ${total}
       </button>`;
   },
 
-
   async training() {
     const [notes, items] = await Promise.all([api('/training'), api('/items')]);
+    if (!notes.length) return `
+      <h1 class="font-display font-semibold text-2xl text-deep mb-4">Training modules</h1>
+      ${emptyState('No training modules in the active content pack yet.')}`;
     const titleOf = id => (items.find(i => i.id === id) || {}).title || id;
     const modules = [...new Set(notes.map(n => n.module))];
     return `
-      <h1 class="text-xl font-semibold text-deep mb-4">Training modules</h1>
-      <div class="space-y-8">
-        ${modules.map(m => `
+      <h1 class="font-display font-semibold text-2xl text-deep">Training modules</h1>
+      <p class="text-sm text-slate-500 mt-0.5 mb-6">Short ordered lessons, grouped by module.</p>
+      <div class="space-y-10">
+        ${modules.map(m => {
+          const lessons = notes.filter(n => n.module === m);
+          return `
           <section>
-            <h2 class="font-medium text-deep border-b border-slate-200 pb-1 mb-3">${m}</h2>
-            <div class="space-y-3">
-              ${notes.filter(n => n.module === m).map(n => `
-                <article class="bg-white border border-slate-200 rounded-lg p-5">
-                  <p class="font-mono text-brass text-xs">lesson ${n.order}</p>
-                  <h3 class="font-medium text-deep mt-0.5">${n.title}</h3>
-                  <div class="text-sm leading-relaxed mt-2">${md(n.body_md)}</div>
+            <div class="flex items-baseline justify-between border-b-2 border-slate-200 pb-1.5 mb-4">
+              <h2 class="font-display font-semibold text-lg text-deep">${m}</h2>
+              <span class="text-xs text-slate-500">${lessons.length} lesson${lessons.length === 1 ? '' : 's'}</span>
+            </div>
+            <div class="space-y-4">
+              ${lessons.map(n => `
+                <article class="bg-white border border-slate-200 rounded-lg p-6">
+                  <div class="flex items-center gap-2">
+                    <span class="font-mono text-[11px] text-brassink bg-slate-50 border border-slate-200 rounded px-1.5 py-0.5">Lesson ${n.order}</span>
+                    <h3 class="font-medium text-deep">${n.title}</h3>
+                  </div>
+                  <div class="text-sm leading-relaxed mt-3">${md(n.body_md)}</div>
                   ${n.related_item_ids.length ? `
-                    <p class="text-xs text-slate-400 mt-3">Related reference:
+                    <p class="text-xs text-slate-500 mt-4 pt-3 border-t border-slate-100">Related reference:
                       ${n.related_item_ids.map(id =>
-                        `<a href="#/item/${id}" class="text-brass hover:underline">${titleOf(id)}</a>`
+                        `<a href="#/item/${id}" class="text-brassink hover:underline">${titleOf(id)}</a>`
                       ).join(' · ')}
                     </p>` : ''}
                 </article>`).join('')}
             </div>
-          </section>`).join('')}
+          </section>`;}).join('')}
       </div>`;
   },
 
   async quiz() {
     const qs = await api('/quiz');
     window._quiz = qs;
+    if (!qs.length) return `
+      <h1 class="font-display font-semibold text-2xl text-deep mb-4">Quiz</h1>
+      ${emptyState('No quiz questions in the active content pack yet.')}`;
     return `
-      <h1 class="text-xl font-semibold text-deep mb-4">Quiz</h1>
-      <form id="quiz-form" class="space-y-5">
+      <h1 class="font-display font-semibold text-2xl text-deep">Quiz</h1>
+      <p class="text-sm text-slate-500 mt-0.5 mb-5">
+        ${qs.length} questions. Answers are scored server-side — explanations appear after you check.
+      </p>
+      <form id="quiz-form" class="space-y-5" onsubmit="return false">
         ${qs.map((q, n) => `
-          <fieldset class="bg-white border border-slate-200 rounded-lg p-4" data-qid="${q.id}">
-            <legend class="sr-only">Question ${n + 1}</legend>
-            <p class="font-medium text-deep mb-2">${n + 1}. ${q.question}</p>
-            ${q.options.map((o, idx) => `
-              <label class="flex items-center gap-2 text-sm py-1 cursor-pointer">
-                <input type="radio" name="${q.id}" value="${idx}" class="accent-brass"> ${o}
-              </label>`).join('')}
-            <p class="result text-sm mt-2"></p>
+          <fieldset class="bg-white border border-slate-200 rounded-lg p-5 transition-colors" data-qid="${q.id}">
+            <legend class="sr-only">Question ${n + 1} of ${qs.length}</legend>
+            <p class="font-medium text-deep mb-3">${n + 1}. ${q.question}</p>
+            <div class="space-y-1.5">
+              ${q.options.map((o, idx) => `
+                <label class="flex items-center gap-2.5 text-sm rounded-md border border-slate-200 px-3 py-2 cursor-pointer
+                              hover:border-brass has-[:checked]:border-brass has-[:checked]:bg-amber-50/40 transition-colors">
+                  <input type="radio" name="${q.id}" value="${idx}" class="accent-[#8a6420]"> ${o}
+                </label>`).join('')}
+            </div>
+            <p class="result text-sm mt-3 leading-relaxed"></p>
           </fieldset>`).join('')}
       </form>
-      <button onclick="submitQuiz()" class="mt-5 bg-deep text-white text-sm rounded-md px-4 py-2 hover:bg-brass transition-colors">
-        Check answers
-      </button>
-      <p id="quiz-score" class="mt-3 font-medium text-deep"></p>`;
+      <div class="mt-5 flex items-center gap-4 flex-wrap">
+        <button id="quiz-submit" onclick="submitQuiz()"
+          class="bg-deep text-white text-sm font-medium rounded-md px-5 py-2 hover:bg-brassink transition-colors">
+          Check answers
+        </button>
+        <p id="quiz-hint" class="text-sm text-red-700" role="status"></p>
+      </div>
+      <p id="quiz-score" class="mt-4 font-display font-semibold text-lg text-deep" role="status"></p>`;
   },
 };
 
 // -------------- Interactions --------------
 let stepIdx = 0;
-function revealStep() {
+function revealStep(btn) {
   const c = window._case, box = document.getElementById('steps');
-  if (stepIdx < c.guided_steps.length) {
+  const total = c.guided_steps.length;
+  if (stepIdx < total) {
     box.insertAdjacentHTML('beforeend',
-      `<div class="border-l-2 border-brass bg-white rounded-r-lg px-4 py-2 text-sm">
-        <span class="font-mono text-brass text-xs">step ${stepIdx + 1}</span> — ${c.guided_steps[stepIdx]}</div>`);
+      `<div class="border-l-2 border-brass bg-white rounded-r-lg px-4 py-2.5 text-sm">
+        <span class="font-mono text-brassink text-xs">Step ${stepIdx + 1} of ${total}</span> — ${c.guided_steps[stepIdx]}</div>`);
     stepIdx++;
+    btn.textContent = stepIdx < total
+      ? `Reveal step ${stepIdx + 1} of ${total}`
+      : 'Reveal expected outcome';
   } else {
     box.insertAdjacentHTML('beforeend',
-      `<div class="bg-deep text-white rounded-lg px-4 py-3 text-sm">${md(c.expected_outcome_md)}</div>`);
-    event.target.remove();
+      `<div class="bg-deep text-white rounded-lg px-5 py-4 text-sm leading-relaxed">
+        <p class="text-[11px] uppercase tracking-wide text-white/70 mb-1">Expected outcome</p>${md(c.expected_outcome_md)}</div>`);
+    btn.remove();
   }
 }
 
 async function submitQuiz() {
+  const hint = document.getElementById('quiz-hint');
+  hint.textContent = '';
   const answers = {};
+  const unanswered = [];
   for (const q of window._quiz) {
+    const fs = document.querySelector(`fieldset[data-qid="${q.id}"]`);
+    fs.classList.remove('border-red-400');
     const sel = document.querySelector(`input[name="${q.id}"]:checked`);
-    if (!sel) { alert('Answer every question first.'); return; }
+    if (!sel) { unanswered.push(fs); continue; }
     answers[q.id] = Number(sel.value);
+  }
+  if (unanswered.length) {
+    unanswered.forEach(fs => fs.classList.add('border-red-400'));
+    hint.textContent = `${unanswered.length} question${unanswered.length === 1 ? '' : 's'} unanswered — highlighted above.`;
+    unanswered[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
   }
   const res = await fetch('/api/v1/quiz/submit', {
     method: 'POST',
@@ -236,12 +434,15 @@ async function submitQuiz() {
   }).then(r => r.json());
   for (const r of res.results) {
     const fs = document.querySelector(`fieldset[data-qid="${r.question_id}"]`);
+    fs.classList.remove('border-slate-200', 'border-red-400');
+    fs.classList.add(r.correct ? 'border-green-600' : 'border-red-400');
     const p = fs.querySelector('.result');
     p.innerHTML = r.correct
-      ? `<span class="text-green-700">✔ Correct.</span> ${r.explanation}`
-      : `<span class="text-red-700">✘ Not quite.</span> ${r.explanation}`;
+      ? `<span class="font-medium text-green-700">✔ Correct.</span> ${r.explanation}`
+      : `<span class="font-medium text-red-700">✘ Not quite.</span> ${r.explanation}`;
   }
   document.getElementById('quiz-score').textContent = `Score: ${res.score} / ${res.total}`;
+  document.getElementById('quiz-submit').textContent = 'Check again';
 }
 
 function wireSearch() {
@@ -255,35 +456,77 @@ function wireSearch() {
       if (!box.value.trim()) { out.innerHTML = ''; return; }
       const items = await api('/items?q=' + encodeURIComponent(box.value.trim()));
       out.innerHTML = items.length
-        ? `<div class="mb-6 space-y-2">${items.map(i => card(
-            `<a href="#/item/${i.id}" class="font-medium text-deep">${i.title}</a>
-             <p class="text-sm text-slate-500">${i.summary}</p>`)).join('')}</div>`
-        : `<p class="text-sm text-slate-400 mb-6">No items match "${esc(box.value)}". Try a tag like "star" or "instrument".</p>`;
+        ? `<p class="text-xs text-slate-500 mb-2">${items.length} result${items.length === 1 ? '' : 's'}:</p>
+           <div class="mb-6 space-y-2">${items.map(i => linkCard('#/item/' + i.id,
+            `<p class="font-medium text-deep">${i.title}</p>
+             <p class="text-sm text-slate-500 mt-0.5">${i.summary}</p>`, i.title)).join('')}</div>`
+        : `<div class="mb-6">${emptyState(`No items match “${esc(box.value)}”.`,
+             'Try a shorter term, or a tag shown on any item card.')}</div>`;
     }, 200);
   });
 }
 
+function wireFilters() {
+  const chips = document.querySelectorAll('.filter-chip');
+  if (!chips.length) return;
+  const activate = (chip) => {
+    chips.forEach(c => {
+      const on = c === chip;
+      c.setAttribute('aria-pressed', on);
+      c.classList.toggle('bg-deep', on);
+      c.classList.toggle('text-white', on);
+      c.classList.toggle('border-deep', on);
+      c.classList.toggle('bg-white', !on);
+      c.classList.toggle('text-slate-600', !on);
+    });
+    const target = chip.dataset.filter;
+    document.querySelectorAll('[data-cat-section]').forEach(sec => {
+      sec.style.display = (target === 'all' || sec.dataset.catSection === target) ? '' : 'none';
+    });
+  };
+  chips.forEach(chip => chip.addEventListener('click', () => activate(chip)));
+  activate(chips[0]); // default: all categories
+}
+
 // -------------- Router --------------
+function markActiveNav(view) {
+  const key = { '': 'home', item: 'categories', case: 'cases' }[view] ?? view;
+  document.querySelectorAll('[data-nav]').forEach(a => {
+    const on = a.dataset.nav === key && key !== 'home';
+    a.classList.toggle('border-brass', on);
+    a.classList.toggle('text-deep', on);
+    a.classList.toggle('font-medium', on);
+    a.classList.toggle('border-transparent', !on);
+  });
+}
+
 async function route() {
   stepIdx = 0;
   const app = document.getElementById('app');
   const hash = location.hash || '#/';
   const [, view, param] = hash.split('/');
+  markActiveNav(view || '');
+  app.innerHTML = loadingView();
   try {
     if (!view)                 app.innerHTML = await views.home();
-    else if (view === 'categories') { app.innerHTML = await views.categories(); wireSearch(); }
+    else if (view === 'categories') { app.innerHTML = await views.categories(); wireSearch(); wireFilters(); }
     else if (view === 'item')  app.innerHTML = await views.item(param);
     else if (view === 'cases') app.innerHTML = await views.cases();
     else if (view === 'case')  app.innerHTML = await views.case(param);
     else if (view === 'training') app.innerHTML = await views.training();
     else if (view === 'quiz')  app.innerHTML = await views.quiz();
-    else app.innerHTML = '<p class="text-slate-500">Page not found. <a class="text-brass" href="#/">Go home</a>.</p>';
+    else app.innerHTML = `
+      <div class="py-16 text-center">
+        <p class="text-slate-600">Page not found.</p>
+        <a class="text-brassink underline text-sm" href="#/">Back to the home page</a>
+      </div>`;
   } catch (e) {
-    app.innerHTML = `<p class="text-red-700 text-sm">Could not load data (${e.message}). Is the API running?</p>`;
+    app.innerHTML = errorView(e);
   }
   window.scrollTo(0, 0);
 }
-// Populate the persistent top banner with the active pack (runs once).
+
+// Populate the persistent top banner and tab title with the active pack (runs once).
 async function loadPackBanner() {
   try {
     const meta = await api('/pack-metadata');
@@ -292,6 +535,7 @@ async function loadPackBanner() {
       el.textContent =
         `Active content pack: ${meta.pack_name} — synthetic demo only. Not for real-world use.`;
     }
+    document.title = `NavigatorEdu — ${meta.pack_name} (demo)`;
   } catch { /* leave the static fallback text in place */ }
 }
 

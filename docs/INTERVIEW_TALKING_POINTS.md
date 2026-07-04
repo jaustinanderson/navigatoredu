@@ -68,9 +68,10 @@ code and tests actually show.
 7. **Make the safe path the easy path.** The `new_pack` scaffolder emits a
    pack that is valid and safe-by-default before the author types a word —
    the same instinct as secure-by-default templates and paved-path tooling.
-8. **Idempotent data pipeline.** The seed script upserts via
-   `session.merge()`, so re-seeding after an edit converges the database;
-   content is human-reviewable JSON, diff-able in a PR.
+8. **Idempotent data pipeline.** The seed script clears content tables and
+   loads only the selected pack, so re-seeding converges and switching
+   domains is a single reseed; content is human-reviewable JSON, diff-able
+   in a PR.
 9. **Deliberate, documented trade-offs.** JSON columns over join tables,
    linear-scan search, hand-rolled validation, no-build frontend — each is
    the honest choice at this scale, each has a named upgrade path.

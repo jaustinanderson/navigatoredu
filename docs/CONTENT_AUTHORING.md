@@ -63,8 +63,7 @@ python -m backend.app.new_pack demo_pack
 # 3. Validate (fast, no database touched)
 python -m backend.app.validate_pack data/seed_demo_pack.json
 
-# 4. Seed a fresh database from your pack
-rm -f data/navigatoredu.db
+# 4. Seed your pack (seeding replaces whatever pack was loaded before)
 SEED_PATH=data/seed_demo_pack.json python -m backend.app.seed
 
 # 5. Run
@@ -75,9 +74,9 @@ Then open <http://127.0.0.1:8000> and confirm the banner and home card name
 your pack, and <http://127.0.0.1:8000/api/v1/pack-metadata> to see the raw
 governance metadata.
 
-> Packs share an ID scheme and the seed script upserts by primary key, so
-> always seed a new pack into a **fresh** database (`rm -f
-> data/navigatoredu.db`) rather than layering it over another domain.
+> Seeding is clear-then-load: the script removes existing content before
+> importing, so the database always holds exactly one pack and switching
+> domains is a single reseed.
 
 ## Pack schema
 

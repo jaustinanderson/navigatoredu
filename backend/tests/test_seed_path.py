@@ -165,3 +165,107 @@ class TestCytoFishPack:
         assert meta["pack_id"] == "cytofish_synthetic"
         assert meta["synthetic_only"] is True
         assert meta["domain_type"] == "synthetic_biomedical_education"
+
+
+class TestPackSwitchingClearsStaleContent:
+    """Seeding is clear-then-load: the database always holds exactly one pack.
+
+    Regression tests for the v10 bug where seeding CytoFISH over a database
+    that already held Tidewatch left the old categories visible on the
+    Reference page while the metadata endpoint named the new pack.
+    """
+
+    @staticmethod
+    def _fresh_engine():
+        engine = create_engine(
+            "sqlite://",
+            connect_args={"check_same_thread": False},
+            poolclass=StaticPool,
+        )
+        SQLModel.metadata.create_all(engine)
+        return engine
+
+    @staticmethod
+    def _client(engine):
+        def override_get_session():
+            with Session(engine) as session:
+                yield session
+
+        app.dependency_overrides[get_session] = override_get_session
+        return TestClient(app)
+
+    @staticmethod
+    def _pack_category_ids(path):
+        import json
+
+        return {c["id"] for c in json.loads(path.read_text())["categories"]}
+
+    def test_reseeding_another_pack_leaves_no_stale_categories(self):
+        engine = self._fresh_engine()
+        with Session(engine) as session:
+            seed(session, seed_path=DEFAULT_SEED_PATH)   # Tidewatch first
+            seed(session, seed_path=CYTOFISH_PACK)       # then CytoFISH, same DB
+        try:
+            client = self._client(engine)
+            cats = client.get("/api/v1/categories").json()
+            names = {c["name"] for c in cats}
+            for stale in [
+                "Instruments", "Sky References", "Procedures",
+                "Materials & Handling", "Cataloguing", "Provenance & Appraisal",
+            ]:
+                assert stale not in names, f"stale category survived reseed: {stale}"
+        finally:
+            app.dependency_overrides.clear()
+
+    def test_categories_after_cytofish_seed_are_exactly_cytofish(self):
+        engine = self._fresh_engine()
+        with Session(engine) as session:
+            seed(session, seed_path=DEFAULT_SEED_PATH)
+            seed(session, seed_path=CYTOFISH_PACK)
+        try:
+            client = self._client(engine)
+            api_ids = {c["id"] for c in client.get("/api/v1/categories").json()}
+            assert api_ids == self._pack_category_ids(CYTOFISH_PACK)
+        finally:
+            app.dependency_overrides.clear()
+
+    def test_all_content_types_switch_together(self):
+        """Not just categories: every content table reflects only the new pack."""
+        import json
+
+        engine = self._fresh_engine()
+        with Session(engine) as session:
+            seed(session, seed_path=ARCHIVE_PACK)
+            counts = seed(session, seed_path=CYTOFISH_PACK)
+        pack = json.loads(CYTOFISH_PACK.read_text())
+        try:
+            client = self._client(engine)
+            for key, route in [
+                ("reference_items", "/api/v1/items"),
+                ("practice_cases", "/api/v1/cases"),
+                ("quiz_questions", "/api/v1/quiz"),
+                ("training_notes", "/api/v1/training"),
+                ("disclaimers", "/api/v1/disclaimers"),
+            ]:
+                got = client.get(route).json()
+                assert len(got) == len(pack[key]) == counts[key], (
+                    f"{key}: expected only the new pack's rows"
+                )
+            meta = client.get("/api/v1/pack-metadata").json()
+            assert meta["pack_id"] == "cytofish_synthetic"
+        finally:
+            app.dependency_overrides.clear()
+
+    def test_reseeding_same_pack_is_idempotent(self):
+        """Clear-then-load keeps the old guarantee: re-running converges."""
+        engine = self._fresh_engine()
+        with Session(engine) as session:
+            first = seed(session, seed_path=DEFAULT_SEED_PATH)
+            second = seed(session, seed_path=DEFAULT_SEED_PATH)
+        assert first == second
+        try:
+            client = self._client(engine)
+            cats = client.get("/api/v1/categories").json()
+            assert len(cats) == first["categories"]  # no duplicates
+        finally:
+            app.dependency_overrides.clear()

@@ -7,14 +7,16 @@ code changes:
 
     SEED_PATH=data/seed_archiveguild.json python -m backend.app.seed
 
-Upsert semantics: existing rows are updated, new rows inserted, so the
-script is safe to re-run after editing a seed file.
+Clear-then-load semantics: seeding first clears all content tables, then
+loads only the selected pack. The database therefore always holds exactly
+one pack — the one named by the metadata endpoint — and re-seeding (after
+an edit, or to switch domains) converges to the selected pack's content.
 """
 import json
 import os
 from pathlib import Path
 
-from sqlmodel import Session, SQLModel
+from sqlmodel import Session, SQLModel, delete
 
 from .db import create_tables, engine
 from .models import (
@@ -46,6 +48,24 @@ COLLECTIONS: list[tuple[str, type[SQLModel]]] = [
     ("quiz_questions", QuizQuestion),
 ]
 
+# Deletion order: children before parents, so FK constraints can never trip.
+CLEAR_ORDER: list[type[SQLModel]] = [
+    QuizQuestion, PracticeCase, TrainingNote,
+    ReferenceItem, Category, Disclaimer, PackMetadata,
+]
+
+
+def clear_content(session: Session) -> None:
+    """Remove all pack content (and pack metadata) from the database.
+
+    Packs use their own ID schemes, so upserting one pack over another would
+    leave the first pack's rows behind — with the metadata endpoint then
+    naming a pack whose content is mixed with a stale one. Clearing first
+    guarantees the database always reflects exactly one pack.
+    """
+    for model in CLEAR_ORDER:
+        session.exec(delete(model))
+
 
 def get_seed_path() -> Path:
     """Resolve the active seed file from SEED_PATH (read at call time so
@@ -59,20 +79,28 @@ def get_seed_path() -> Path:
 
 
 def seed(session: Session, seed_path: Path | None = None) -> dict[str, int]:
-    """Load a seed file into the given session. Returns row counts per table."""
+    """Clear existing content, then load a seed file into the given session.
+
+    Returns row counts per table. Clearing first means the database always
+    holds exactly one pack (see clear_content), and re-seeding after an edit
+    still converges: the call is idempotent for a given pack file.
+    """
     path = seed_path or get_seed_path()
     data = json.loads(path.read_text(encoding="utf-8"))
+
+    clear_content(session)
+
     counts: dict[str, int] = {}
     for key, model in COLLECTIONS:
         rows = data.get(key, [])
         for row in rows:
-            session.merge(model(**row))  # merge = upsert by primary key
+            session.add(model(**row))  # tables were just cleared: plain inserts
         counts[key] = len(rows)
 
-    # Upsert the single metadata row (id=1) describing this pack.
+    # The single metadata row (id=1) describing this pack.
     meta = data.get(METADATA_KEY, {})
     if meta:
-        session.merge(PackMetadata(id=1, **{f: meta[f] for f in METADATA_FIELDS}))
+        session.add(PackMetadata(id=1, **{f: meta[f] for f in METADATA_FIELDS}))
         counts[METADATA_KEY] = 1
 
     session.commit()

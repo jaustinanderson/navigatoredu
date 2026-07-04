@@ -54,8 +54,9 @@ Constraints were chosen up front and kept:
 One FastAPI process serves a static single-page frontend and a versioned
 JSON REST API. SQLModel maps six content tables plus a single-row
 `PackMetadata` table onto SQLite. All domain content originates in one JSON
-**content pack**; an idempotent seed script (upsert via `session.merge()`)
-loads the pack selected by the `SEED_PATH` environment variable.
+**content pack**; an idempotent clear-then-load seed script loads the pack
+selected by the `SEED_PATH` environment variable, so the database always
+holds exactly one pack.
 
 ```
 content pack (JSON) ─► validate_pack ─► seed.py ─► SQLite ─► FastAPI ─► SPA + /docs

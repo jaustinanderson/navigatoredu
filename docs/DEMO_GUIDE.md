@@ -18,14 +18,13 @@ pip install -r requirements.txt
 
 ## Switching packs
 
-Because the seed script upserts by primary key and the packs share an ID
-scheme, always start each demo from a **fresh database** so two domains don't
-mix.
+The seed script clears existing content before loading, so switching packs
+is just a reseed — the database always holds exactly one pack and two
+domains can never mix.
 
 ### Default — Tidewatch Guild (celestial navigation)
 
 ```bash
-rm -f data/navigatoredu.db
 python -m backend.app.seed
 uvicorn backend.app.main:app --reload
 ```
@@ -33,7 +32,6 @@ uvicorn backend.app.main:app --reload
 ### ArchiveGuild (historical-archive apprenticeship)
 
 ```bash
-rm -f data/navigatoredu.db
 SEED_PATH=data/seed_archiveguild.json python -m backend.app.seed
 SEED_PATH=data/seed_archiveguild.json uvicorn backend.app.main:app --reload
 ```
@@ -41,7 +39,6 @@ SEED_PATH=data/seed_archiveguild.json uvicorn backend.app.main:app --reload
 ### CytoFISH Navigator (synthetic FISH/cytogenetics education)
 
 ```bash
-rm -f data/navigatoredu.db
 SEED_PATH=data/seed_cytofish_synthetic.json python -m backend.app.seed
 SEED_PATH=data/seed_cytofish_synthetic.json uvicorn backend.app.main:app --reload
 ```
@@ -108,8 +105,7 @@ python -m backend.app.new_pack demo_pack
 # 2. It passes the validator immediately — before any content is written.
 python -m backend.app.validate_pack data/seed_demo_pack.json   # -> OK
 
-# 3. Seed a fresh database from it and run.
-rm -f data/navigatoredu.db
+# 3. Seed it and run (seeding replaces whatever pack was loaded before).
 SEED_PATH=data/seed_demo_pack.json python -m backend.app.seed
 SEED_PATH=data/seed_demo_pack.json uvicorn backend.app.main:app --reload
 ```

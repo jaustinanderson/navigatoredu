@@ -102,7 +102,8 @@ uvicorn backend.app.main:app --reload
 - API docs: <http://127.0.0.1:8000/docs>
 
 First run auto-seeds an empty database; the explicit seed script is for
-re-importing after editing a pack (it upserts, so re-running is safe).
+re-importing after editing a pack, and for switching packs (seeding
+clears the content tables first, then loads only the selected pack).
 
 Or with Docker:
 
@@ -112,11 +113,10 @@ docker compose up --build
 
 ## Demo the CytoFISH pack
 
-Packs share an ID scheme and the seed script upserts, so always switch packs
-on a fresh database:
+Switching packs is a single reseed — the seed script clears existing
+content before loading, so the database always holds exactly one pack:
 
 ```bash
-rm -f data/navigatoredu.db
 SEED_PATH=data/seed_cytofish_synthetic.json python -m backend.app.seed
 SEED_PATH=data/seed_cytofish_synthetic.json uvicorn backend.app.main:app --reload
 ```
