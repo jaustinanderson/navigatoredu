@@ -81,11 +81,11 @@ one for **all three packs**; the rest can use whichever pack reads best
 | `home-tidewatch.png` | Home (`#/`) with Tidewatch loaded | Active-pack card + banner |
 | `home-archiveguild.png` | Home with ArchiveGuild loaded | Same UI, different pack |
 | `home-cytofish.png` | Home with CytoFISH loaded | Same UI, specialized domain |
-| `categories.png` | Categories with a search in progress | Search + taxonomy |
+| `reference-cytofish.png` | Categories with a search in progress | Search + taxonomy |
 | `item-detail.png` | A reference item | Markdown content rendering |
 | `practice-case.png` | A case with two steps revealed | Guided reveal UX |
 | `training.png` | Training modules page | Module-grouped lessons |
-| `quiz-results.png` | Quiz after "Check answers" | Server-side scoring + explanations |
+| `quiz-cytofish-results.png` | Quiz after "Check answers" | Server-side scoring + explanations |
 | `pack-metadata.png` | `/api/v1/pack-metadata` JSON, or `/docs` | Governance metadata exposed via API |
 
 An animated GIF of switching packs (home page before/after a reseed) is the
