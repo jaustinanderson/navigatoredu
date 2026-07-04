@@ -1,172 +1,171 @@
 # NavigatorEdu — Portfolio Case Study
 
-*How to present this project on GitHub, LinkedIn, a résumé, and in interviews.*
+*A professional case study of the project: what it is, why it was built this
+way, and what it demonstrates. For interview preparation specifically, see
+[INTERVIEW_TALKING_POINTS.md](INTERVIEW_TALKING_POINTS.md).*
 
-## One-line summary
+## Context
 
-> Full-stack reference and training platform (FastAPI, SQLModel/SQLite,
-> vanilla-JS SPA) with a searchable content library, training modules,
-> guided practice cases, and a server-scored quiz engine — fully tested and containerized.
+NavigatorEdu is a portfolio project: a full-stack learning platform built to
+be read and evaluated by employers, not shipped to users. It was developed in
+nine sequential milestones, each delivered with tests, documentation, and CI
+green, so the repository history itself demonstrates incremental,
+disciplined delivery.
 
-## The problem it demonstrates solving
+The product shape is deliberately familiar — a reference library, training
+modules, guided practice cases, and a quiz engine — because that shape recurs
+across real systems (LMS platforms, documentation products, onboarding
+tools, laboratory training material). The interesting engineering is not the
+shape; it is that the entire knowledge domain is data.
 
-Specialized fields need structured learning tools: reference material,
-scenario practice, and self-assessment, tied together by a coherent data
-model. This project builds that product shape end-to-end using a fictional
-domain, so the engineering is evaluable without any proprietary or sensitive
-content.
+## Problem
 
-Choosing a **fictional domain is a feature, not a dodge**: it proves the
-architecture is domain-agnostic. And the repo now proves it concretely: two
-complete content packs (celestial navigation and archive apprenticeship)
-drive the same code, switched by one environment variable. This is the
-difference between *claiming* separation of content and structure and
-*demonstrating* it — a reviewer can run both products from one codebase in
-under a minute.
+Two problems, one demonstrated solution:
 
-Why this matters beyond the demo: content-agnostic design is the load-bearing
-idea in real product families (LMS platforms, documentation systems,
-white-label apps). Showing you can identify the invariant structure beneath
-a domain — and keep it out of your code — is an architecture skill, not a
-content trick.
+1. **Product problem.** Specialized fields need learning tools that combine
+   searchable reference material, scenario-based practice, and
+   self-assessment over one coherent data model.
+2. **Engineering problem.** Content-driven systems usually treat content as
+   an afterthought: unvalidated, unversioned, coupled to code. When content
+   outlives code and is edited by people who never read the code, every
+   content edit is effectively a deploy — and deserves deploy-grade rigor.
 
-### Specialization without coupling
+NavigatorEdu answers both: the product shape is built end-to-end, and the
+content is held to a validated, governed, CI-enforced contract.
 
-The third pack, **CytoFISH Navigator**, is the strongest form of this
-argument. It is a *specialized, safety-sensitive* domain — synthetic
-cytogenetics/FISH education — yet it required **zero code changes**: same
-models, same routes, same validator, same frontend. The domain knowledge
-lives in content; the engineering stays generic.
+## Design constraints
 
-It also demonstrates handling a domain where *what you leave out* matters as
-much as what you include. Every safety boundary — no PHI, no real cases, no
-accession numbers, no protocols, no diagnostic or sign-out language — is
-enforced in the content and stated in the pack's own disclaimers, not bolted
-onto the code. For any employer in health, legal, finance, or another
-regulated space, that instinct — put the domain's safety rules where the
-domain lives, and keep the platform neutral — is exactly the judgment they're
-screening for.
+Constraints were chosen up front and kept:
 
-## Skills evidenced, mapped to the code
+- **No authentication, no external APIs, no AI features.** The scope is a
+  single reviewer-runnable process; every added service dilutes the signal.
+- **Beginner-manageable stack.** FastAPI + SQLite + a no-build-step frontend:
+  anyone can clone, seed, and run in under a minute.
+- **All content synthetic.** No real organizations, people, records, or
+  procedures anywhere — enforced mechanically, not just promised.
+- **No overbuilding.** Every trade-off (JSON columns, linear-scan search,
+  hand-rolled validation) is the honest choice at this scale, with the
+  upgrade path named in the code or docs.
+- **Documentation is a first-class deliverable.** README, architecture
+  notes, authoring guide, demo guide, and this case study ship with the code.
+
+## Architecture
+
+One FastAPI process serves a static single-page frontend and a versioned
+JSON REST API. SQLModel maps six content tables plus a single-row
+`PackMetadata` table onto SQLite. All domain content originates in one JSON
+**content pack**; an idempotent seed script (upsert via `session.merge()`)
+loads the pack selected by the `SEED_PATH` environment variable.
+
+```
+content pack (JSON) ─► validate_pack ─► seed.py ─► SQLite ─► FastAPI ─► SPA + /docs
+        ▲
+   new_pack scaffolder
+```
+
+Three complete packs ship: two fictional domains (celestial navigation,
+archive apprenticeship) and one synthetic specialized domain
+(cytogenetics/FISH education). Swapping packs changes every page of the
+product with zero code changes — the concrete proof that the models, routes,
+and frontend encode structure, not content.
+
+Full detail and rationale: [ARCHITECTURE.md](ARCHITECTURE.md).
+
+## Safety and synthetic-content approach
+
+The project's safety posture has three layers, all mechanical:
+
+1. **Content-level boundaries.** The CytoFISH pack — a safety-sensitive
+   domain — contains no PHI, no real cases, no accession numbers, no
+   protocols, and no diagnostic or sign-out language. Those exclusions are
+   stated in the pack's own disclaimers, which are schema objects rendered in
+   the product, not README promises.
+2. **Governance metadata.** Every pack must declare `pack_id`, `pack_name`,
+   `pack_version`, `pack_description`, `domain_type`, `intended_use`,
+   `safety_notes`, and `synthetic_only: true`. The validator fails any pack
+   that omits these or weakens the synthetic-only invariant, and CI runs the
+   validator on every push.
+3. **Safe-by-default authoring.** The `new_pack` scaffolder generates new
+   packs with the safety defaults already in place, so the lowest-effort path
+   to a new domain is also the governed one.
+
+The positioning is deliberately modest: this demonstrates safe modeling of a
+sensitive domain and governance instinct. It makes no claim of clinical
+validity, clinical use, or clinical expertise.
+
+## Testing and validation strategy
+
+- **One seam, no mocks.** Every route receives its DB session via
+  `Depends(get_session)`. Tests override that single dependency with an
+  in-memory SQLite engine seeded from the same pack format — real queries
+  end-to-end, and the development database is never touched.
+- **87 tests** across API behavior (including the security-relevant
+  properties: quiz answers never serialized on GET, scoring server-side),
+  pack switching, validator behavior (broken-pack fixtures built by mutating
+  a copy of a real pack), and the authoring command (all file I/O in temp
+  directories so CI's working tree stays clean).
+- **Content validated like code.** A parametrized test sweeps every
+  `data/seed*.json` automatically, and CI additionally runs the validator CLI
+  against each shipped pack. A content edit that breaks a reference fails the
+  build exactly like a code regression.
+
+## What changed over the milestones
+
+| Milestone | Delivered | Tests |
+|-----------|-----------|-------|
+| v01 | MVP blueprint: positioning, architecture, data model, build plan | — |
+| v02 | Working scaffold: FastAPI + routers, SQLite/SQLModel, upserting seed script | 14 |
+| v03 | Training modules, Docker (non-root) + compose, GitHub Actions CI, full docs | 17 |
+| v04 | `SEED_PATH` content-pack switching — architecture proven content-agnostic | 26 |
+| v05 | Content-pack validator CLI, collect-all-errors, CI-gated | 39 |
+| v06 | CytoFISH Navigator: synthetic specialized pack, safety in content | 48 |
+| v07 | Per-pack governance metadata, `PackMetadata` table, metadata endpoint + UI banner | 57 |
+| v08 | `new_pack` authoring scaffolder: valid, safe-by-default skeletons | 87 |
+| v09 | Portfolio polish: documentation, positioning, interview preparation | 87 |
+
+The arc is intentional: build the product, prove the abstraction
+(`SEED_PATH`), enforce the contract (validator), stress it with a hard domain
+(CytoFISH), make governance explicit (metadata), then make the safe path the
+easy path (authoring). Test count grew with every functional milestone.
+
+## What this demonstrates professionally
 
 | Skill | Where a reviewer sees it |
 |-------|--------------------------|
 | REST API design | Versioned prefix, list/detail response shaping, correct 400/404 usage |
-| Data modeling | Six related entities with FKs; deliberate JSON-column trade-off, documented |
+| Data modeling | Seven related tables with FKs; deliberate JSON-column trade-off, documented |
 | Security thinking | Quiz answers never leave the server; server-side scoring; HTML-escaped rendering |
 | Testing discipline | 87 tests on isolated in-memory DBs via dependency override — no mocks |
-| Data pipelines | Idempotent seed script; human-reviewable JSON as source of truth; CLI validator gating CI; `new_pack` scaffolder for safe-by-default authoring |
-| Documentation | README, ARCHITECTURE.md, CONTENT_AUTHORING.md, DEMO_GUIDE.md, this case study; OpenAPI for free |
-| Content governance | Required per-pack metadata, validated in CI; active pack surfaced in API + UI |
-| Operations basics | Docker (non-root user, layer caching), compose volume + healthcheck, GitHub Actions CI |
+| Data pipelines | Idempotent seed script; human-reviewable JSON as source of truth; CLI validator gating CI; scaffolder for safe-by-default authoring |
+| Content governance | Required provenance/intended-use metadata, validated in CI; active pack queryable at runtime |
+| Safe domain modeling | A sensitive domain hosted with every safety boundary in content and metadata, none in code |
+| Documentation | README, ARCHITECTURE, CONTENT_AUTHORING, DEMO_GUIDE, this case study; OpenAPI for free |
+| Operations basics | Docker (non-root, layer caching), compose volume + healthcheck, GitHub Actions CI |
 | Product judgment | Reveal-as-you-go practice cases; disclaimer system built into the schema |
 
-## Talking points for interviews
+Two transferable ideas run through everything:
 
-1. **"Walk me through your testing strategy."** One dependency —
-   `get_session` — is the seam. Tests override it with an in-memory SQLite
-   engine seeded from the same JSON as production. Real queries run; nothing
-   is mocked; the dev database is never touched.
-2. **"What trade-offs did you make?"** JSON columns instead of join tables
-   for list fields; in-Python text matching instead of FTS5; a no-build-step
-   frontend. Each is the right call at this scale, and each has a named,
-   documented upgrade path.
-3. **"How would you scale it?"** Postgres via a connection-string change,
-   FTS or an external index for search, a real frontend build if the UI
-   grows. The point: the current design doesn't block any of these.
-4. **"Why can't users cheat the quiz?"** `GET /quiz` strips answers before
-   serialization; grading happens in `POST /quiz/submit`. Verified by a
-   dedicated test.
+- **Content-agnostic architecture** — identifying the invariant structure
+  beneath a domain and keeping it out of the code is the load-bearing idea in
+  LMS platforms, white-label products, and documentation systems.
+- **Data contracts with code-contract rigor** — required metadata, a gating
+  validator, and CI enforcement are the same discipline behind schema
+  registries, dataset datasheets, and ETL data-quality gates.
 
-## Suggested résumé bullet
-
-> Designed and built a full-stack learning platform (Python/FastAPI, SQLite,
-> REST) featuring structured reference content, scenario-based practice, and
-> a server-scored quiz engine; 100% of endpoints covered by an isolated
-> pytest suite; containerized with Docker.
-
-## Suggested LinkedIn post skeleton
-
-- What it is (1–2 sentences), with a screenshot or GIF.
-- One interesting decision (the quiz-answer isolation is the most relatable).
-- What you learned; link to the repo.
-- Explicit note that all content is fictional/synthetic — this reads as
-  professionalism, not weakness.
-
-## Future expansion ideas
-
-- **Quiz attempt history** — first feature that would justify user state.
-- **FTS5 search** — the documented upgrade path once content grows.
-- **Content authoring CLI** — validate/lint `seed.json` before import;
-  demonstrates pipeline thinking.
-- ~~**Second fictional domain**~~ — shipped: the ArchiveGuild pack proves
-  content-agnosticism (one new JSON file, zero code changes).
-- ~~**Pack validation tooling**~~ — shipped: `validate_pack` runs in CI, so
-  the pack format is now an enforced interface.
-- ~~**Domain specialization**~~ — shipped: the CytoFISH pack proves a
-  specialized, safety-sensitive domain fits the generic architecture unchanged.
-- ~~**Pack scaffolding**~~ — shipped: `new_pack` emits a valid, safe-by-default
-  skeleton, so a new pack starts green instead of hand-copied — completing the
-  content authoring toolchain.
-
-## Why metadata + governance matter here
-
-The metadata milestone turns "which content is loaded?" from tribal knowledge
-into an enforced, queryable fact. Every pack must declare `pack_id`,
-`pack_name`, `intended_use`, and affirm `synthetic_only: true`, or the
-validator fails the build. The active pack is then exposed via
-`GET /api/v1/pack-metadata` and shown in the UI banner.
-
-Why an interviewer should care: in real informatics and content-driven
-systems, *provenance and intended-use labelling* are governance requirements,
-not niceties. Knowing — at runtime, from the system itself — exactly which
-content set is live, what it is for, and whether it is cleared for real use is
-the same discipline behind dataset datasheets, model cards, and data-catalog
-lineage. Encoding "this is synthetic, this is its intended use" into the
-content contract and enforcing it in CI is a small, concrete demonstration of
-that instinct.
-
-## Why validation matters here
-
-In any reusable education or informatics system, content outlives code and
-is edited by people who never read the code. Every content edit is then a
-deploy — and unvalidated content fails at the worst possible time: at import,
-or silently at runtime (a quiz whose `correct_index` points past its options
-is a bug users find for you).
-
-The validator moves those failures to the earliest possible moment, with
-errors written for content authors ("quiz_questions 'q-003': correct_index 7
-out of range for 4 options"), and CI runs it on every push. The transferable
-skill on display: treating data contracts with the same rigor as code
-contracts. This is the same discipline behind schema registries, API
-contract tests, and ETL data-quality gates in production systems.
-
-## Why authoring tooling matters here
-
-A validator tells an author when a pack is *wrong*. A scaffolder makes the
-*right* pack the path of least resistance. `new_pack` emits a minimal,
-fully-wired pack that is valid on creation and safe-by-default —
-`synthetic_only: true`, educational-demo-only intended use, and safety notes
-forbidding real or operational use, all baked in before the author types a
-word.
-
-Why an interviewer should care: this is "make the safe thing the easy thing"
-applied to a data pipeline. Instead of trusting every author to remember the
-governance fields and reconstruct the referential contract by hand, the system
-hands them a green, governed baseline and lets them add content on top. That is
-the same instinct behind project scaffolds, secure-by-default templates, and
-paved-path tooling in real engineering orgs — reducing the chance of an unsafe
-or invalid artifact by making the default output correct. Paired with the
-CI-gated validator, it closes the loop: easy to start right, impossible to ship
-wrong.
-
-## Honest limitations (know these before an interviewer finds them)
+## Honest limitations
 
 - No authentication or user state — quiz scores are per-request.
-- Search is linear scan over a small corpus.
+- Search is a linear scan over a small corpus (FTS5 is the named upgrade).
 - Single-container deployment; CI runs tests but there is no CD.
-- Frontend is intentionally minimal; it demonstrates API consumption, not
-  frontend engineering depth.
+- The frontend is intentionally minimal; it demonstrates API consumption,
+  not frontend engineering depth.
 
 Naming limitations yourself, with a rationale, is a stronger signal than
 pretending they don't exist.
+
+## Future roadmap
+
+Kept realistic and incremental — see [ROADMAP.md](ROADMAP.md) for the full
+plan (UI polish, an in-app pack selector, richer search, exportable learning
+reports, a deployment option, and — only after substantially stronger
+guardrails — an AI/RAG study assistant).

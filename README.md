@@ -2,55 +2,179 @@
 
 ![CI](https://github.com/jaustinanderson/navigatoredu/actions/workflows/ci.yml/badge.svg)
 
-A full-stack reference and training web app for a **fictional** knowledge
-domain — the celestial-navigation practices of the invented *Tidewatch
-Guild*. Built as a portfolio project demonstrating clean API design,
-structured data modeling, testing discipline, and education-product thinking.
+**A full-stack learning platform where the entire knowledge domain is a
+swappable, validated JSON content pack.** One codebase (FastAPI + SQLite +
+vanilla-JS SPA) hosts three complete demo domains — including a fully
+synthetic cytogenetics/FISH education pack — switched by a single environment
+variable, with governance metadata and content validation enforced in CI.
 
 > **Synthetic-content statement:** every record in this application is
 > fictional, written for this demo. There are no real organizations, people,
-> or operational procedures here, and nothing is suitable for real-world
-> navigation or training. The disclaimer is part of the schema (a
-> `Disclaimer` table + `is_synthetic` flags), not just this paragraph.
+> patients, cases, or operational procedures here, and nothing is suitable for
+> real-world, operational, or clinical use. That statement is enforced by the
+> system itself: each pack must declare `synthetic_only: true` in governance
+> metadata that the validator checks on every CI run.
 
-## Problem statement
+## What this is, in 30 seconds
 
-Specialized fields need learning tools that combine three things: searchable
-reference material, scenario-based practice, and self-assessment — all backed
-by one coherent data model. This project builds that product shape
-end-to-end. The domain is deliberately fictional so the engineering can be
-evaluated without proprietary content, and to prove the architecture is
-domain-agnostic: swapping one JSON file re-skins the entire app.
+- **What:** a reference-library / training-module / practice-case / quiz web
+  app whose content is entirely data — a JSON "content pack" loaded into
+  SQLite by an idempotent seed script.
+- **Why:** to demonstrate, concretely, that structure and content can be
+  fully separated: swapping one file re-skins the whole product with zero
+  code changes.
+- **The problem it solves:** specialized fields need learning tools that
+  combine searchable reference material, scenario practice, and
+  self-assessment over one coherent data model — and content-driven systems
+  need their content held to the same rigor as code.
+- **Skills shown:** REST API design, relational data modeling, test-driven
+  development (87 tests, no mocks), data validation and governance, CI/CD
+  basics, Docker, and safe modeling of a sensitive domain using synthetic
+  content.
 
-## Features
+## Portfolio value
 
-- 📚 **Reference library** — categorized, tagged, searchable items with
-  markdown bodies
-- 🎓 **Training modules** — short ordered lessons, cross-linked to reference
-  items
-- 🧭 **Practice cases** — scenarios with reveal-as-you-go guided steps and
-  expected outcomes
-- ✅ **Quiz mode** — server-side scoring; answers never reach the client
-  before submission
-- 🗂 **Content pipeline** — human-reviewable `seed.json` → idempotent import
-  script → SQLite
-- 📄 **Auto-generated API docs** at `/docs`
-- 🐳 **One-command Docker run**, 🔁 **CI running the full test suite**
+This project is built to be read by employers. It maps to real work in:
 
-## Architecture overview
+- **Clinical laboratory informatics** — the CytoFISH pack shows a
+  specialized, safety-sensitive domain (cytogenetics/FISH education concepts)
+  hosted on a generic platform, with every safety boundary carried in the
+  content and its governance metadata rather than bolted onto code. This is a
+  demonstration of domain interest and safe-data discipline, not a clinical
+  tool or a claim of clinical validity.
+- **Structured educational content systems** — categories, reference items,
+  ordered training modules, guided practice cases, and server-scored quizzes
+  over one relational model; the shape of an LMS or documentation platform in
+  miniature.
+- **Validation and governance** — a CLI validator enforces the pack contract
+  (structure, references, quiz sanity, and required provenance/intended-use
+  metadata) and runs in CI, so a content edit that breaks the contract fails
+  the build exactly like a code regression.
+- **Data-backed UI/API workflows** — versioned REST endpoints with deliberate
+  list/detail response shaping; the frontend and Swagger docs both consume
+  the same API.
+- **Test-driven development** — 87 pytest tests against isolated in-memory
+  databases through one dependency-injection seam; real queries, zero mocks.
+- **Content-pack architecture** — the load-bearing idea behind white-label
+  products, LMS platforms, and documentation systems: identify the invariant
+  structure beneath a domain and keep it out of the code.
+- **Safe synthetic domain modeling** — inventing realistic-shaped but fully
+  fictional content, stating its boundaries in disclaimers and metadata, and
+  enforcing the synthetic-only invariant mechanically.
 
+### Why the CytoFISH pack matters
+
+CytoFISH Navigator is the strongest single artifact in the repo for a career
+direction toward clinical laboratory informatics. It shows two things at
+once: familiarity with the *shape* of cytogenetics/FISH education content
+(panels, probes, signal-pattern reasoning, review and escalation habits), and
+the judgment to model that domain **safely** — no PHI, no real cases, no
+accession numbers, no protocols, no diagnostic language, with those
+exclusions written into the pack's own disclaimers and `safety_notes`. In
+regulated fields, knowing what to leave out is as important as knowing what
+to include; this pack demonstrates that instinct without overclaiming any
+clinical capability.
+
+## Technical highlights
+
+| Area | What's here |
+|------|-------------|
+| Backend | **FastAPI**, versioned `/api/v1` routers, dependency-injected sessions |
+| Data | **SQLModel / SQLite**; six related tables; JSON columns for list fields with a documented FTS5 upgrade path |
+| Testing | **Pytest** — 87 tests on isolated in-memory DBs via one DI override; no mocks |
+| CI | **GitHub Actions** — full suite + content-pack validation on every push/PR |
+| Ops | **Docker** (non-root image) + compose volume and healthcheck |
+| Content pipeline | **Content-pack validator** (`validate_pack`) gating CI; **SEED_PATH**-based pack switching; **authoring command** (`new_pack`) scaffolding valid, safe-by-default packs |
+| Governance | **Pack-metadata endpoint** (`GET /api/v1/pack-metadata`) reporting exactly what was seeded; active pack shown in the UI banner |
+| Frontend | Single-file vanilla-JS SPA (Tailwind via CDN, hash router, HTML-escaped markdown rendering) — a deliberate no-build-step demo UI |
+| Domains | Three validated packs: Tidewatch Guild (celestial navigation), ArchiveGuild (archive apprenticeship), **CytoFISH Navigator** (synthetic cytogenetics/FISH education) |
+
+## Run it locally
+
+```bash
+python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+python -m backend.app.seed        # builds data/navigatoredu.db from seed.json
+uvicorn backend.app.main:app --reload
 ```
-Browser ── static SPA (/) + JSON REST (/api/v1/*)
-   │
-FastAPI (one process)
-   ├── routers: reference · training · cases · quiz
-   └── SQLModel session (DI) ──► SQLite
-                                    ▲
-                       seed.py ◄── data/seed.json  (source of truth)
+
+- App: <http://127.0.0.1:8000>
+- API docs: <http://127.0.0.1:8000/docs>
+
+First run auto-seeds an empty database; the explicit seed script is for
+re-importing after editing a pack (it upserts, so re-running is safe).
+
+Or with Docker:
+
+```bash
+docker compose up --build
 ```
 
-Full detail, including the trade-offs and their upgrade paths:
-[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+## Demo the CytoFISH pack
+
+Packs share an ID scheme and the seed script upserts, so always switch packs
+on a fresh database:
+
+```bash
+rm -f data/navigatoredu.db
+SEED_PATH=data/seed_cytofish_synthetic.json python -m backend.app.seed
+SEED_PATH=data/seed_cytofish_synthetic.json uvicorn backend.app.main:app --reload
+```
+
+Open <http://127.0.0.1:8000> — the banner and home card name the active pack
+and restate that it is synthetic-only. The raw governance metadata is at
+`/api/v1/pack-metadata`. The other packs work the same way with their file in
+`SEED_PATH` (`data/seed.json` is the default; `data/seed_archiveguild.json`
+is the third domain).
+
+## Validate all content packs
+
+```bash
+python -m backend.app.validate_pack data/seed.json
+python -m backend.app.validate_pack data/seed_archiveguild.json
+python -m backend.app.validate_pack data/seed_cytofish_synthetic.json
+```
+
+The validator checks structure, required fields, unique IDs, foreign
+references, quiz-answer sanity, and the governance metadata (including the
+`synthetic_only: true` invariant). It collects all problems before reporting
+and exits 0/1/2 for valid/invalid/unreadable. CI runs it on every push.
+
+## Create a new content pack
+
+```bash
+python -m backend.app.new_pack demo_pack        # → data/seed_demo_pack.json
+python -m backend.app.new_pack demo_pack --force # regenerate (overwrite)
+```
+
+The scaffolder emits a minimal, fully-wired pack that passes the validator
+immediately and ships safe-by-default (`synthetic_only: true`,
+educational-demo-only intended use, safety notes forbidding real records,
+real cases, and operational or clinical use). Edit the `TODO` placeholder
+records, validate, seed, run. Full schema and workflow:
+[docs/CONTENT_AUTHORING.md](docs/CONTENT_AUTHORING.md).
+
+## 60-second demo script
+
+1. **Home page** — point out the "Active content pack" card and top banner:
+   the app tells you which domain is loaded and that it is synthetic-only.
+   That text comes from governance metadata written at seed time and served
+   by `GET /api/v1/pack-metadata`.
+2. **Categories → a reference item** — categorized, tagged, searchable
+   content with rendered markdown.
+3. **A practice case** — reveal guided steps one at a time, ending in the
+   expected outcome; the answer fields are omitted from list endpoints and
+   fetched on demand.
+4. **Quiz → submit** — scoring happens server-side; correct answers never
+   appear in the page source before submission.
+5. **`/docs`** — the same API, self-documenting via OpenAPI.
+6. **Close on validation and CI** — every content pack is checked by
+   `validate_pack` on every push: structure, references, quiz sanity, and
+   required governance metadata. Content is held to the same contract
+   discipline as code.
+
+The full multi-pack walkthrough (including switching domains live and a
+screenshot checklist) is in [docs/DEMO_GUIDE.md](docs/DEMO_GUIDE.md).
 
 ## Data model
 
@@ -62,147 +186,7 @@ Full detail, including the trade-offs and their upgrade paths:
 | PracticeCase   | Scenario + guided steps + outcome    | answer fields hidden in list views |
 | QuizQuestion   | MCQ with explanation                 | `correct_index` never serialized on GET |
 | Disclaimer     | Safety/synthetic-content notices     | `applies_to` scope |
-
-## Setup
-
-```bash
-python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-python -m backend.app.seed        # builds data/navigatoredu.db from seed.json
-```
-
-## Run
-
-```bash
-uvicorn backend.app.main:app --reload
-```
-
-- App: <http://127.0.0.1:8000>
-- API docs: <http://127.0.0.1:8000/docs>
-
-First run auto-seeds an empty database; the explicit seed script is for
-re-importing after you edit a seed file (it upserts, so re-running is safe).
-
-## Content packs (SEED_PATH)
-
-The entire application is content-agnostic: all domain content lives in a
-single JSON "content pack," selected with the `SEED_PATH` environment
-variable. Three packs ship with the repo:
-
-| Pack | File | Domain |
-|------|------|--------|
-| Tidewatch Guild (default) | `data/seed.json` | fictional celestial navigation |
-| ArchiveGuild | `data/seed_archiveguild.json` | fictional archive apprenticeship |
-| CytoFISH Navigator | `data/seed_cytofish_synthetic.json` | synthetic FISH/cytogenetics **education** (no real/clinical content) |
-
-Run with the default pack:
-
-```bash
-python -m backend.app.seed
-uvicorn backend.app.main:app --reload
-```
-
-Run with the ArchiveGuild pack — zero code changes:
-
-```bash
-rm -f data/navigatoredu.db          # start from a clean database
-SEED_PATH=data/seed_archiveguild.json python -m backend.app.seed
-SEED_PATH=data/seed_archiveguild.json uvicorn backend.app.main:app --reload
-```
-
-Or the synthetic CytoFISH education pack:
-
-```bash
-rm -f data/navigatoredu.db
-SEED_PATH=data/seed_cytofish_synthetic.json python -m backend.app.seed
-SEED_PATH=data/seed_cytofish_synthetic.json uvicorn backend.app.main:app --reload
-```
-
-> The CytoFISH pack is **synthetic educational content only** — no patient
-> information, no real cases, no protocols, and no diagnostic guidance. It
-> demonstrates that the architecture can host a specialized, safety-sensitive
-> domain while keeping every safety boundary in the *content*, not the code.
-
-Same routes, same frontend, same tests — different product. Note that the
-seed script upserts by primary key and the packs share an ID scheme, so
-switch packs on a fresh database rather than seeding one over the other.
-
-### Active pack metadata (demo mode)
-
-Every pack carries a governed `metadata` object (`pack_id`, `pack_name`,
-`pack_version`, `pack_description`, `domain_type`, `synthetic_only`,
-`intended_use`, `safety_notes`). On seeding, it is written to a single-row
-`PackMetadata` table and served at `GET /api/v1/pack-metadata`. The home page
-and the top banner display the active pack, so a viewer always knows which
-domain is loaded and that it is synthetic-only:
-
-```
-Active content pack: CytoFISH Navigator Synthetic Pack — synthetic demo only.
-```
-
-The validator **requires** this metadata (see below), so a pack cannot ship
-without declaring what it is and affirming `synthetic_only: true`. For a full
-local walkthrough of all three packs, see
-[docs/DEMO_GUIDE.md](docs/DEMO_GUIDE.md).
-
-With Docker:
-
-```bash
-docker compose down -v              # reset the persisted volume
-SEED_PATH=data/seed_archiveguild.json docker compose up --build
-```
-
-### Validating a pack
-
-Every pack can be checked before import — governance **metadata**, structure,
-required fields, unique IDs, foreign references, and quiz-answer sanity:
-
-```bash
-python -m backend.app.validate_pack data/seed.json
-python -m backend.app.validate_pack data/seed_archiveguild.json
-python -m backend.app.validate_pack data/seed_cytofish_synthetic.json
-```
-
-Exit code 0 means valid; problems are listed with record IDs. CI validates
-every shipped pack on every push, so a content edit that breaks a reference
-fails the build just like a code regression would.
-
-### Authoring a new pack (new_pack)
-
-Start a new pack from a valid skeleton rather than hand-copying an existing
-one — the scaffolder emits a minimal, fully-wired pack that passes the
-validator immediately and ships with safety defaults baked in:
-
-```bash
-python -m backend.app.new_pack demo_pack        # writes data/seed_demo_pack.json
-python -m backend.app.new_pack demo_pack --force # regenerate (overwrite)
-```
-
-The slug names both the file and the `pack_id` (lowercase letters, digits,
-underscores; must start with a letter). The generated pack has
-`synthetic_only: true`, an `intended_use` that says educational demo only, and
-`safety_notes` stating no real records, no real cases, and no operational or
-clinical use — so a new domain begins valid, governed, and safe-by-default.
-Then edit the `TODO` placeholder records, validate, seed, and run. The full
-workflow and pack schema are in
-[docs/CONTENT_AUTHORING.md](docs/CONTENT_AUTHORING.md).
-
-## Docker
-
-```bash
-docker compose up --build
-```
-
-That's the whole story: the image bundles the app and `seed.json`, the
-database auto-seeds on first start, and a named volume (`navigatoredu-data`)
-persists it across restarts. Set `SEED_PATH` to choose a content pack (see
-above); reset the volume with `docker compose down -v` when switching. The container runs as a non-root user and has a
-healthcheck against the API. Plain Docker, if you prefer:
-
-```bash
-docker build -t navigatoredu .
-docker run -p 8000:8000 navigatoredu
-```
+| PackMetadata   | Single-row record of the seeded pack | `synthetic_only`, `intended_use`, `safety_notes` |
 
 ## Tests
 
@@ -211,40 +195,25 @@ python -m pytest        # 87 tests
 ```
 
 Tests run against an **isolated in-memory SQLite database** seeded from the
-same `seed.json`, injected by overriding the one `get_session` dependency —
-real queries, zero mocks, and your development database is never touched.
+same pack format, injected by overriding the one `get_session` dependency —
+real queries, zero mocks, and the development database is never touched.
 
-## CI
+## Screenshots and docs
 
-`.github/workflows/ci.yml` runs the full pytest suite **and validates every
-content pack** on every push and pull request (Ubuntu, Python 3.12, cached
-pip). Content is checked in CI because content is part of the contract. Update the badge URL at the top of
-this file with your GitHub username after pushing.
-
-## Screenshots
-
-See [screenshots/README.md](screenshots/README.md) for the capture checklist.
-
-## Roadmap
-
-- SQLite FTS5 search once the corpus outgrows linear scan
-- Quiz sessions with persisted attempt history
-- Postgres profile in docker-compose for a production-shaped variant
-
-Shipped: content-agnostic `SEED_PATH` packs, a CI-gated pack validator,
-per-pack governance metadata, and a `new_pack` scaffolder — the content
-authoring toolchain is now complete end to end.
-
-## Docs
-
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — how it's built and why
-- [docs/PORTFOLIO_CASE_STUDY.md](docs/PORTFOLIO_CASE_STUDY.md) — how to
-  present this project professionally
+- [screenshots/](screenshots/) — captured views of all three packs;
+  [screenshots/README.md](screenshots/README.md) is the capture checklist
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — system design, data flow,
+  lifecycles, and trade-offs
+- [docs/PORTFOLIO_CASE_STUDY.md](docs/PORTFOLIO_CASE_STUDY.md) — the project
+  as a professional case study
+- [docs/INTERVIEW_TALKING_POINTS.md](docs/INTERVIEW_TALKING_POINTS.md) —
+  concise interview preparation for this project
 - [docs/CONTENT_AUTHORING.md](docs/CONTENT_AUTHORING.md) — pack schema and
-  the create → validate → seed → run authoring workflow
+  the create → validate → seed → run workflow
 - [docs/DEMO_GUIDE.md](docs/DEMO_GUIDE.md) — local walkthrough of all three
-  content packs and what to screenshot
+  packs and what to screenshot
+- [docs/ROADMAP.md](docs/ROADMAP.md) — realistic next milestones
 
 ## License
 
-Portfolio/education demo. All content fictional.
+Portfolio/education demo. All content fictional and synthetic.

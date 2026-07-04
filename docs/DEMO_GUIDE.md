@@ -57,6 +57,9 @@ the raw metadata.
 
 ## Demo narration (the 90-second version)
 
+(A tighter 60-second variant lives in the README's "60-second demo script"
+section; this one adds the pack-switching payoff.)
+
 1. **Open the home page.** Point out the "Active content pack" card and the
    banner — the app tells you which domain is loaded and restates that it is
    synthetic-only.
