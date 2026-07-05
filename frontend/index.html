@@ -77,8 +77,11 @@
   Skip to content
 </a>
 
-<!-- Synthetic-content banner: static fallback, replaced with the active pack. -->
-<div class="bg-deep text-white text-xs text-center py-1.5 px-3">
+<!-- Synthetic-content banner: static fallback, replaced with the active pack.
+     role="region" + aria-label makes it a named landmark, so no page content
+     sits outside the landmark structure (axe `region` rule). -->
+<div role="region" aria-label="Content notice"
+     class="bg-deep text-white text-xs text-center py-1.5 px-3">
   <span id="pack-banner">Portfolio demo — all content is fictional and synthetic. Not for real-world use.</span>
 </div>
 

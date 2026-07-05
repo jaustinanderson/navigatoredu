@@ -82,7 +82,7 @@ clinical capability.
 | Backend | **FastAPI**, versioned `/api/v1` routers, dependency-injected sessions |
 | Data | **SQLModel / SQLite**; six related tables; JSON columns for list fields; **FTS5 full-text search** over reference items, rebuilt on every seed |
 | Testing | **Pytest** — 137 tests on isolated in-memory DBs via one DI override; no mocks |
-| CI | **GitHub Actions** — pytest + pack validation, Docker build check, and Playwright browser tests, on every push/PR |
+| CI | **GitHub Actions** — pytest + pack validation, Docker build check, and Playwright browser tests including an **axe-core accessibility audit** (fails on serious/critical), on every push/PR |
 | Ops | **Docker** (non-root image, PORT-aware) + compose volume and healthcheck; **Render blueprint** for deploy-it-yourself hosting |
 | Content pipeline | **Content-pack validator** (`validate_pack`) gating CI; **SEED_PATH**-based pack switching; **authoring command** (`new_pack`) scaffolding valid, safe-by-default packs |
 | Governance | **Pack-metadata endpoint** (`GET /api/v1/pack-metadata`) reporting exactly what was seeded; active pack shown in the UI banner |
@@ -261,7 +261,28 @@ after pack switching) both lived in exactly that layer. Twelve tests cover
 chip readability via real computed styles (at rest, selected, after Clear
 all), search/tag/difficulty/combined filtering, pack switching through the
 Packs UI with stale-content assertions, the quiz report download (file
-contents verified, `<script>`-free), and an API-docs smoke.
+contents verified, `<script>`-free), and an API-docs smoke. Four further
+tests run the accessibility audit below, for sixteen browser tests total.
+
+### Accessibility (axe-core in CI)
+
+Every CI run scans Home, Reference, Packs, and Quiz in a real browser with
+the **full default axe-core ruleset** (via `@axe-core/playwright`, a dev
+dependency only — nothing ships to the app). **Serious and critical
+violations fail the build**; minor/moderate findings are printed in the
+test output as advisories rather than silently ignored. No rules are
+disabled and no elements are excluded. Current status: all four views scan
+clean at every impact level.
+
+Honest limits of this posture, deliberately documented rather than implied
+away: automated scanning covers only the mechanically checkable subset of
+WCAG (names, roles, ARIA validity, landmarks, computed contrast).
+Keyboard-only task flows and actual screen-reader UX are exercised manually
+(and partially by the chip suite's contrast/`aria-pressed` assertions) but
+are not yet automated as end-to-end flows, and only the four primary views
+are scanned — detail views (reference item, practice case) share the same
+templates and markup patterns but are not independently audited. Both are
+scoped follow-ups, not claims of completeness.
 
 ```bash
 npm install

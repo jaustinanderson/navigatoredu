@@ -279,8 +279,14 @@ legitimate only when you can name the property the code correctly upholds.
   author's loop further.
 - **Optional hosted demo.** The blueprint exists; maintaining one live URL
   (with an uptime badge) would remove the last click for reviewers.
-- **Accessibility testing.** Manual keyboard/contrast checks should become
-  automated axe-core runs in CI.
+- **Accessibility testing.** ~~Manual keyboard/contrast checks should
+  become automated axe-core runs in CI.~~ Shipped in v18: axe-core scans of
+  the four primary views in the browser-test CI job, full default ruleset,
+  failing on serious/critical. The audit's first run validated the earlier
+  manual work — the only finding at any level was a banner outside the
+  landmark structure, fixed with two attributes. Keyboard-journey and
+  screen-reader coverage remain manual, and that boundary is documented
+  rather than glossed.
 - **Typed API client generation from OpenAPI.** The frontend hand-codes
   fetch calls; generating a typed client would demonstrate schema-driven
   integration and catch response-shape drift.

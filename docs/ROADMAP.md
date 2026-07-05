@@ -54,6 +54,19 @@ UI, and the report download verified file-in-hand — with a self-starting
 web server config and a dedicated `browser-test` CI job. This was the top
 item on the retrospective's improvement list.
 
+## ~~Accessibility audit~~ (shipped in v18)
+
+Shipped: automated axe-core scans (`@axe-core/playwright`, dev dependency
+only) of Home, Reference, Packs, and Quiz inside the existing Playwright
+suite and `browser-test` CI job — full default ruleset, no rule or element
+exclusions, failing the build on serious/critical violations and printing
+minor/moderate findings as advisories. The one real finding (the
+synthetic-content banner sat outside every landmark) was fixed with a
+two-attribute change (`role="region"` + `aria-label`); all four views now
+scan clean at every impact level. Deliberately out of scope, documented in
+ARCHITECTURE: keyboard-only journey tests, screen-reader UX, and
+independent scans of detail views that reuse already-scanned templates.
+
 ## ~~Project retrospective~~ (shipped in v16)
 
 Shipped: [RETROSPECTIVE.md](RETROSPECTIVE.md) — the v01–v15 engineering

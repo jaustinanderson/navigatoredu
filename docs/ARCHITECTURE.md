@@ -270,6 +270,38 @@ ranking tuning, no highlighting).
 - **137 tests**, all green in under a second, no services or secrets
   required — which is what keeps the CI workflow short.
 
+### Accessibility audit (browser layer)
+
+`tests/browser/accessibility.spec.js` runs axe-core (via
+`@axe-core/playwright`, dev-only) against the four primary views — Home,
+Reference, Packs, Quiz — rendered in the same self-starting Playwright
+setup as the behavior tests, against a deterministic pack so contrast and
+content findings are reproducible. Design decisions:
+
+- **Full default ruleset, no exclusions.** No rules disabled, no elements
+  excluded from the scan; there is nothing to keep in sync with the markup.
+- **Fail threshold = serious/critical.** Those axe impact tiers map to
+  defects that block or badly degrade assistive-technology use.
+  Minor/moderate findings do not fail CI but are printed as advisories in
+  the test output, so they stay visible until triaged instead of
+  disappearing into a suppression list. (At v18 the four views scan clean
+  at every level — the threshold is policy for the future, not a carve-out
+  for present debt.)
+- **Scan after real render.** Each test waits for the async content
+  (chips, category sections, pack cards, quiz fieldsets) before scanning,
+  so the audit sees the page users interact with, not the loading state.
+
+**Known boundaries, stated plainly:** axe automates only the mechanically
+checkable subset of WCAG. Not covered by this audit: keyboard-only task
+flows as end-to-end journeys (tab order is partially enforced by the
+skip-link and `aria-pressed` chip assertions elsewhere in the suite),
+screen-reader interaction quality, and post-interaction states such as the
+quiz results view. Detail views (reference item, practice case) reuse the
+same templates as the scanned views and were left out to keep the audit at
+one representative scan per template family — they inherit, rather than
+independently prove, the clean result. These are the documented next
+increments if the accessibility bar is raised further.
+
 ## Deployment and dev workflow
 
 **Local:** venv → `pip install -r requirements.txt` →
