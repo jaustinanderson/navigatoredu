@@ -82,8 +82,8 @@ clinical capability.
 | Backend | **FastAPI**, versioned `/api/v1` routers, dependency-injected sessions |
 | Data | **SQLModel / SQLite**; six related tables; JSON columns for list fields; **FTS5 full-text search** over reference items, rebuilt on every seed |
 | Testing | **Pytest** — 137 tests on isolated in-memory DBs via one DI override; no mocks |
-| CI | **GitHub Actions** — full suite + content-pack validation on every push/PR |
-| Ops | **Docker** (non-root image) + compose volume and healthcheck |
+| CI | **GitHub Actions** — full suite + content-pack validation + Docker build check on every push/PR |
+| Ops | **Docker** (non-root image, PORT-aware) + compose volume and healthcheck; **Render blueprint** for deploy-it-yourself hosting |
 | Content pipeline | **Content-pack validator** (`validate_pack`) gating CI; **SEED_PATH**-based pack switching; **authoring command** (`new_pack`) scaffolding valid, safe-by-default packs |
 | Governance | **Pack-metadata endpoint** (`GET /api/v1/pack-metadata`) reporting exactly what was seeded; active pack shown in the UI banner |
 | Pack browser | **Allowlisted local-demo selector** (`/api/v1/packs` + Packs page) — flip between the bundled domains from the UI; no paths, no uploads |
@@ -112,6 +112,39 @@ Or with Docker:
 ```bash
 docker compose up --build
 ```
+
+## Live demo / deployment
+
+**Local run is the primary demo path** — this project is built to be cloned
+and running in under a minute. For reviewers who want a hosted look, the
+repo includes a one-file deployment blueprint for **Render** (chosen for
+simplicity: free tier, deploys from a GitHub fork in the browser, no CLI,
+no payment method, and it consumes the existing Dockerfile unchanged).
+
+Deploy it yourself:
+
+1. Fork this repository.
+2. In the Render dashboard: **New → Blueprint**, select your fork. Render
+   reads [`render.yaml`](render.yaml) and builds the Dockerfile.
+3. Optionally set the `SEED_PATH` environment variable to choose which
+   bundled pack the instance serves:
+
+   | Pack | `SEED_PATH` value |
+   |------|-------------------|
+   | Tidewatch Guild (default) | `data/seed.json` |
+   | ArchiveGuild | `data/seed_archiveguild.json` |
+   | CytoFISH (synthetic) | `data/seed_cytofish_synthetic.json` |
+
+Scope and safety, stated plainly: a deployed instance serves **only the
+bundled synthetic packs** — the allowlisted selector cannot load anything
+else, there are no uploads and no user data, and all content remains
+fictional. **No real clinical use, no PHI, no real patient data**, on the
+server exactly as locally. There is deliberately no auth (nothing to
+protect), no persistence beyond the demo SQLite file (free-tier disks are
+ephemeral; the app re-seeds `SEED_PATH` on every start, so UI pack switches
+last until the next restart — expected demo behavior), and **no continuous
+deployment** (CI includes a Docker *build check* only; `autoDeploy` is off
+in the blueprint).
 
 ## Demo the CytoFISH pack
 

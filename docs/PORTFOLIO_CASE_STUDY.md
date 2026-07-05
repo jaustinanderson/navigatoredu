@@ -128,6 +128,7 @@ validity, clinical use, or clinical expertise.
 | v12 | Reviewer landing: self-guiding home page with walkthrough, scope, and safety posture | 101 |
 | v13 | FTS5 search + tag/difficulty filters; index rebuilt per seed; linear scan retired | 124 |
 | v14 | Exportable learning reports: stateless, printable HTML per quiz attempt | 137 |
+| v15 | Deployment option: Render blueprint + CI Docker build check, no CD | 137 |
 
 The arc is intentional: build the product, prove the abstraction
 (`SEED_PATH`), enforce the contract (validator), stress it with a hard domain
@@ -164,7 +165,9 @@ Two transferable ideas run through everything:
   learner keeps results via the stateless downloadable report, by design.
 - Search is unranked-beyond-bm25 FTS5 over small synthetic packs — real demo
   search, not production search infrastructure (no tuning, no highlighting).
-- Single-container deployment; CI runs tests but there is no CD.
+- Single-container deployment with a deploy-it-yourself Render blueprint;
+  CI proves the image builds, but there is deliberately no CD — a portfolio
+  demo warrants a build check, not a pipeline.
 - The frontend is intentionally minimal; it demonstrates API consumption,
   not frontend engineering depth.
 

@@ -283,9 +283,25 @@ SQLite file persists across restarts; a compose healthcheck polls
 `/api/v1/categories`. `SEED_PATH` selects the pack; reset the volume
 (`docker compose down -v`) when switching.
 
-**CI:** `.github/workflows/ci.yml` — checkout → Python 3.12 with pip caching
-→ install → `pytest -v` → `validate_pack` against every shipped pack, on
-every push and PR.
+**CI:** `.github/workflows/ci.yml` — two jobs on every push and PR. `test`:
+checkout → Python 3.12 with pip caching → install → `pytest -v` →
+`validate_pack` against every shipped pack. `docker-build`: builds the image
+from a clean checkout and smoke-tests it (curl against `/api/v1/categories`
+and `/api/v1/pack-metadata` in the running container) — a packaging proof,
+deliberately not deployment: no push, no registry, no secrets.
+
+**Deployment option (Render):** `render.yaml` is a declarative blueprint a
+reviewer can deploy from a fork in the browser — free tier, no CLI, no
+secrets — consuming the same Dockerfile. The container `CMD` honors the
+platform-injected `PORT` with a local default of 8000, so one image serves
+compose and Render identically. `SEED_PATH` selects the bundled pack at
+deploy time. Design positions, held on purpose: `autoDeploy: false` (a
+portfolio demo warrants a build check, not CD), no added auth (there is no
+user data to protect — the report feature is stateless by design), and no
+persistence beyond the demo SQLite file (ephemeral free-tier disks simply
+re-seed on restart, which is the same clear-then-load behavior the app has
+everywhere). Deployment readiness here is evidence the container story is
+real — not an invitation to treat a synthetic demo as production.
 
 **Milestone workflow:** the project is developed in sequential milestones,
 each starting from a fresh clone of the pushed repo, delivered with tests

@@ -20,4 +20,6 @@ RUN chown -R appuser:appuser /app
 USER appuser
 
 EXPOSE 8000
-CMD ["uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Honor the platform-injected PORT (e.g. Render) with a local default of
+# 8000 — identical behavior locally and in docker compose.
+CMD ["sh", "-c", "uvicorn backend.app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]

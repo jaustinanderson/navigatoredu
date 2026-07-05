@@ -9,6 +9,10 @@ Each pack is loaded by seeding the database from a different JSON file via the
 content does. The home page and top banner display the **active content pack**
 so it is always clear which domain is loaded.
 
+As of v15, the repo carries a Render blueprint (`render.yaml`) — if you've
+deployed a copy, the demo works identically at the hosted URL; otherwise the
+local run remains the primary path.
+
 As of v14, the quiz offers **Download report** after checking answers — a
 printable, self-contained HTML summary generated statelessly from the
 submitted answers. It makes a great closing beat: check a quiz, download,

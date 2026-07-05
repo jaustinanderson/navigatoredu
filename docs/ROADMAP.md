@@ -45,13 +45,16 @@ tables — keeping the no-auth constraint intact. PDF was skipped
 deliberately: it would add a heavy dependency for no reviewer value
 (browsers print HTML). Version drift again: planned as v13, shipped as v14.
 
-## v14 — Deployment option
+## ~~Deployment option~~ (shipped in v15)
 
-One documented, low-cost deployment target (a container platform such as
-Fly.io or Render), with the compose setup adapted, environment variables
-documented, and a deploy section in the README. CI gains a build check but
-not full CD. Success criterion: a reviewer can visit a live URL, and the
-repo explains exactly how it got there.
+Shipped: a Render blueprint (`render.yaml`, free tier, browser-only deploy
+from a fork, consuming the existing Dockerfile with a PORT-aware CMD),
+`SEED_PATH` documented for choosing the bundled pack at deploy time, a
+"Live demo / deployment" README section, and a CI `docker-build` job that
+builds and smoke-tests the image on every push — a build check, not CD
+(`autoDeploy: false`). The repo explains exactly how a live URL comes to
+exist; hosting one is the reader's single click. Version drift continues:
+planned as v14, shipped as v15.
 
 ## Later — AI/RAG study assistant (only after stronger guardrails)
 

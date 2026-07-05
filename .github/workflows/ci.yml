@@ -26,3 +26,23 @@ jobs:
           python -m backend.app.validate_pack data/seed.json
           python -m backend.app.validate_pack data/seed_archiveguild.json
           python -m backend.app.validate_pack data/seed_cytofish_synthetic.json
+
+  docker-build:
+    # Build check only: proves the image packages from a clean checkout.
+    # Deliberately no push, no registry, no secrets, no deployment.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t navigatoredu:ci .
+
+      - name: Smoke-test the image
+        run: |
+          docker run -d --rm -p 8000:8000 --name navsmoke navigatoredu:ci
+          for i in $(seq 1 20); do
+            curl -fsS http://127.0.0.1:8000/api/v1/categories > /dev/null && break
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:8000/api/v1/pack-metadata
+          docker stop navsmoke

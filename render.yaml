@@ -1,0 +1,30 @@
+# Render blueprint for NavigatorEdu (https://render.com/docs/blueprint-spec)
+#
+# Deploy-it-yourself: fork the repo, then in the Render dashboard choose
+# "New → Blueprint" and point it at your fork. Render builds the existing
+# Dockerfile — no CLI, no secrets, no paid plan required.
+#
+# Scope notes, on purpose:
+# - The deployed instance serves ONLY the bundled synthetic demo packs.
+#   All content is fictional; nothing here is for real-world, operational,
+#   or clinical use, and the app says so in its own UI and metadata.
+# - autoDeploy is off: this is a build-and-deploy-once portfolio demo, not
+#   continuous deployment.
+# - Free-tier disks are ephemeral. That is fine by design: the app auto-seeds
+#   its SQLite database from SEED_PATH at startup, so a restart simply
+#   re-seeds the chosen pack. Pack switches made in the UI last until the
+#   next restart — expected demo behavior, documented in the README.
+services:
+  - type: web
+    name: navigatoredu
+    runtime: docker
+    plan: free
+    autoDeploy: false
+    healthCheckPath: /api/v1/categories
+    envVars:
+      # Which bundled pack the instance serves by default. Pick one:
+      #   data/seed.json                     (Tidewatch Guild)
+      #   data/seed_archiveguild.json        (ArchiveGuild)
+      #   data/seed_cytofish_synthetic.json  (CytoFISH, synthetic)
+      - key: SEED_PATH
+        value: data/seed.json
