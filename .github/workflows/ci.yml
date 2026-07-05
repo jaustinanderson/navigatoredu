@@ -49,10 +49,11 @@ jobs:
 
   browser-test:
     # Playwright browser tests: the UI-behavior layer pytest can't see
-    # (computed chip styles, filter interaction, downloads), plus the
-    # axe-core accessibility audit of Home/Reference/Packs/Quiz, which
-    # fails the job on serious or critical violations. Runs alongside
-    # test and docker-build; deploys nothing.
+    # (computed chip styles, filter interaction, downloads), the axe-core
+    # accessibility audit of Home/Reference/Packs/Quiz (fails on serious or
+    # critical violations), and the keyboard-only journeys proving the main
+    # tasks complete without a mouse. Runs alongside test and docker-build;
+    # deploys nothing.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
