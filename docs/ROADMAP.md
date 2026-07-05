@@ -45,6 +45,13 @@ tables — keeping the no-auth constraint intact. PDF was skipped
 deliberately: it would add a heavy dependency for no reviewer value
 (browsers print HTML). Version drift again: planned as v13, shipped as v14.
 
+## ~~Project retrospective~~ (shipped in v16)
+
+Shipped: [RETROSPECTIVE.md](RETROSPECTIVE.md) — the v01–v15 engineering
+narrative with the three major debugging stories and architecture lessons,
+plus refreshed interview bug stories. A documentation milestone by design:
+no app behavior changed, all 137 tests untouched and passing.
+
 ## ~~Deployment option~~ (shipped in v15)
 
 Shipped: a Render blueprint (`render.yaml`, free tier, browser-only deploy

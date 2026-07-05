@@ -130,6 +130,51 @@ code and tests actually show.
 > seven. The general lesson I took: for content-driven systems, the content
 > contract *is* the architecture, so invest in enforcing it first."
 
+## Two "tell me about a bug you fixed" stories
+
+Both are real, both are in the repo history, and both are told at length in
+[RETROSPECTIVE.md](RETROSPECTIVE.md). Interview-length versions:
+
+**Story 1 — Stale-seed / content-pack drift.**
+- *Situation:* During manual review, the app's banner said the CytoFISH pack
+  was active, but the Reference page showed categories from all three
+  domains at once — the governance display and the actual content disagreed.
+- *Diagnosis:* The seed script upserted by primary key, and packs use their
+  own ID schemes, so seeding pack B over pack A inserted B's rows and left
+  A's untouched. The single fixed-ID metadata row flipped correctly, which
+  is exactly why the mismatch was possible.
+- *Fix:* Made seeding clear-then-load — wipe the content tables child-first,
+  then insert only the selected pack — with four regression tests, one of
+  which walks the exact reported scenario.
+- *Result:* The database is now always a pure function of one pack file, and
+  the fix became load-bearing: the pack browser reseeds through the same
+  path, and the FTS index can rebuild from scratch at every seed, making
+  stale search results structurally impossible.
+- *Lesson:* Derive state from one controlled transition instead of patching
+  it incrementally — and if the docs warn "always do X first," that warning
+  is a design bug report.
+
+**Story 2 — The invisible filter chips (runtime CSS).**
+- *Situation:* New tag-filter chips rendered as blank pill outlines; labels
+  appeared only on hover or after clicking. Data pills elsewhere were fine.
+- *Diagnosis:* Ruled out bad data with an audit of all three packs; found
+  and fixed an asymmetric class toggle (two same-property utilities on one
+  element) and proved the new logic correct programmatically — and the
+  browser still showed blank chips. That contradiction was the clue: the
+  bug lived in a layer the harness couldn't see. The page styled chips via
+  runtime-generated Tailwind utilities (Play CDN), whose presence and rule
+  order for dynamically-injected DOM aren't under the page's control.
+- *Fix:* Removed the fragile layer instead of adjusting it — a static
+  `.facet-chip` CSS component in `<head>` setting every visual property for
+  every state, with selection keyed off `aria-pressed`, which the code
+  already maintained for accessibility. The styling JS shrank to setting one
+  attribute, and verification moved to computed styles in a real DOM.
+- *Result:* Chips readable in every state across all packs, an entire class
+  of failure gone, and simpler code than before the bug.
+- *Lesson:* When a provably-correct fix changes nothing, stop iterating on
+  the fix and question which layer you're observing; explicit CSS beats
+  clever utility interplay for state-dependent UI.
+
 ## Explaining the clinical-lab / informatics relevance — without overclaiming
 
 The honest framing, in one paragraph:

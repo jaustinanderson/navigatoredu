@@ -260,6 +260,9 @@ real queries, zero mocks, and the development database is never touched.
   lifecycles, and trade-offs
 - [docs/PORTFOLIO_CASE_STUDY.md](docs/PORTFOLIO_CASE_STUDY.md) — the project
   as a professional case study
+- [docs/RETROSPECTIVE.md](docs/RETROSPECTIVE.md) — the project as an
+  engineering story: v01–v15 narrative, the three major bugs and how they
+  were diagnosed, and the lessons that changed the architecture
 - [docs/INTERVIEW_TALKING_POINTS.md](docs/INTERVIEW_TALKING_POINTS.md) —
   concise interview preparation for this project
 - [docs/CONTENT_AUTHORING.md](docs/CONTENT_AUTHORING.md) — pack schema and

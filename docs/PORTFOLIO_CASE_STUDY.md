@@ -159,6 +159,16 @@ Two transferable ideas run through everything:
   validator, and CI enforcement are the same discipline behind schema
   registries, dataset datasheets, and ETL data-quality gates.
 
+## The retrospective
+
+This case study describes the destination; [RETROSPECTIVE.md](RETROSPECTIVE.md)
+describes the journey — a milestone-by-milestone narrative including the
+three substantial bugs (stale-seed pack drift, the chip-rendering CSS
+failure, and version-drift/packaging discipline), how each was diagnosed,
+and how the fixes changed the architecture. For a reviewer, it is the more
+revealing document: features show what was built, but debugging stories
+show how the builder thinks when the plan stops working.
+
 ## Honest limitations
 
 - No authentication or user state — quiz scores are per-request; the
