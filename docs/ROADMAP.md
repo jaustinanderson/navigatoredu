@@ -79,6 +79,22 @@ detail views never skip a level. The test was not weakened: no rules
 disabled, no elements excluded, same serious/critical threshold — the tool
 did exactly its job, including on its author.
 
+## ~~Keyboard-only journeys~~ (shipped in v19)
+
+Shipped: five Playwright tests (`tests/browser/keyboard.spec.js`) proving
+the main user journeys complete without a mouse — nav reachability and
+activation, Reference search/filter/clear, pack switching with
+stale-content checks, the full quiz through a verified report download,
+and focus visibility — all through real Tab/Shift+Tab/Enter/Space events,
+with reachability proven by bounded tabbing rather than programmatic
+focus. This closes the largest boundary the v18 audit documented: axe
+proves the page's properties, these prove its operation. The journeys
+passed on the existing markup with no frontend fixes needed — native
+buttons, radios, and hash links plus the `:focus-visible` rule already
+carried correct keyboard behavior, which is the payoff of building on
+semantic HTML. Dev/test only: no runtime, backend, or dependency changes.
+Still manual, still documented: screen-reader UX.
+
 ## ~~Project retrospective~~ (shipped in v16)
 
 Shipped: [RETROSPECTIVE.md](RETROSPECTIVE.md) — the v01–v15 engineering

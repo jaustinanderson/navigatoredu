@@ -262,7 +262,24 @@ chip readability via real computed styles (at rest, selected, after Clear
 all), search/tag/difficulty/combined filtering, pack switching through the
 Packs UI with stale-content assertions, the quiz report download (file
 contents verified, `<script>`-free), and an API-docs smoke. Four further
-tests run the accessibility audit below, for sixteen browser tests total.
+tests run the accessibility audit below, and five more run the
+keyboard-only journeys, for twenty-one browser tests total.
+
+### Keyboard-only journeys
+
+Five tests (`tests/browser/keyboard.spec.js`) prove the app's main tasks
+can be **completed without a mouse**, using only real keyboard events
+(Tab / Shift+Tab / Enter / Space): reaching and activating every main nav
+section; searching, filtering by tag and difficulty, and clearing filters
+on Reference; loading a different content pack and confirming Reference
+reflects it with no stale categories; answering the full quiz, checking
+answers, and downloading the verified report; and a focus-visibility test
+asserting keyboard focus produces a real outline (style-based invariant,
+no exact-RGB assertions) that is absent at rest. Reachability is proven by
+bounded tabbing — never programmatic `.focus()` — so a focus trap or an
+unreachable control fails loudly with a description of where focus ended
+up. They run as part of `npm run test:browser` and the same `browser-test`
+CI job; no separate command.
 
 ### Accessibility (axe-core in CI)
 
@@ -280,12 +297,12 @@ first CI run correctly failed lighter slate tones — details in
 Honest limits of this posture, deliberately documented rather than implied
 away: automated scanning covers only the mechanically checkable subset of
 WCAG (names, roles, ARIA validity, landmarks, computed contrast).
-Keyboard-only task flows and actual screen-reader UX are exercised manually
-(and partially by the chip suite's contrast/`aria-pressed` assertions) but
-are not yet automated as end-to-end flows, and only the four primary views
-are scanned — detail views (reference item, practice case) share the same
-templates and markup patterns but are not independently audited. Both are
-scoped follow-ups, not claims of completeness.
+Keyboard-only task flows are now automated end-to-end (the journey suite
+above, shipped in v19); actual screen-reader UX remains manual, and only
+the four primary views are axe-scanned — detail views (reference item,
+practice case) share the same templates and markup patterns but are not
+independently audited. Those are scoped follow-ups, not claims of
+completeness.
 
 ```bash
 npm install

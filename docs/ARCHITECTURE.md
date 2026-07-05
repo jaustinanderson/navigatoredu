@@ -301,15 +301,46 @@ content findings are reproducible. Design decisions:
   rendered documents never skip a level.
 
 **Known boundaries, stated plainly:** axe automates only the mechanically
-checkable subset of WCAG. Not covered by this audit: keyboard-only task
-flows as end-to-end journeys (tab order is partially enforced by the
-skip-link and `aria-pressed` chip assertions elsewhere in the suite),
-screen-reader interaction quality, and post-interaction states such as the
-quiz results view. Detail views (reference item, practice case) reuse the
-same templates as the scanned views and were left out to keep the audit at
-one representative scan per template family — they inherit, rather than
+checkable subset of WCAG. Screen-reader interaction quality is not covered,
+and detail views (reference item, practice case) reuse the same templates
+as the scanned views and were left out to keep the audit at one
+representative scan per template family — they inherit, rather than
 independently prove, the clean result. These are the documented next
 increments if the accessibility bar is raised further.
+
+### Keyboard journeys (browser layer)
+
+`tests/browser/keyboard.spec.js` (v19) is the deliberate complement to the
+axe scans: axe proves the page's *properties* (names, roles, contrast,
+landmarks); the keyboard suite proves its *operation* — that a person
+without a mouse can actually complete the app's main tasks. Five journeys
+cover main-nav reachability and activation, Reference search + tag +
+difficulty filtering + Clear all, pack switching with stale-content
+assertions, the full quiz through report download (file verified), and
+focus visibility. Design decisions:
+
+- **Real keyboard events only.** Tab / Shift+Tab / Enter / Space via
+  Playwright's keyboard API; no `.click()` and no programmatic `.focus()`
+  inside the journeys. The one setup exception is pack selection through
+  the API, which arranges server state and is not part of the journey
+  under test.
+- **Reachability by bounded tabbing.** A helper presses Tab until the
+  target is the active element, capped at 40 presses — so a focus trap or
+  keyboard-unreachable control fails with a message naming where focus
+  actually ended up, instead of hanging or silently cheating with
+  `element.focus()`.
+- **Invariant-based focus assertions.** Keyboard focus must produce a
+  solid outline of measurable width (the `:focus-visible` rule), absent at
+  rest. Style-based, polled, no exact-RGB checks — the same lesson the
+  chip suite learned from mid-transition frames. One Chromium quirk is
+  encoded in the test: computed `outline-width` reports 3px even when
+  `outline-style: none`, so "no indicator" is asserted on style, not width.
+
+The v19 run found **no frontend bugs to fix** — the journeys pass on the
+existing markup because it is built from native elements (real `<button>`,
+`<input type=radio>`, hash `<a>` links) that carry correct keyboard
+behavior for free. That is itself the architectural point: semantic HTML
+is the cheapest accessibility investment in the codebase.
 
 ## Deployment and dev workflow
 

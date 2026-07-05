@@ -291,7 +291,16 @@ legitimate only when you can name the property the code correctly upholds.
   markdown heading levels — without weakening the test. Two lessons worth
   keeping: an accessibility audit is only as real as the rendering it runs
   against, and a check that fails on its own author's work is evidence it
-  works. Keyboard-journey and screen-reader coverage remain manual, and
+  works. ~~Keyboard-journey and screen-reader coverage remain manual~~ —
+  keyboard journeys shipped in v19 as five Playwright tests driving the
+  main tasks (nav, search/filter, pack switch, quiz through report
+  download) with real Tab/Enter/Space events and bounded-tab reachability.
+  What they protect against: focus traps, keyboard-unreachable controls,
+  regressions that swap semantic elements for div-with-onclick, and the
+  loss of visible focus indicators — the failure classes that break
+  keyboard and assistive-tech users while remaining invisible to both
+  pytest and axe's static-property scans. Screen-reader coverage remains
+  manual, and
   that boundary is documented rather than glossed.
 - **Typed API client generation from OpenAPI.** The frontend hand-codes
   fetch calls; generating a typed client would demonstrate schema-driven
