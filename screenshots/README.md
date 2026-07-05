@@ -1,6 +1,8 @@
 # Screenshots
 
-Current portfolio screenshots for the NavigatorEdu CytoFISH synthetic content-pack demo.
+Current portfolio screenshots for the NavigatorEdu synthetic content-pack demo.
+
+NavigatorEdu is a validated, swappable content-pack education platform. These screenshots show the CytoFISH synthetic demo pack and the local content-pack browser introduced in v11.
 
 ## Files
 
@@ -12,5 +14,10 @@ Current portfolio screenshots for the NavigatorEdu CytoFISH synthetic content-pa
 - `quiz-cytofish.png` — quiz page before submission
 - `quiz-cytofish-results.png` — quiz results/scoring view with explanations
 - `api-pack-metadata.png` — API docs showing the pack metadata endpoint
+- `packs-content-browser.png` — v11 content-pack browser showing bundled allowlisted demo packs
+
+## Notes
 
 All screenshots use synthetic educational demo content only.
+
+The content-pack browser is a local portfolio/demo feature. It only loads bundled, allowlisted demo packs and does not accept arbitrary user-uploaded files or filesystem paths.
