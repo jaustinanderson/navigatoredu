@@ -9,6 +9,12 @@ Each pack is loaded by seeding the database from a different JSON file via the
 content does. The home page and top banner display the **active content pack**
 so it is always clear which domain is loaded.
 
+As of v14, the quiz offers **Download report** after checking answers — a
+printable, self-contained HTML summary generated statelessly from the
+submitted answers. It makes a great closing beat: check a quiz, download,
+open the file, and point at the footer line "Generated locally from
+submitted answers; not stored" — scope control as a feature.
+
 As of v13, Reference search is FTS5-backed with tag and difficulty filter
 chips — during the Reference beat, type a partial word (prefix matching) and
 click a tag chip to show server-side filtering; the active-filter bar and

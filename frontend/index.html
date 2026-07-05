@@ -573,7 +573,10 @@ const views = {
         </button>
         <p id="quiz-hint" class="text-sm text-red-700" role="status"></p>
       </div>
-      <p id="quiz-score" class="mt-4 font-display font-semibold text-lg text-deep" role="status"></p>`;
+      <div class="mt-4 flex items-center gap-4 flex-wrap">
+        <p id="quiz-score" class="font-display font-semibold text-lg text-deep" role="status"></p>
+        <span id="quiz-report-slot"></span>
+      </div>`;
   },
 
   async packs() {
@@ -695,6 +698,13 @@ async function submitQuiz() {
   }
   document.getElementById('quiz-score').textContent = `Score: ${res.score} / ${res.total}`;
   document.getElementById('quiz-submit').textContent = 'Check again';
+  window._lastQuizAnswers = answers;
+  document.getElementById('quiz-report-slot').innerHTML = `
+    <button onclick="downloadQuizReport(this)"
+      class="border border-deep text-deep text-sm font-medium rounded-md px-4 py-2 hover:border-brassink hover:text-brassink transition-colors">
+      Download report
+    </button>
+    <span class="text-xs text-slate-500 ml-1.5">printable HTML · generated locally, not stored</span>`;
 }
 
 async function loadPack(slug, btn) {
@@ -716,6 +726,37 @@ async function loadPack(slug, btn) {
     btn.textContent = 'Load demo pack';
     btn.insertAdjacentHTML('afterend',
       `<p class="text-sm text-red-700 mt-2" role="status">Could not load the pack (${esc(e.message)}). Check that the API is running, then try again.</p>`);
+  }
+}
+
+async function downloadQuizReport(btn) {
+  // Same payload as submit; server returns a self-contained printable HTML
+  // document generated statelessly from these answers — nothing is stored.
+  btn.disabled = true;
+  const label = btn.textContent;
+  btn.textContent = 'Preparing…';
+  try {
+    const r = await fetch('/api/v1/quiz/report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ answers: window._lastQuizAnswers || {} }),
+    });
+    if (!r.ok) throw new Error(`API ${r.status}`);
+    const blob = await r.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'navigatoredu-quiz-report.html';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  } catch (e) {
+    btn.insertAdjacentHTML('afterend',
+      `<span class="text-sm text-red-700 ml-2" role="status">Could not generate the report (${esc(e.message)}).</span>`);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = label;
   }
 }
 

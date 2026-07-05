@@ -34,12 +34,16 @@ documented fallback: a never-seeded database returns no matches rather than
 erroring). Actual version numbers drifted from this plan: v12 became the
 reviewer landing polish, so search landed as v13.
 
-## v13 — Exportable learning reports
+## ~~Exportable learning reports~~ (shipped in v14)
 
-A per-session summary a learner could keep: quiz results with explanations
-and linked reference items, exportable as printable HTML (PDF only if it
-stays dependency-light). Still no accounts — the report is generated from
-the submitted answers in the request, keeping the no-auth constraint intact.
+Shipped: `POST /api/v1/quiz/report` returns a self-contained, printable
+HTML report (score, per-question submitted/correct answers, explanations,
+related reference titles, pack governance metadata, synthetic-only footer),
+with a Download button on the quiz results. Generated statelessly from the
+submitted answers in the request — no accounts, no persistence, no new
+tables — keeping the no-auth constraint intact. PDF was skipped
+deliberately: it would add a heavy dependency for no reviewer value
+(browsers print HTML). Version drift again: planned as v13, shipped as v14.
 
 ## v14 — Deployment option
 

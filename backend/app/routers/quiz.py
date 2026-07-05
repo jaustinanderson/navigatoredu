@@ -1,9 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from sqlmodel import Session, select
 
 from ..db import get_session
 from ..models import QuizQuestion
+from ..report import build_report_html
 
 router = APIRouter(prefix="/api/v1", tags=["quiz"])
 
@@ -43,3 +45,27 @@ def submit_quiz(
             "explanation": q.explanation,
         })
     return {"score": score, "total": len(results), "results": results}
+
+
+@router.post("/quiz/report", response_class=HTMLResponse)
+def quiz_report(
+    submission: QuizSubmission, session: Session = Depends(get_session)
+):
+    """A self-contained, printable HTML learning report for one attempt.
+
+    Same payload as /quiz/submit; generated statelessly from the submitted
+    answers plus the loaded pack — nothing is stored (no accounts, no
+    tables, no history). All pack content and submitted values are
+    HTML-escaped by the builder.
+    """
+    try:
+        html_doc = build_report_html(session, submission.answers)
+    except KeyError as e:
+        raise HTTPException(400, f"Unknown question id: {e.args[0]}")
+    return HTMLResponse(
+        content=html_doc,
+        headers={
+            "Content-Disposition":
+                'attachment; filename="navigatoredu-quiz-report.html"'
+        },
+    )

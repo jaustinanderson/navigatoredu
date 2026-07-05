@@ -100,7 +100,7 @@ validity, clinical use, or clinical expertise.
   `Depends(get_session)`. Tests override that single dependency with an
   in-memory SQLite engine seeded from the same pack format — real queries
   end-to-end, and the development database is never touched.
-- **124 tests** across API behavior (including the security-relevant
+- **137 tests** across API behavior (including the security-relevant
   properties: quiz answers never serialized on GET, scoring server-side),
   pack switching, validator behavior (broken-pack fixtures built by mutating
   a copy of a real pack), and the authoring command (all file I/O in temp
@@ -127,6 +127,7 @@ validity, clinical use, or clinical expertise.
 | v11 | Content Pack Browser: allowlisted local-demo pack selector | 101 |
 | v12 | Reviewer landing: self-guiding home page with walkthrough, scope, and safety posture | 101 |
 | v13 | FTS5 search + tag/difficulty filters; index rebuilt per seed; linear scan retired | 124 |
+| v14 | Exportable learning reports: stateless, printable HTML per quiz attempt | 137 |
 
 The arc is intentional: build the product, prove the abstraction
 (`SEED_PATH`), enforce the contract (validator), stress it with a hard domain
@@ -140,7 +141,7 @@ easy path (authoring). Test count grew with every functional milestone.
 | REST API design | Versioned prefix, list/detail response shaping, correct 400/404 usage |
 | Data modeling | Seven related tables with FKs; deliberate JSON-column trade-off, documented |
 | Security thinking | Quiz answers never leave the server; server-side scoring; HTML-escaped rendering |
-| Testing discipline | 124 tests on isolated in-memory DBs via dependency override — no mocks |
+| Testing discipline | 137 tests on isolated in-memory DBs via dependency override — no mocks |
 | Data pipelines | Idempotent seed script; human-reviewable JSON as source of truth; CLI validator gating CI; scaffolder for safe-by-default authoring |
 | Content governance | Required provenance/intended-use metadata, validated in CI; active pack queryable at runtime |
 | Safe domain modeling | A sensitive domain hosted with every safety boundary in content and metadata, none in code |
@@ -159,7 +160,8 @@ Two transferable ideas run through everything:
 
 ## Honest limitations
 
-- No authentication or user state — quiz scores are per-request.
+- No authentication or user state — quiz scores are per-request; the
+  learner keeps results via the stateless downloadable report, by design.
 - Search is unranked-beyond-bm25 FTS5 over small synthetic packs — real demo
   search, not production search infrastructure (no tuning, no highlighting).
 - Single-container deployment; CI runs tests but there is no CD.
