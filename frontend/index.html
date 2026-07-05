@@ -93,13 +93,13 @@
     <a href="#/training" data-nav="training" class="nav-link text-sm text-slate-600 hover:text-brassink py-0.5 border-b-2 border-transparent">Training</a>
     <a href="#/quiz" data-nav="quiz" class="nav-link text-sm text-slate-600 hover:text-brassink py-0.5 border-b-2 border-transparent">Quiz</a>
     <a href="#/packs" data-nav="packs" class="nav-link text-sm text-slate-600 hover:text-brassink py-0.5 border-b-2 border-transparent">Packs</a>
-    <a href="/docs" class="text-xs text-slate-400 hover:text-brassink ml-auto" title="OpenAPI documentation">API docs ↗</a>
+    <a href="/docs" class="text-xs text-slate-600 hover:text-brassink ml-auto" title="OpenAPI documentation">API docs ↗</a>
   </nav>
 </header>
 
 <main id="app" class="max-w-4xl mx-auto px-4 py-10 w-full flex-1" aria-live="polite"></main>
 
-<footer class="border-t border-slate-200 bg-white text-center text-xs text-slate-500 py-6 mt-8">
+<footer class="border-t border-slate-200 bg-white text-center text-xs text-slate-600 py-6 mt-8">
   NavigatorEdu · Synthetic content-pack education platform · Portfolio demo
 </footer>
 
@@ -111,9 +111,18 @@ const api = (path) => fetch('/api/v1' + path).then(r => {
 
 // --- Minimal markdown renderer (headers, bold, italics, lists, paragraphs) ---
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function md(src){
+function md(src, base = 2){
   const lines = esc(src).split('\n');
   let html = '', inList = false, inOl = false;
+  // Heading levels are normalized: the shallowest heading in the block maps
+  // to `base` (one level below the enclosing page/section heading), deeper
+  // ones follow relatively. Content authors can use #/##/### naturally and
+  // the rendered document never skips a level (axe `heading-order`).
+  let minH = Infinity;
+  for (const line of lines) {
+    const m = line.match(/^(#{1,3})\s/);
+    if (m) minH = Math.min(minH, m[1].length);
+  }
   const inline = t => t
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>');
@@ -123,7 +132,8 @@ function md(src){
     const ol = line.match(/^\d+\.\s+(.*)/);
     if (!ul && inList) { html += '</ul>'; inList = false; }
     if (!ol && inOl)   { html += '</ol>'; inOl = false; }
-    if (h)       html += `<h${h[1].length+2} class="font-semibold text-deep mt-4 mb-1">${inline(h[2])}</h${h[1].length+2}>`;
+    if (h) { const lvl = Math.min(6, base + h[1].length - minH);
+             html += `<h${lvl} class="font-semibold text-deep mt-4 mb-1">${inline(h[2])}</h${lvl}>`; }
     else if (ul) { if(!inList){html+='<ul class="list-disc ml-5 space-y-1">';inList=true;} html += `<li>${inline(ul[1])}</li>`; }
     else if (ol) { if(!inOl){html+='<ol class="list-decimal ml-5 space-y-1">';inOl=true;} html += `<li>${inline(ol[1])}</li>`; }
     else if (line.trim()) html += `<p class="my-2">${inline(line)}</p>`;
@@ -181,13 +191,13 @@ const linkCard = (href, inner, label) => `
 
 const loadingView = () => `
   <div class="py-16 text-center" role="status">
-    <p class="text-sm text-slate-500">Loading…</p>
+    <p class="text-sm text-slate-600">Loading…</p>
   </div>`;
 
 const emptyState = (what, hint) => `
   <div class="bg-white border border-dashed border-slate-300 rounded-lg px-6 py-10 text-center">
     <p class="text-sm text-slate-600">${what}</p>
-    ${hint ? `<p class="text-xs text-slate-500 mt-1.5">${hint}</p>` : ''}
+    ${hint ? `<p class="text-xs text-slate-600 mt-1.5">${hint}</p>` : ''}
   </div>`;
 
 const errorView = (e) => `
@@ -203,7 +213,7 @@ const errorView = (e) => `
 function manifestCard(meta) {
   const row = (label, value) => `
     <div class="grid sm:grid-cols-[8.5rem_1fr] gap-x-4 gap-y-0.5 py-2.5 border-t border-slate-100">
-      <dt class="text-[11px] uppercase tracking-wide text-slate-500 pt-0.5">${label}</dt>
+      <dt class="text-[11px] uppercase tracking-wide text-slate-600 pt-0.5">${label}</dt>
       <dd class="text-sm text-ink leading-relaxed">${esc(value)}</dd>
     </div>`;
   return `
@@ -217,7 +227,7 @@ function manifestCard(meta) {
           ${synthPill()}
         </div>
         <p class="text-sm text-slate-600 mt-1.5">${esc(meta.pack_description)}</p>
-        <p class="font-mono text-[11px] text-slate-500 mt-2">
+        <p class="font-mono text-[11px] text-slate-600 mt-2">
           ${esc(meta.pack_id)} · v${esc(meta.pack_version)}${meta.domain_type ? ' · ' + esc(meta.domain_type) : ''}
         </p>
       </div>
@@ -242,14 +252,14 @@ const views = {
             <a href="${href}" class="font-medium text-deep hover:text-brassink underline decoration-slate-300 underline-offset-2">${title}</a>
             — ${desc}
           </p>
-          <p class="text-slate-500 mt-0.5"><span class="text-[11px] uppercase tracking-wide text-brassink">Notice:</span> ${notice}</p>
+          <p class="text-slate-600 mt-0.5"><span class="text-[11px] uppercase tracking-wide text-brassink">Notice:</span> ${notice}</p>
         </div>
       </li>`;
 
     const demoCard = (title, desc) => `
       <div class="bg-white border border-slate-200 rounded-lg p-4">
         <p class="font-medium text-deep text-sm">${title}</p>
-        <p class="text-sm text-slate-500 mt-1 leading-relaxed">${desc}</p>
+        <p class="text-sm text-slate-600 mt-1 leading-relaxed">${desc}</p>
       </div>`;
 
     return `
@@ -304,7 +314,7 @@ const views = {
       <!-- Reviewer walkthrough -->
       <section aria-label="Reviewer walkthrough" id="walkthrough" class="mt-10 scroll-mt-20">
         <h2 class="font-display font-semibold text-lg text-deep">Reviewer walkthrough</h2>
-        <p class="text-sm text-slate-500 mt-0.5 mb-4">The 60-second demo path, in order:</p>
+        <p class="text-sm text-slate-600 mt-0.5 mb-4">The 60-second demo path, in order:</p>
         <ol class="space-y-4">
           ${step(1, '#/packs', 'Open Packs',
             'the bundled, allowlisted demo packs with their governance metadata.',
@@ -366,7 +376,7 @@ const views = {
             <li>· No authentication or admin complexity</li>
             <li>· No AI/RAG features</li>
           </ul>
-          <p class="text-sm text-slate-500 leading-relaxed mt-3">
+          <p class="text-sm text-slate-600 leading-relaxed mt-3">
             Each exclusion keeps the demo honest: safety boundaries are
             enforced mechanically (validator + allowlist), and nothing ships
             that can't be validated.
@@ -397,11 +407,11 @@ const views = {
         aria-pressed="false">${label}</button>`;
     return `
       <h1 class="font-display font-semibold text-2xl text-deep">Reference</h1>
-      <p class="text-sm text-slate-500 mt-0.5 mb-4">Search across every item, or filter by category.</p>
+      <p class="text-sm text-slate-600 mt-0.5 mb-4">Search across every item, or filter by category.</p>
 
       <label for="search" class="sr-only">Search reference items</label>
       <input id="search" type="search" placeholder="Search titles, summaries, body text, and tags…"
-        class="w-full border border-slate-300 rounded-md px-3 py-2 mb-3 text-sm bg-white placeholder:text-slate-400 focus:outline-none focus:border-brass"/>
+        class="w-full border border-slate-300 rounded-md px-3 py-2 mb-3 text-sm bg-white placeholder:text-slate-600 focus:outline-none focus:border-brass"/>
 
       ${(() => {
         // Difficulty row: normalized, blanks dropped; row hidden if empty.
@@ -409,7 +419,7 @@ const views = {
           .filter(Boolean).sort();
         if (!diffs.length) return '';
         return `<div class="flex flex-wrap items-center gap-1.5 mb-1.5" role="group" aria-label="Filter by difficulty">
-          <span class="text-[11px] uppercase tracking-wide text-slate-500 mr-0.5">Difficulty</span>
+          <span class="text-[11px] uppercase tracking-wide text-slate-600 mr-0.5">Difficulty</span>
           ${diffs.map(d => `<button data-difficulty="${esc(d)}" class="facet-chip" aria-pressed="false">${esc(d)}</button>`).join('')}
         </div>`;
       })()}
@@ -425,7 +435,7 @@ const views = {
         const top = Object.keys(freq).sort((a, b) => freq[b].n - freq[a].n).slice(0, 12);
         if (!top.length) return '';
         return `<div class="flex flex-wrap items-center gap-1.5 mb-2" role="group" aria-label="Filter by tag">
-          <span class="text-[11px] uppercase tracking-wide text-slate-500 mr-0.5">Tags</span>
+          <span class="text-[11px] uppercase tracking-wide text-slate-600 mr-0.5">Tags</span>
           ${top.map(k => `<button data-tag="${esc(freq[k].label)}" class="facet-chip facet-chip--mono" aria-pressed="false">${esc(freq[k].label)}</button>`).join('')}
         </div>`;
       })()}
@@ -441,14 +451,14 @@ const views = {
         ${cats.map(c => `
           <section data-cat-section="${c.id}">
             <h2 class="font-display font-semibold text-lg text-deep">${c.name}</h2>
-            <p class="text-sm text-slate-500 mb-3">${c.description}</p>
+            <p class="text-sm text-slate-600 mb-3">${c.description}</p>
             <div class="grid sm:grid-cols-2 gap-3">
               ${byCat(c.id).length ? byCat(c.id).map(i => linkCard('#/item/' + i.id, `
                 <p class="font-medium text-deep">${i.title}</p>
-                <p class="text-sm text-slate-500 mt-1">${i.summary}</p>
+                <p class="text-sm text-slate-600 mt-1">${i.summary}</p>
                 <div class="flex flex-wrap gap-1.5 mt-2.5 items-center">${diffPill(i.difficulty)} ${normalizeTags(i.tags).map(tagPill).join('')}</div>
               `, i.title)).join('')
-              : `<p class="text-sm text-slate-500 sm:col-span-2">No items in this category yet.</p>`}
+              : `<p class="text-sm text-slate-600 sm:col-span-2">No items in this category yet.</p>`}
             </div>
           </section>`).join('')}
       </div>`;
@@ -458,7 +468,7 @@ const views = {
     const i = await api('/items/' + id);
     return `
       <nav aria-label="Breadcrumb" class="text-sm">
-        <a href="#/categories" class="text-slate-500 hover:text-brassink">← Reference</a>
+        <a href="#/categories" class="text-slate-600 hover:text-brassink">← Reference</a>
       </nav>
       <h1 class="font-display font-semibold text-2xl text-deep mt-3">${i.title}</h1>
       <div class="flex flex-wrap gap-1.5 mt-2 items-center">${diffPill(i.difficulty)} ${normalizeTags(i.tags).map(tagPill).join('')}</div>
@@ -469,7 +479,7 @@ const views = {
     const cs = await api('/cases');
     return `
       <h1 class="font-display font-semibold text-2xl text-deep">Practice cases</h1>
-      <p class="text-sm text-slate-500 mt-0.5 mb-5">
+      <p class="text-sm text-slate-600 mt-0.5 mb-5">
         Fully synthetic scenarios. Open a case, then reveal the guided steps one at a time.
       </p>
       ${cs.length ? `<div class="space-y-3">
@@ -478,7 +488,7 @@ const views = {
             <p class="font-medium text-deep">${c.title}</p>
             ${diffPill(c.difficulty)}
           </div>
-          <p class="text-sm text-slate-500 mt-1">${plainPreview(c.scenario_md)}</p>
+          <p class="text-sm text-slate-600 mt-1">${plainPreview(c.scenario_md)}</p>
         `, c.title)).join('')}
       </div>`
       : emptyState('No practice cases in the active content pack yet.')}`;
@@ -490,7 +500,7 @@ const views = {
     const total = c.guided_steps.length;
     return `
       <nav aria-label="Breadcrumb" class="text-sm">
-        <a href="#/cases" class="text-slate-500 hover:text-brassink">← Practice cases</a>
+        <a href="#/cases" class="text-slate-600 hover:text-brassink">← Practice cases</a>
       </nav>
       <div class="flex items-center gap-2.5 mt-3 flex-wrap">
         <h1 class="font-display font-semibold text-2xl text-deep">${c.title}</h1>
@@ -513,7 +523,7 @@ const views = {
     const modules = [...new Set(notes.map(n => n.module))];
     return `
       <h1 class="font-display font-semibold text-2xl text-deep">Training modules</h1>
-      <p class="text-sm text-slate-500 mt-0.5 mb-6">Short ordered lessons, grouped by module.</p>
+      <p class="text-sm text-slate-600 mt-0.5 mb-6">Short ordered lessons, grouped by module.</p>
       <div class="space-y-10">
         ${modules.map(m => {
           const lessons = notes.filter(n => n.module === m);
@@ -521,7 +531,7 @@ const views = {
           <section>
             <div class="flex items-baseline justify-between border-b-2 border-slate-200 pb-1.5 mb-4">
               <h2 class="font-display font-semibold text-lg text-deep">${m}</h2>
-              <span class="text-xs text-slate-500">${lessons.length} lesson${lessons.length === 1 ? '' : 's'}</span>
+              <span class="text-xs text-slate-600">${lessons.length} lesson${lessons.length === 1 ? '' : 's'}</span>
             </div>
             <div class="space-y-4">
               ${lessons.map(n => `
@@ -530,11 +540,11 @@ const views = {
                     <span class="font-mono text-[11px] text-brassink bg-slate-50 border border-slate-200 rounded px-1.5 py-0.5">Lesson ${n.order}</span>
                     <h3 class="font-medium text-deep">${n.title}</h3>
                   </div>
-                  <div class="text-sm leading-relaxed mt-3">${md(n.body_md)}</div>
+                  <div class="text-sm leading-relaxed mt-3">${md(n.body_md, 4)}</div>
                   ${n.related_item_ids.length ? `
-                    <p class="text-xs text-slate-500 mt-4 pt-3 border-t border-slate-100">Related reference:
+                    <p class="text-xs text-slate-600 mt-4 pt-3 border-t border-slate-100">Related reference:
                       ${n.related_item_ids.map(id =>
-                        `<a href="#/item/${id}" class="text-brassink hover:underline">${titleOf(id)}</a>`
+                        `<a href="#/item/${id}" class="text-brassink underline">${titleOf(id)}</a>`
                       ).join(' · ')}
                     </p>` : ''}
                 </article>`).join('')}
@@ -551,7 +561,7 @@ const views = {
       ${emptyState('No quiz questions in the active content pack yet.')}`;
     return `
       <h1 class="font-display font-semibold text-2xl text-deep">Quiz</h1>
-      <p class="text-sm text-slate-500 mt-0.5 mb-5">
+      <p class="text-sm text-slate-600 mt-0.5 mb-5">
         ${qs.length} questions. Answers are scored server-side — explanations appear after you check.
       </p>
       <form id="quiz-form" class="space-y-5" onsubmit="return false">
@@ -600,7 +610,7 @@ const views = {
           <div class="flex items-start justify-between gap-3 flex-wrap">
             <div>
               <h2 class="font-display font-semibold text-lg text-deep">${esc(p.pack_name)}</h2>
-              <p class="font-mono text-[11px] text-slate-500 mt-0.5">${esc(p.pack_id)} · v${esc(p.pack_version)} · ${esc(p.domain_type)}</p>
+              <p class="font-mono text-[11px] text-slate-600 mt-0.5">${esc(p.pack_id)} · v${esc(p.pack_version)} · ${esc(p.domain_type)}</p>
             </div>
             <div class="flex items-center gap-2">
               ${synthPill()}
@@ -611,17 +621,17 @@ const views = {
         </div>
         <dl class="px-5 pb-3">
           <div class="grid sm:grid-cols-[8.5rem_1fr] gap-x-4 py-2 border-t border-slate-100">
-            <dt class="text-[11px] uppercase tracking-wide text-slate-500 pt-0.5">Intended use</dt>
+            <dt class="text-[11px] uppercase tracking-wide text-slate-600 pt-0.5">Intended use</dt>
             <dd class="text-sm text-ink leading-relaxed">${esc(p.intended_use)}</dd>
           </div>
           <div class="grid sm:grid-cols-[8.5rem_1fr] gap-x-4 py-2 border-t border-slate-100">
-            <dt class="text-[11px] uppercase tracking-wide text-slate-500 pt-0.5">Safety notes</dt>
+            <dt class="text-[11px] uppercase tracking-wide text-slate-600 pt-0.5">Safety notes</dt>
             <dd class="text-sm text-ink leading-relaxed">${esc(p.safety_notes)}</dd>
           </div>
         </dl>
         <div class="px-5 pb-4">
           ${active
-            ? `<p class="text-sm text-slate-500">This pack is currently loaded.</p>`
+            ? `<p class="text-sm text-slate-600">This pack is currently loaded.</p>`
             : `<button onclick="loadPack('${p.slug}', this)" aria-label="Load the ${esc(p.pack_name)} demo pack"
                  class="bg-deep text-white text-sm font-medium rounded-md px-4 py-2 hover:bg-brassink transition-colors">
                  Load demo pack
@@ -631,7 +641,7 @@ const views = {
     };
     return `
       <h1 class="font-display font-semibold text-2xl text-deep">Content packs</h1>
-      <p class="text-sm text-slate-500 mt-0.5 mb-6 max-w-2xl leading-relaxed">
+      <p class="text-sm text-slate-600 mt-0.5 mb-6 max-w-2xl leading-relaxed">
         The bundled demo packs. Loading one reseeds the local demo database —
         the same app then serves an entirely different domain, which is the
         point of the content-pack architecture. All packs are synthetic,
@@ -639,7 +649,7 @@ const views = {
       </p>
       ${success}
       <div class="space-y-4">${body.packs.map(packCard).join('')}</div>
-      <p class="text-xs text-slate-500 mt-6">
+      <p class="text-xs text-slate-600 mt-6">
         Local demo convenience: only the bundled packs above can be loaded.
         The command-line workflow (<code class="font-mono">SEED_PATH=… python -m backend.app.seed</code>) still works unchanged.
       </p>`;
@@ -707,7 +717,7 @@ async function submitQuiz() {
       class="border border-deep text-deep text-sm font-medium rounded-md px-4 py-2 hover:border-brassink hover:text-brassink transition-colors">
       Download report
     </button>
-    <span class="text-xs text-slate-500 ml-1.5">printable HTML · generated locally, not stored</span>`;
+    <span class="text-xs text-slate-600 ml-1.5">printable HTML · generated locally, not stored</span>`;
 }
 
 async function loadPack(slug, btn) {
@@ -805,10 +815,10 @@ function wireSearch() {
     if (state.difficulty) params.set('difficulty', state.difficulty);
     const results = await api('/items?' + params.toString());
     out.innerHTML = results.length
-      ? `<p class="text-xs text-slate-500 mb-2">${results.length} result${results.length === 1 ? '' : 's'}:</p>
+      ? `<p class="text-xs text-slate-600 mb-2">${results.length} result${results.length === 1 ? '' : 's'}:</p>
          <div class="mb-6 space-y-2">${results.map(i => linkCard('#/item/' + i.id,
           `<p class="font-medium text-deep">${i.title}</p>
-           <p class="text-sm text-slate-500 mt-0.5">${i.summary}</p>
+           <p class="text-sm text-slate-600 mt-0.5">${i.summary}</p>
            <div class="flex flex-wrap gap-1.5 mt-2 items-center">${diffPill(i.difficulty)} ${normalizeTags(i.tags).map(tagPill).join('')}</div>`, i.title)).join('')}</div>`
       : `<div class="mb-6">${emptyState('No items match the active filters.',
            'Try clearing a filter, or a shorter search term.')}</div>`;

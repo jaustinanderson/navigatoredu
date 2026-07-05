@@ -272,7 +272,10 @@ dependency only — nothing ships to the app). **Serious and critical
 violations fail the build**; minor/moderate findings are printed in the
 test output as advisories rather than silently ignored. No rules are
 disabled and no elements are excluded. Current status: all four views scan
-clean at every impact level.
+clean at every impact level. Muted text standardizes on `text-slate-600`
+as its lightest tone (≥7:1 on every background in use), after the audit's
+first CI run correctly failed lighter slate tones — details in
+[ROADMAP](docs/ROADMAP.md) and [ARCHITECTURE](docs/ARCHITECTURE.md).
 
 Honest limits of this posture, deliberately documented rather than implied
 away: automated scanning covers only the mechanically checkable subset of

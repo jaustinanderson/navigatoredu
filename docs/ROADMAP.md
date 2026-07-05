@@ -67,6 +67,18 @@ scan clean at every impact level. Deliberately out of scope, documented in
 ARCHITECTURE: keyboard-only journey tests, screen-reader UX, and
 independent scans of detail views that reuse already-scanned templates.
 
+**Post-ship fix:** the audit's first CI run failed itself — legitimately.
+The local pre-ship scan ran in an environment that couldn't load the
+Tailwind CDN stylesheet, and an unstyled page scans clean; CI, with real
+styling, flagged serious color-contrast violations (`text-slate-400` at
+2.56:1 on white, `text-slate-500` at 4.39:1 on the page background). Fixed
+by standardizing all muted text on `text-slate-600` (≥7:1 on every
+background in use), underlining the inline related-reference links that had
+relied on color alone, and normalizing rendered markdown heading levels so
+detail views never skip a level. The test was not weakened: no rules
+disabled, no elements excluded, same serious/critical threshold — the tool
+did exactly its job, including on its author.
+
 ## ~~Project retrospective~~ (shipped in v16)
 
 Shipped: [RETROSPECTIVE.md](RETROSPECTIVE.md) — the v01–v15 engineering

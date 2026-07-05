@@ -282,11 +282,17 @@ legitimate only when you can name the property the code correctly upholds.
 - **Accessibility testing.** ~~Manual keyboard/contrast checks should
   become automated axe-core runs in CI.~~ Shipped in v18: axe-core scans of
   the four primary views in the browser-test CI job, full default ruleset,
-  failing on serious/critical. The audit's first run validated the earlier
-  manual work — the only finding at any level was a banner outside the
-  landmark structure, fixed with two attributes. Keyboard-journey and
-  screen-reader coverage remain manual, and that boundary is documented
-  rather than glossed.
+  failing on serious/critical. Its first CI run promptly failed the build —
+  correctly. The pre-ship scan had run in an environment where the Tailwind
+  CDN was unreachable, and an unstyled page has near-perfect contrast; with
+  real styling, axe flagged `text-slate-400`/`text-slate-500` body text
+  below WCAG AA. The fix standardized muted text on `text-slate-600`,
+  underlined inline links that relied on color alone, and normalized
+  markdown heading levels — without weakening the test. Two lessons worth
+  keeping: an accessibility audit is only as real as the rendering it runs
+  against, and a check that fails on its own author's work is evidence it
+  works. Keyboard-journey and screen-reader coverage remain manual, and
+  that boundary is documented rather than glossed.
 - **Typed API client generation from OpenAPI.** The frontend hand-codes
   fetch calls; generating a typed client would demonstrate schema-driven
   integration and catch response-shape drift.

@@ -290,6 +290,15 @@ content findings are reproducible. Design decisions:
 - **Scan after real render.** Each test waits for the async content
   (chips, category sections, pack cards, quiz fieldsets) before scanning,
   so the audit sees the page users interact with, not the loading state.
+- **Contrast floor for muted text.** `text-slate-600` (#475569) is the
+  lightest tone used for readable text: ≥7:1 on white and on the `foam`
+  page background. `slate-400`/`slate-500` proved below WCAG AA in the
+  audit's first CI run (2.56:1 and 4.39:1 respectively) and are no longer
+  used anywhere — visible text and the search placeholder alike sit at
+  `slate-600` or darker. Inline links inside body
+  text are underlined, not distinguished by color alone, and the markdown
+  renderer normalizes heading levels relative to the enclosing heading so
+  rendered documents never skip a level.
 
 **Known boundaries, stated plainly:** axe automates only the mechanically
 checkable subset of WCAG. Not covered by this audit: keyboard-only task
