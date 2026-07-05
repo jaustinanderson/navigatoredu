@@ -125,6 +125,7 @@ validity, clinical use, or clinical expertise.
 | v09 | Portfolio polish: documentation, positioning, interview preparation | 87 |
 | v10 | Frontend reviewer-experience polish; clear-then-load seeding fix | 91 |
 | v11 | Content Pack Browser: allowlisted local-demo pack selector | 101 |
+| v12 | Reviewer landing: self-guiding home page with walkthrough, scope, and safety posture | 101 |
 
 The arc is intentional: build the product, prove the abstraction
 (`SEED_PATH`), enforce the contract (validator), stress it with a hard domain

@@ -174,50 +174,154 @@ const views = {
 
   async home() {
     const [cats, meta] = await Promise.all([api('/categories'), api('/pack-metadata')]);
-    const step = (n, href, title, desc) => `
+
+    const step = (n, href, title, desc, notice) => `
       <li class="flex gap-3">
         <span class="flex-none w-6 h-6 rounded-full bg-deep text-white text-xs flex items-center justify-center font-mono" aria-hidden="true">${n}</span>
-        <p class="text-sm text-slate-700 leading-relaxed">
-          <a href="${href}" class="font-medium text-deep hover:text-brassink underline decoration-slate-300 underline-offset-2">${title}</a>
-          — ${desc}
-        </p>
+        <div class="text-sm leading-relaxed">
+          <p class="text-slate-700">
+            <a href="${href}" class="font-medium text-deep hover:text-brassink underline decoration-slate-300 underline-offset-2">${title}</a>
+            — ${desc}
+          </p>
+          <p class="text-slate-500 mt-0.5"><span class="text-[11px] uppercase tracking-wide text-brassink">Notice:</span> ${notice}</p>
+        </div>
       </li>`;
+
+    const demoCard = (title, desc) => `
+      <div class="bg-white border border-slate-200 rounded-lg p-4">
+        <p class="font-medium text-deep text-sm">${title}</p>
+        <p class="text-sm text-slate-500 mt-1 leading-relaxed">${desc}</p>
+      </div>`;
+
     return `
-      <h1 class="font-display font-bold text-3xl text-deep tracking-tight">NavigatorEdu</h1>
-      <p class="text-slate-600 mt-2 mb-6 max-w-2xl leading-relaxed">
-        A learning platform where the entire knowledge domain is a swappable,
-        validated JSON content pack: reference library, training modules,
-        guided practice cases, and a server-scored quiz — all driven by the
-        pack below. Every record is fictional and synthetic.
-      </p>
+      <!-- Hero -->
+      <section aria-label="Introduction">
+        <h1 class="font-display font-bold text-3xl text-deep tracking-tight">NavigatorEdu</h1>
+        <p class="text-lg text-slate-700 mt-2 max-w-2xl leading-relaxed">
+          A local-demo education platform where the entire knowledge domain is
+          supplied by a validated JSON content pack — the same app serves
+          different domains without changing backend or frontend code.
+        </p>
+        <div class="flex flex-wrap gap-2.5 mt-5">
+          <button onclick="document.getElementById('walkthrough')?.scrollIntoView({behavior:'smooth'})"
+            class="bg-deep text-white text-sm font-medium rounded-md px-4 py-2 hover:bg-brassink transition-colors">
+            Start reviewer walkthrough
+          </button>
+          <a href="#/packs"
+            class="border border-deep text-deep text-sm font-medium rounded-md px-4 py-2 hover:border-brassink hover:text-brassink transition-colors">
+            Browse content packs
+          </a>
+          <a href="/docs"
+            class="text-sm font-medium text-slate-600 rounded-md px-4 py-2 hover:text-brassink transition-colors">
+            View API docs ↗
+          </a>
+        </div>
+      </section>
 
-      ${manifestCard(meta)}
+      <!-- What / why / how to evaluate -->
+      <section aria-label="About this project" class="mt-8 max-w-2xl">
+        <p class="text-sm text-slate-600 leading-relaxed">
+          Content-driven systems usually treat content as an afterthought —
+          unvalidated, unversioned, coupled to code. NavigatorEdu demonstrates
+          the opposite: a <strong class="text-deep">content pack</strong> is one
+          JSON file holding an entire domain (reference items, training
+          lessons, practice cases, quiz questions, disclaimers, and governance
+          metadata), checked by a validator before it can be seeded. Because
+          the code encodes structure rather than content, swapping the pack
+          re-skins the whole product — and the pack is held to the same
+          contract discipline as code. Every record in every pack is fictional
+          and synthetic.
+        </p>
+        <p class="text-sm text-slate-600 leading-relaxed mt-3">
+          <span class="text-[11px] uppercase tracking-wide text-brassink">How to evaluate this app:</span>
+          follow the walkthrough below — the moment to judge is the pack
+          switch, where the entire visible domain changes and the governance
+          banner follows. Then skim the API docs and the repo's tests.
+        </p>
+      </section>
 
-      <section aria-label="Reviewer walkthrough" class="mt-8">
+      <div class="mt-8">${manifestCard(meta)}</div>
+
+      <!-- Reviewer walkthrough -->
+      <section aria-label="Reviewer walkthrough" id="walkthrough" class="mt-10 scroll-mt-20">
         <h2 class="font-display font-semibold text-lg text-deep">Reviewer walkthrough</h2>
         <p class="text-sm text-slate-500 mt-0.5 mb-4">The 60-second demo path, in order:</p>
-        <ol class="space-y-3">
-          ${step(1, '#/categories', 'Browse the reference', `searchable, categorized items across ${cats.length} categories.`)}
-          ${step(2, '#/cases', 'Review a practice case', 'guided steps reveal one at a time, ending in the expected outcome.')}
-          ${step(3, '#/training', 'Study the training modules', 'short ordered lessons, cross-linked to reference items.')}
-          ${step(4, '#/quiz', 'Take the quiz', 'answers are scored server-side and never appear in the page source.')}
-          ${step(5, '/docs', 'Inspect the API docs', 'the same data over a versioned REST API, self-documented via OpenAPI.')}
+        <ol class="space-y-4">
+          ${step(1, '#/packs', 'Open Packs',
+            'the bundled, allowlisted demo packs with their governance metadata.',
+            'each pack declares its intended use, safety notes, and synthetic-only status — and exactly one is marked Active.')}
+          ${step(2, '#/packs', 'Load a different pack',
+            'one click reseeds the local demo database.',
+            'the top banner and active-pack card change immediately; the database now holds only the selected pack.')}
+          ${step(3, '#/categories', 'Browse the Reference',
+            `searchable, categorized items — currently ${cats.length} categories.`,
+            'the domain has completely changed, with zero code changes. This is the content-pack architecture working.')}
+          ${step(4, '#/cases', 'Open a practice case',
+            'guided steps reveal one at a time, ending in the expected outcome.',
+            'answer material is fetched on demand — list endpoints deliberately omit it.')}
+          ${step(5, '#/quiz', 'Take the quiz',
+            'multiple-choice with explanations after checking.',
+            'scoring happens server-side; correct answers never appear in the page source before submission.')}
+          ${step(6, '/docs', 'Inspect the API docs',
+            'the same data over a versioned REST API.',
+            'OpenAPI documentation generated from the code — the frontend is just one consumer of this API.')}
         </ol>
       </section>
 
-      <section aria-label="Sections" class="grid sm:grid-cols-2 gap-3 mt-8">
-        ${linkCard('#/categories', `
-          <p class="font-medium text-deep">📚 Reference</p>
-          <p class="text-sm text-slate-500 mt-1">Searchable items across ${cats.length} categories.</p>`, 'Reference library')}
-        ${linkCard('#/cases', `
-          <p class="font-medium text-deep">🧭 Practice cases</p>
-          <p class="text-sm text-slate-500 mt-1">Scenarios with guided reveal-as-you-go answers.</p>`, 'Practice cases')}
-        ${linkCard('#/training', `
-          <p class="font-medium text-deep">🎓 Training modules</p>
-          <p class="text-sm text-slate-500 mt-1">Short conceptual lessons grouped by module.</p>`, 'Training modules')}
-        ${linkCard('#/quiz', `
-          <p class="font-medium text-deep">✅ Quiz</p>
-          <p class="text-sm text-slate-500 mt-1">Server-scored questions with explanations.</p>`, 'Quiz')}
+      <!-- What this demonstrates -->
+      <section aria-label="What this demonstrates" class="mt-10">
+        <h2 class="font-display font-semibold text-lg text-deep mb-3">What this demonstrates</h2>
+        <div class="grid sm:grid-cols-2 gap-3">
+          ${demoCard('Swappable content-pack architecture',
+            'Three complete domains run on one codebase; the models, routes, and UI encode structure, not content.')}
+          ${demoCard('Allowlisted local-demo pack loading',
+            'The Packs selector loads bundled packs only — no uploads, no arbitrary paths, no filesystem exposure.')}
+          ${demoCard('JSON validation before seeding',
+            'A validator enforces structure, references, quiz sanity, and required governance metadata — in CI, on every push.')}
+          ${demoCard('Server-scored quiz',
+            'Answers are stripped from GET responses and graded server-side, so the page source never leaks them.')}
+          ${demoCard('Synthetic data safety boundaries',
+            'Every pack must declare synthetic_only, intended use, and safety notes; the CytoFISH pack models a sensitive domain with those boundaries in the content itself.')}
+          ${demoCard('CI-tested backend behavior',
+            'A pytest suite runs real queries against isolated databases — no mocks — plus pack validation on every push.')}
+          ${demoCard('Portfolio-grade documentation',
+            'Architecture notes, authoring guide, demo guide, case study, and screenshots ship with the code.')}
+        </div>
+      </section>
+
+      <!-- Intentionally out of scope -->
+      <section aria-label="Intentionally out of scope" class="mt-10">
+        <h2 class="font-display font-semibold text-lg text-deep mb-3">Intentionally out of scope</h2>
+        <div class="bg-white border border-slate-200 rounded-lg p-5">
+          <p class="text-sm text-slate-600 leading-relaxed">
+            Scope control is part of the design. This demo deliberately
+            excludes anything it could not do responsibly at this scale:
+          </p>
+          <ul class="grid sm:grid-cols-2 gap-x-6 gap-y-1.5 mt-3 text-sm text-slate-600">
+            <li>· No real clinical use or claims</li>
+            <li>· No PHI, ever</li>
+            <li>· No real patient cases</li>
+            <li>· No diagnostic language</li>
+            <li>· No arbitrary file uploads</li>
+            <li>· No arbitrary filesystem loading</li>
+            <li>· No authentication or admin complexity</li>
+            <li>· No AI/RAG features</li>
+          </ul>
+          <p class="text-sm text-slate-500 leading-relaxed mt-3">
+            Each exclusion keeps the demo honest: safety boundaries are
+            enforced mechanically (validator + allowlist), and nothing ships
+            that can't be validated.
+          </p>
+        </div>
+      </section>
+
+      <!-- Tech stack -->
+      <section aria-label="Tech stack" class="mt-10 mb-2">
+        <h2 class="font-display font-semibold text-lg text-deep mb-3">Tech stack</h2>
+        <div class="flex flex-wrap gap-1.5">
+          ${['FastAPI', 'SQLModel / SQLite', 'Vanilla HTML/CSS/JavaScript', 'Pytest', 'GitHub Actions', 'JSON content packs']
+            .map(t => `<span class="text-xs font-mono bg-white border border-slate-200 text-slate-600 rounded-full px-3 py-1">${t}</span>`).join('')}
+        </div>
       </section>`;
   },
 

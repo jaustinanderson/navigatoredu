@@ -9,6 +9,13 @@ Each pack is loaded by seeding the database from a different JSON file via the
 content does. The home page and top banner display the **active content pack**
 so it is always clear which domain is loaded.
 
+As of v12, the home page is a self-guiding reviewer landing: a hero with
+three calls to action, the on-screen **Reviewer walkthrough** (six steps,
+each with a "Notice:" line saying what that step proves), a "What this
+demonstrates" grid, an "Intentionally out of scope" card, and the tech
+stack. When demoing live, you can simply follow the home page top to
+bottom — the narration below adds the spoken framing.
+
 ## One-time setup
 
 ```bash

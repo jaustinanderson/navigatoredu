@@ -163,28 +163,34 @@ records, validate, seed, run. Full schema and workflow:
 
 ## 60-second demo script
 
-1. **Home page** — point out the "Active content pack" card and top banner:
-   the app tells you which domain is loaded and that it is synthetic-only.
-   That text comes from governance metadata written at seed time and served
-   by `GET /api/v1/pack-metadata`.
-2. **Categories → a reference item** — categorized, tagged, searchable
-   content with rendered markdown.
-3. **A practice case** — reveal guided steps one at a time, ending in the
-   expected outcome; the answer fields are omitted from list endpoints and
-   fetched on demand.
-4. **Quiz → submit** — scoring happens server-side; correct answers never
-   appear in the page source before submission.
-5. **Packs → Load demo pack** — reseed to a different bundled domain live;
-   every page re-skins with zero code changes. This is the content-pack
-   architecture made visible.
+The home page carries this walkthrough on-screen (hero → **Start reviewer
+walkthrough**), with a "Notice:" line per step telling the reviewer what each
+step proves. The canonical order:
+
+1. **Home** — hero states what the app is; the active-pack manifest card
+   shows the loaded domain's governance metadata (intended use, safety
+   notes, synthetic-only badge), served by `GET /api/v1/pack-metadata`.
+2. **Packs → Load a different pack** — one click reseeds the local demo
+   database from an allowlisted bundled pack. The banner and manifest change
+   immediately.
+3. **Reference** — the entire domain has changed with zero code changes.
+   This is the moment to judge: the content-pack architecture made visible.
+4. **A practice case** — guided steps reveal one at a time; answer material
+   is omitted from list endpoints and fetched on demand.
+5. **Quiz → check answers** — scoring happens server-side; correct answers
+   never appear in the page source before submission.
 6. **`/docs`** — the same API, self-documenting via OpenAPI.
 7. **Close on validation and CI** — every content pack is checked by
    `validate_pack` on every push: structure, references, quiz sanity, and
    required governance metadata. Content is held to the same contract
    discipline as code.
 
-The full multi-pack walkthrough (including switching domains live and a
-screenshot checklist) is in [docs/DEMO_GUIDE.md](docs/DEMO_GUIDE.md).
+The home page also states what the project demonstrates, what is
+intentionally out of scope (no clinical use, no PHI, no uploads, no
+auth/AI), and the tech stack — so a reviewer gets positioning, safety
+posture, and demo path without opening a single doc. The full multi-pack
+walkthrough (including CLI switching and a screenshot checklist) is in
+[docs/DEMO_GUIDE.md](docs/DEMO_GUIDE.md).
 
 ## Data model
 
