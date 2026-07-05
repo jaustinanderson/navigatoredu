@@ -93,6 +93,7 @@
     <a href="#/training" data-nav="training" class="nav-link text-sm text-slate-600 hover:text-brassink py-0.5 border-b-2 border-transparent">Training</a>
     <a href="#/quiz" data-nav="quiz" class="nav-link text-sm text-slate-600 hover:text-brassink py-0.5 border-b-2 border-transparent">Quiz</a>
     <a href="#/packs" data-nav="packs" class="nav-link text-sm text-slate-600 hover:text-brassink py-0.5 border-b-2 border-transparent">Packs</a>
+    <a href="#/guide" data-nav="guide" class="nav-link text-sm text-slate-600 hover:text-brassink py-0.5 border-b-2 border-transparent">Reviewer guide</a>
     <a href="/docs" class="text-xs text-slate-600 hover:text-brassink ml-auto" title="OpenAPI documentation">API docs ↗</a>
   </nav>
 </header>
@@ -314,7 +315,8 @@ const views = {
       <!-- Reviewer walkthrough -->
       <section aria-label="Reviewer walkthrough" id="walkthrough" class="mt-10 scroll-mt-20">
         <h2 class="font-display font-semibold text-lg text-deep">Reviewer walkthrough</h2>
-        <p class="text-sm text-slate-600 mt-0.5 mb-4">The 60-second demo path, in order:</p>
+        <p class="text-sm text-slate-600 mt-0.5 mb-4">The 60-second demo path, in order — or take the fuller
+          <a href="#/guide" class="text-brassink underline">Reviewer guide</a>:</p>
         <ol class="space-y-4">
           ${step(1, '#/packs', 'Open Packs',
             'the bundled, allowlisted demo packs with their governance metadata.',
@@ -654,6 +656,118 @@ const views = {
         The command-line workflow (<code class="font-mono">SEED_PATH=… python -m backend.app.seed</code>) still works unchanged.
       </p>`;
   },
+
+  // Reviewer guide (v20): a static, self-contained walkthrough for a
+  // portfolio reviewer or interviewer — evaluate the project in 3–5 minutes
+  // with no prior context. No API calls: this page must render even before
+  // a first pack is understood, because it's where understanding starts.
+  async guide() {
+    const repo = 'https://github.com/jaustinanderson/navigatoredu';
+    const cta = (href, title, desc, external = false) => linkCard(href, `
+      <p class="font-medium text-deep">${title}${external ? ' <span aria-hidden="true">↗</span>' : ''}</p>
+      <p class="text-sm text-slate-600 mt-0.5 leading-relaxed">${desc}</p>`,
+      title);
+    const tryStep = (n, text) => `
+      <li class="flex gap-3">
+        <span class="flex-none w-6 h-6 rounded-full bg-deep text-white text-xs flex items-center justify-center font-mono" aria-hidden="true">${n}</span>
+        <p class="text-sm text-slate-700 leading-relaxed pt-0.5">${text}</p>
+      </li>`;
+    const glance = (t, d) => `
+      <div class="bg-white border border-slate-200 rounded-lg p-4">
+        <h3 class="text-sm font-medium text-deep">${t}</h3>
+        <p class="text-sm text-slate-600 mt-1 leading-relaxed">${d}</p>
+      </div>`;
+    const link = (href, label) =>
+      `<a href="${href}" class="text-brassink underline">${label}</a>`;
+    return `
+      <h1 class="font-display font-semibold text-2xl text-deep">Reviewer guide</h1>
+      <p class="text-sm text-slate-600 mt-0.5 mb-8 max-w-2xl leading-relaxed">
+        A 3–5 minute evaluation path for reviewers and interviewers — no prior
+        context needed.
+      </p>
+
+      <section aria-labelledby="guide-what">
+        <h2 id="guide-what" class="font-display font-semibold text-lg text-deep mb-3">What this is</h2>
+        <div class="bg-white border border-slate-200 rounded-lg p-5 max-w-2xl">
+          <p class="text-sm text-slate-700 leading-relaxed">
+            NavigatorEdu is a <strong>synthetic content-pack education
+            platform</strong>: one FastAPI + SQLite application that serves
+            reference material, practice cases, training modules, and a
+            server-scored quiz for <strong>any domain expressed as a
+            validated JSON content pack</strong>. Three complete packs ship
+            with it; swapping one re-skins the entire product with zero code
+            changes.
+          </p>
+          <p class="text-sm text-slate-700 leading-relaxed mt-3">
+            It is <strong>not clinical software</strong>. Every record in
+            every pack is fictional and synthetic — no PHI, no real cases,
+            and nothing here is suitable for real-world use. That boundary
+            is enforced mechanically, not just stated: packs must declare
+            <code class="font-mono text-xs">synthetic_only</code> and pass a
+            validator in CI.
+          </p>
+        </div>
+      </section>
+
+      <section aria-labelledby="guide-try" class="mt-10">
+        <h2 id="guide-try" class="font-display font-semibold text-lg text-deep mb-3">What to try first</h2>
+        <ol class="space-y-3 max-w-2xl">
+          ${tryStep(1, `Open ${link('#/packs', 'Packs')} and load the <strong>CytoFISH Navigator</strong> pack — a synthetic cytogenetics education domain. One click reseeds the demo database.`)}
+          ${tryStep(2, `Browse the ${link('#/categories', 'Reference')} — categorized, searchable items with governance metadata in the banner above.`)}
+          ${tryStep(3, `Search for <em>probe</em>, then filter by a tag and a difficulty chip — full-text search is SQLite FTS5, rebuilt on every reseed.`)}
+          ${tryStep(4, `Open a ${link('#/cases', 'practice case')} — guided steps reveal one at a time, and answer material is deliberately absent from list endpoints.`)}
+          ${tryStep(5, `Take the ${link('#/quiz', 'quiz')} — answers are scored server-side and never appear in the page source before you check.`)}
+          ${tryStep(6, `Download the HTML learning report from the quiz results — generated statelessly from your submitted answers, stored nowhere.`)}
+          ${tryStep(7, `Return to ${link('#/packs', 'Packs')} and load a different pack — the whole visible domain changes. That switch is the moment to judge: the architecture is data-driven, and this proves it.`)}
+        </ol>
+      </section>
+
+      <section aria-labelledby="guide-tech" class="mt-10">
+        <h2 id="guide-tech" class="font-display font-semibold text-lg text-deep mb-3">Technical details to notice</h2>
+        <div class="grid sm:grid-cols-2 gap-3">
+          ${glance('FastAPI + SQLite backend',
+            'One process serves the API and the static frontend; SQLModel over SQLite, versioned /api/v1 routes, dependency-injected sessions.')}
+          ${glance('Validated content packs',
+            'A validator CLI enforces structure, cross-references, quiz sanity, and required governance metadata — run in CI on every push.')}
+          ${glance('Pack reseeding and switching',
+            'Clear-then-load seeding through one code path (CLI, SEED_PATH, and the Packs UI all share it); a metadata table records what was actually seeded.')}
+          ${glance('FTS5 search + filters',
+            'Free-text search over reference items via SQLite FTS5, rebuilt on every seed so pack switches can never serve stale results; tag and difficulty filters compose with it.')}
+          ${glance('Stateless quiz reports',
+            'The learning report is generated from the submitted answers in the request — no accounts, no persistence, nothing stored.')}
+          ${glance('Docker / Render deployment',
+            'Non-root Docker image with a CI build-and-smoke-test job, plus a Render blueprint for browser-only deploy from a fork.')}
+          ${glance('Four layers of tests',
+            'pytest (backend, no mocks, isolated in-memory DBs), Playwright behavior tests, an axe-core accessibility audit failing on serious/critical, and keyboard-only journey tests.')}
+        </div>
+      </section>
+
+      <section aria-labelledby="guide-safety" class="mt-10">
+        <h2 id="guide-safety" class="font-display font-semibold text-lg text-deep mb-3">Safety boundaries</h2>
+        <div class="bg-white border border-slate-200 rounded-lg p-5 max-w-2xl">
+          <ul class="space-y-1.5 text-sm text-slate-700">
+            <li>· <strong>Synthetic content only</strong> — every pack declares it, the validator enforces it.</li>
+            <li>· <strong>No PHI</strong> — no real patients, cases, accession numbers, or protocols anywhere.</li>
+            <li>· <strong>No accounts</strong> — no authentication, no user data to protect or leak.</li>
+            <li>· <strong>No persistence of quiz submissions</strong> — scoring and reports are stateless.</li>
+            <li>· <strong>No clinical interpretation</strong> — no diagnostic language; education-shaped content only.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section aria-labelledby="guide-jump" class="mt-10 mb-2">
+        <h2 id="guide-jump" class="font-display font-semibold text-lg text-deep mb-3">Jump straight in</h2>
+        <div class="grid sm:grid-cols-2 gap-3">
+          ${cta('#/categories', 'Reference', 'Browse and search the active pack\u2019s knowledge items.')}
+          ${cta('#/cases', 'Practice cases', 'Scenario walkthroughs with step-by-step reveals.')}
+          ${cta('#/quiz', 'Quiz', 'Server-scored questions with explanations and a downloadable report.')}
+          ${cta('#/packs', 'Packs', 'Load a different synthetic domain and watch the app re-skin.')}
+          ${cta('/docs', 'API docs', 'The OpenAPI documentation — the frontend is just one consumer.', true)}
+          ${cta(repo + '/blob/main/docs/PORTFOLIO_CASE_STUDY.md', 'Portfolio case study', 'Why this project exists and what it is meant to demonstrate.', true)}
+          ${cta(repo + '/blob/main/docs/RETROSPECTIVE.md', 'Retrospective', 'The engineering narrative: bugs found, lessons kept, boundaries documented.', true)}
+        </div>
+      </section>`;
+  },
 };
 
 // -------------- Interactions --------------
@@ -871,6 +985,10 @@ function markActiveNav(view) {
     a.classList.toggle('text-deep', on);
     a.classList.toggle('font-medium', on);
     a.classList.toggle('border-transparent', !on);
+    // The visual active state exists for sighted users; aria-current="page"
+    // is the same information for assistive technology.
+    if (on) a.setAttribute('aria-current', 'page');
+    else a.removeAttribute('aria-current');
   });
 }
 
@@ -890,6 +1008,7 @@ async function route() {
     else if (view === 'training') app.innerHTML = await views.training();
     else if (view === 'quiz')  app.innerHTML = await views.quiz();
     else if (view === 'packs') app.innerHTML = await views.packs();
+    else if (view === 'guide') app.innerHTML = await views.guide();
     else app.innerHTML = `
       <div class="py-16 text-center">
         <p class="text-slate-600">Page not found.</p>

@@ -279,6 +279,12 @@ legitimate only when you can name the property the code correctly upholds.
   author's loop further.
 - **Optional hosted demo.** The blueprint exists; maintaining one live URL
   (with an uptime badge) would remove the last click for reviewers.
+  Partially addressed from the other direction in v20: an in-app Reviewer
+  guide (`#/guide`) makes whatever instance a reviewer reaches — local or
+  hosted — self-explaining in 3–5 minutes, with the demo path, the details
+  worth noticing, the safety boundaries, and tested CTA links into every
+  section. Reviewer experience treated as a feature with its own tests,
+  not an afterthought in a README.
 - **Accessibility testing.** ~~Manual keyboard/contrast checks should
   become automated axe-core runs in CI.~~ Shipped in v18: axe-core scans of
   the four primary views in the browser-test CI job, full default ruleset,

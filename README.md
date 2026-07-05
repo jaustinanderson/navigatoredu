@@ -17,6 +17,11 @@ variable, with governance metadata and content validation enforced in CI.
 
 ## What this is, in 30 seconds
 
+> **Reviewing this project?** Run it and open **Reviewer guide** in the top
+> navigation (`#/guide`) — an in-app 3–5 minute walkthrough with the demo
+> path, the technical details worth noticing, the safety boundaries, and
+> one-click jumps into every section.
+
 - **What:** a reference-library / training-module / practice-case / quiz web
   app whose content is entirely data — a JSON "content pack" loaded into
   SQLite by an idempotent seed script.
@@ -261,9 +266,11 @@ after pack switching) both lived in exactly that layer. Twelve tests cover
 chip readability via real computed styles (at rest, selected, after Clear
 all), search/tag/difficulty/combined filtering, pack switching through the
 Packs UI with stale-content assertions, the quiz report download (file
-contents verified, `<script>`-free), and an API-docs smoke. Four further
-tests run the accessibility audit below, and five more run the
-keyboard-only journeys, for twenty-one browser tests total.
+contents verified, `<script>`-free), and an API-docs smoke. Five further
+tests run the accessibility audit below (now including the Reviewer guide
+page), five run the keyboard-only journeys, and three pin the Reviewer
+guide's structure, CTA links, and keyboard operability — twenty-five
+browser tests total.
 
 ### Keyboard-only journeys
 
@@ -283,12 +290,12 @@ CI job; no separate command.
 
 ### Accessibility (axe-core in CI)
 
-Every CI run scans Home, Reference, Packs, and Quiz in a real browser with
+Every CI run scans Home, Reference, Packs, Quiz, and the Reviewer guide in a real browser with
 the **full default axe-core ruleset** (via `@axe-core/playwright`, a dev
 dependency only — nothing ships to the app). **Serious and critical
 violations fail the build**; minor/moderate findings are printed in the
 test output as advisories rather than silently ignored. No rules are
-disabled and no elements are excluded. Current status: all four views scan
+disabled and no elements are excluded. Current status: all five scanned views come back
 clean at every impact level. Muted text standardizes on `text-slate-600`
 as its lightest tone (≥7:1 on every background in use), after the audit's
 first CI run correctly failed lighter slate tones — details in
@@ -299,7 +306,7 @@ away: automated scanning covers only the mechanically checkable subset of
 WCAG (names, roles, ARIA validity, landmarks, computed contrast).
 Keyboard-only task flows are now automated end-to-end (the journey suite
 above, shipped in v19); actual screen-reader UX remains manual, and only
-the four primary views are axe-scanned — detail views (reference item,
+the five primary views are axe-scanned — detail views (reference item,
 practice case) share the same templates and markup patterns but are not
 independently audited. Those are scoped follow-ups, not claims of
 completeness.

@@ -131,11 +131,17 @@ validity, clinical use, or clinical expertise.
 | v15 | Deployment option: Render blueprint + CI Docker build check, no CD | 137 |
 | v16 | Project retrospective: v01–v15 engineering narrative and debugging stories | 137 |
 | v17 | Playwright browser tests: 12 UI-behavior tests + dedicated CI job | 137 pytest + 12 browser |
+| v18 | axe-core accessibility audit in CI (fails on serious/critical); contrast fixes it forced | 137 pytest + 16 browser |
+| v19 | Keyboard-only journeys: main tasks proven completable without a mouse | 137 pytest + 21 browser |
+| v20 | Reviewer guide: in-app 3–5 minute evaluation walkthrough with tested CTAs | 137 pytest + 25 browser |
 
 The arc is intentional: build the product, prove the abstraction
 (`SEED_PATH`), enforce the contract (validator), stress it with a hard domain
 (CytoFISH), make governance explicit (metadata), then make the safe path the
-easy path (authoring). Test count grew with every functional milestone.
+easy path (authoring) — and finally make the whole thing effortless to
+*evaluate*: automated accessibility and keyboard coverage, and a reviewer
+guide inside the product itself. Test count grew with every functional
+milestone.
 
 ## What this demonstrates professionally
 

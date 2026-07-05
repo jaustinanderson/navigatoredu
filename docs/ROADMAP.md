@@ -95,6 +95,22 @@ carried correct keyboard behavior, which is the payoff of building on
 semantic HTML. Dev/test only: no runtime, backend, or dependency changes.
 Still manual, still documented: screen-reader UX.
 
+## ~~Reviewer walkthrough~~ (shipped in v20)
+
+Shipped: an in-app **Reviewer guide** (`#/guide`, in the top navigation) —
+a static, API-call-free page that lets a reviewer or interviewer evaluate
+the project in 3–5 minutes with no prior context: what the app is (and
+isn't — not clinical software, synthetic content only), a seven-step demo
+path ending at the pack switch that proves the architecture is
+data-driven, the technical details worth noticing, the safety boundaries,
+and CTA cards into Reference, Practice cases, Quiz, Packs, the API docs,
+the case study, and the retrospective. Built from the app's existing
+components and visual language; the one behavioral addition is
+`aria-current="page"` on the active nav link, a genuine ARIA improvement
+the page's own review surfaced. Covered by three new browser tests
+(nav reachability, structure + every CTA href, keyboard-only CTA
+activation) plus a fifth axe scan — 25 browser tests total.
+
 ## ~~Project retrospective~~ (shipped in v16)
 
 Shipped: [RETROSPECTIVE.md](RETROSPECTIVE.md) — the v01–v15 engineering

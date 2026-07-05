@@ -9,6 +9,13 @@ Each pack is loaded by seeding the database from a different JSON file via the
 content does. The home page and top banner display the **active content pack**
 so it is always clear which domain is loaded.
 
+As of v20, the app has an in-app **Reviewer guide** (`#/guide`, in the top
+navigation) — if you're handing the demo to someone else, or short on time,
+start there: it carries the walkthrough below in condensed form, the
+technical details to notice, the safety boundaries, and one-click jumps
+into every section. The scripted path in this document remains the fuller
+presenter version.
+
 As of v15, the repo carries a Render blueprint (`render.yaml`) — if you've
 deployed a copy, the demo works identically at the hosted URL; otherwise the
 local run remains the primary path.

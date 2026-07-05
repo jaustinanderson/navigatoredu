@@ -82,4 +82,10 @@ test.describe('Accessibility audit (axe-core, fails on serious/critical)', () =>
     await page.waitForSelector('fieldset[data-qid]');
     await auditCurrentPage(page, 'Quiz (#/quiz)');
   });
+
+  test('Reviewer guide has no serious or critical violations', async ({ page }) => {
+    await selectPack(page, 'tidewatch', '#/guide');
+    await page.waitForSelector('section[aria-labelledby="guide-jump"] a');
+    await auditCurrentPage(page, 'Reviewer guide (#/guide)');
+  });
 });

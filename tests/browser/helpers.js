@@ -116,6 +116,39 @@ async function expectChipReadable(chip, opts = {}) {
   return last;
 }
 
+
+// --------------------------------------------------------- keyboard nav ---
+// Shared by the keyboard-journey and reviewer-guide specs (v19/v20).
+
+const MAX_TABS = 40; // generous upper bound; a trap or unreachable control fails loudly
+
+// Press Tab (or Shift+Tab) until document.activeElement matches `selector`.
+// Returns the number of presses. Throws after MAX_TABS with a description of
+// where focus ended up, so failures explain themselves.
+async function tabTo(page, selector, { shift = false, max = MAX_TABS } = {}) {
+  for (let i = 1; i <= max; i++) {
+    await page.keyboard.press(shift ? 'Shift+Tab' : 'Tab');
+    const hit = await page.evaluate(
+      (sel) => document.activeElement && document.activeElement.matches(sel),
+      selector
+    );
+    if (hit) return i;
+  }
+  const at = await page.evaluate(() => {
+    const el = document.activeElement;
+    return el ? `${el.tagName}${el.id ? '#' + el.id : ''} "${(el.textContent || el.value || '').trim().slice(0, 40)}"` : 'null';
+  });
+  throw new Error(`Could not reach ${selector} within ${max} ${shift ? 'Shift+' : ''}Tab presses; focus is on ${at}`);
+}
+
+// Keyboard-navigate to a top-nav destination from wherever focus currently
+// is: Tab to the nav link, press Enter, wait for the destination heading.
+async function keyboardNavTo(page, navName, headingRe) {
+  await tabTo(page, `nav a[data-nav="${navName}"]`);
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#app h1')).toHaveText(headingRe);
+}
+
 // Select a bundled pack through the app's real endpoint, then land on a page.
 async function selectPack(page, slug, hash = '#/categories') {
   const res = await page.request.post('/api/v1/packs/select', { data: { slug } });
@@ -126,6 +159,9 @@ async function selectPack(page, slug, hash = '#/categories') {
 
 module.exports = {
   selectPack,
+  tabTo,
+  keyboardNavTo,
+  MAX_TABS,
   expectChipReadable,
   parseRgb,
   relativeLuminance,
