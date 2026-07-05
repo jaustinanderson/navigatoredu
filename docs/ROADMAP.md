@@ -45,6 +45,15 @@ tables — keeping the no-auth constraint intact. PDF was skipped
 deliberately: it would add a heavy dependency for no reviewer value
 (browsers print HTML). Version drift again: planned as v13, shipped as v14.
 
+## ~~Frontend browser tests~~ (shipped in v17)
+
+Shipped: a 12-test Playwright suite (`tests/browser/`) targeting the exact
+failure classes manual review previously caught — chip readability asserted
+on computed styles, filter behavior, pack-switch staleness through the real
+UI, and the report download verified file-in-hand — with a self-starting
+web server config and a dedicated `browser-test` CI job. This was the top
+item on the retrospective's improvement list.
+
 ## ~~Project retrospective~~ (shipped in v16)
 
 Shipped: [RETROSPECTIVE.md](RETROSPECTIVE.md) — the v01–v15 engineering

@@ -269,10 +269,11 @@ legitimate only when you can name the property the code correctly upholds.
 
 ## 5. What I would improve next
 
-- **Frontend test automation.** The Node render harness and jsdom
-  computed-style audits caught a lot, but the chip bug proved some failures
-  live only in a real browser. **Playwright** tests for chip rendering,
-  filter interaction, and the report download would close that gap.
+- **Frontend test automation.** ~~The chip bug proved some failures live
+  only in a real browser; Playwright tests would close that gap.~~ Shipped
+  in v17: a 12-test Playwright suite asserting computed chip styles, filter
+  interaction, pack-switch staleness, and the report download, running in
+  its own CI job. The remaining step is broadening it as the UI grows.
 - **Richer authoring tooling.** `new_pack` scaffolds; a `--seed`
   smoke-check flag and a pack linting/preview mode would shorten the
   author's loop further.

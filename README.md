@@ -82,7 +82,7 @@ clinical capability.
 | Backend | **FastAPI**, versioned `/api/v1` routers, dependency-injected sessions |
 | Data | **SQLModel / SQLite**; six related tables; JSON columns for list fields; **FTS5 full-text search** over reference items, rebuilt on every seed |
 | Testing | **Pytest** — 137 tests on isolated in-memory DBs via one DI override; no mocks |
-| CI | **GitHub Actions** — full suite + content-pack validation + Docker build check on every push/PR |
+| CI | **GitHub Actions** — pytest + pack validation, Docker build check, and Playwright browser tests, on every push/PR |
 | Ops | **Docker** (non-root image, PORT-aware) + compose volume and healthcheck; **Render blueprint** for deploy-it-yourself hosting |
 | Content pipeline | **Content-pack validator** (`validate_pack`) gating CI; **SEED_PATH**-based pack switching; **authoring command** (`new_pack`) scaffolding valid, safe-by-default packs |
 | Governance | **Pack-metadata endpoint** (`GET /api/v1/pack-metadata`) reporting exactly what was seeded; active pack shown in the UI banner |
@@ -251,6 +251,29 @@ python -m pytest        # 137 tests
 Tests run against an **isolated in-memory SQLite database** seeded from the
 same pack format, injected by overriding the one `get_session` dependency —
 real queries, zero mocks, and the development database is never touched.
+
+### Browser tests (Playwright)
+
+Pytest covers backend and data invariants; a separate **Playwright** suite
+covers the UI-behavior layer a headless harness can't see — added because
+the two bugs manual review caught (blank filter chips, stale categories
+after pack switching) both lived in exactly that layer. Twelve tests cover
+chip readability via real computed styles (at rest, selected, after Clear
+all), search/tag/difficulty/combined filtering, pack switching through the
+Packs UI with stale-content assertions, the quiz report download (file
+contents verified, `<script>`-free), and an API-docs smoke.
+
+```bash
+npm install
+npx playwright install --with-deps chromium
+npm run test:browser
+```
+
+The config starts the app itself on a test port after reseeding a fresh
+demo database (`data/navigatoredu.db` is a rebuildable artifact, so this is
+lossless). Dev/test-only: the app has no runtime Node dependency, and CI
+runs the suite in its own `browser-test` job. All content exercised remains
+the bundled synthetic packs.
 
 ## Screenshots and docs
 

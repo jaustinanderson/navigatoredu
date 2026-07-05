@@ -129,6 +129,8 @@ validity, clinical use, or clinical expertise.
 | v13 | FTS5 search + tag/difficulty filters; index rebuilt per seed; linear scan retired | 124 |
 | v14 | Exportable learning reports: stateless, printable HTML per quiz attempt | 137 |
 | v15 | Deployment option: Render blueprint + CI Docker build check, no CD | 137 |
+| v16 | Project retrospective: v01–v15 engineering narrative and debugging stories | 137 |
+| v17 | Playwright browser tests: 12 UI-behavior tests + dedicated CI job | 137 pytest + 12 browser |
 
 The arc is intentional: build the product, prove the abstraction
 (`SEED_PATH`), enforce the contract (validator), stress it with a hard domain
@@ -179,7 +181,9 @@ show how the builder thinks when the plan stops working.
   CI proves the image builds, but there is deliberately no CD — a portfolio
   demo warrants a build check, not a pipeline.
 - The frontend is intentionally minimal; it demonstrates API consumption,
-  not frontend engineering depth.
+  not frontend engineering depth — though as of v17 its behavior is guarded
+  by a real-browser Playwright suite, born directly from the chip-rendering
+  incident.
 
 Naming limitations yourself, with a rationale, is a stronger signal than
 pretending they don't exist.

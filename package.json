@@ -1,0 +1,11 @@
+{
+  "name": "navigatoredu-browser-tests",
+  "private": true,
+  "description": "Playwright browser tests for NavigatorEdu (dev/test only — the app has no runtime Node dependency). Covers the browser-level failure classes manual review previously caught: chip visibility, filter behavior, pack-switch staleness, and the report download.",
+  "scripts": {
+    "test:browser": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0"
+  }
+}

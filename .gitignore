@@ -11,3 +11,8 @@ data/navigatoredu.db
 .vscode/
 .idea/
 .DS_Store
+
+# Node (browser tests only — the app has no runtime Node dependency)
+node_modules/
+playwright-report/
+test-results/
