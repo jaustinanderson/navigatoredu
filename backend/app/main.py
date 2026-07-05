@@ -7,7 +7,7 @@ from sqlmodel import Session, select
 
 from .db import create_tables, engine
 from .models import Category
-from .routers import cases, quiz, reference, training
+from .routers import cases, packs, quiz, reference, training
 from .seed import seed
 
 
@@ -34,6 +34,7 @@ app = FastAPI(
 app.include_router(reference.router)
 app.include_router(cases.router)
 app.include_router(quiz.router)
+app.include_router(packs.router)
 app.include_router(training.router)
 
 # Serve the single-page frontend at the root (mounted last so /api wins).

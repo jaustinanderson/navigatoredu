@@ -28,7 +28,7 @@ variable, with governance metadata and content validation enforced in CI.
   self-assessment over one coherent data model — and content-driven systems
   need their content held to the same rigor as code.
 - **Skills shown:** REST API design, relational data modeling, test-driven
-  development (87 tests, no mocks), data validation and governance, CI/CD
+  development (101 tests, no mocks), data validation and governance, CI/CD
   basics, Docker, and safe modeling of a sensitive domain using synthetic
   content.
 
@@ -81,11 +81,12 @@ clinical capability.
 |------|-------------|
 | Backend | **FastAPI**, versioned `/api/v1` routers, dependency-injected sessions |
 | Data | **SQLModel / SQLite**; six related tables; JSON columns for list fields with a documented FTS5 upgrade path |
-| Testing | **Pytest** — 87 tests on isolated in-memory DBs via one DI override; no mocks |
+| Testing | **Pytest** — 101 tests on isolated in-memory DBs via one DI override; no mocks |
 | CI | **GitHub Actions** — full suite + content-pack validation on every push/PR |
 | Ops | **Docker** (non-root image) + compose volume and healthcheck |
 | Content pipeline | **Content-pack validator** (`validate_pack`) gating CI; **SEED_PATH**-based pack switching; **authoring command** (`new_pack`) scaffolding valid, safe-by-default packs |
 | Governance | **Pack-metadata endpoint** (`GET /api/v1/pack-metadata`) reporting exactly what was seeded; active pack shown in the UI banner |
+| Pack browser | **Allowlisted local-demo selector** (`/api/v1/packs` + Packs page) — flip between the bundled domains from the UI; no paths, no uploads |
 | Frontend | Single-file vanilla-JS SPA (Tailwind via CDN, hash router, HTML-escaped markdown rendering) — a deliberate no-build-step demo UI |
 | Domains | Three validated packs: Tidewatch Guild (celestial navigation), ArchiveGuild (archive apprenticeship), **CytoFISH Navigator** (synthetic cytogenetics/FISH education) |
 
@@ -113,7 +114,13 @@ docker compose up --build
 
 ## Demo the CytoFISH pack
 
-Switching packs is a single reseed — the seed script clears existing
+Easiest way: open **Packs** in the running app and click **Load demo
+pack** — a local-demo selector that reseeds from one of the three bundled,
+allowlisted packs and refreshes the UI (no arbitrary paths, no uploads;
+details in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)).
+
+The command-line workflow works unchanged, and is the canonical way outside
+the browser. Switching is a single reseed — the seed script clears existing
 content before loading, so the database always holds exactly one pack:
 
 ```bash
@@ -167,8 +174,11 @@ records, validate, seed, run. Full schema and workflow:
    fetched on demand.
 4. **Quiz → submit** — scoring happens server-side; correct answers never
    appear in the page source before submission.
-5. **`/docs`** — the same API, self-documenting via OpenAPI.
-6. **Close on validation and CI** — every content pack is checked by
+5. **Packs → Load demo pack** — reseed to a different bundled domain live;
+   every page re-skins with zero code changes. This is the content-pack
+   architecture made visible.
+6. **`/docs`** — the same API, self-documenting via OpenAPI.
+7. **Close on validation and CI** — every content pack is checked by
    `validate_pack` on every push: structure, references, quiz sanity, and
    required governance metadata. Content is held to the same contract
    discipline as code.
@@ -191,7 +201,7 @@ screenshot checklist) is in [docs/DEMO_GUIDE.md](docs/DEMO_GUIDE.md).
 ## Tests
 
 ```bash
-python -m pytest        # 87 tests
+python -m pytest        # 101 tests
 ```
 
 Tests run against an **isolated in-memory SQLite database** seeded from the

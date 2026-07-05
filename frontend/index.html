@@ -50,6 +50,7 @@
     <a href="#/cases" data-nav="cases" class="nav-link text-sm text-slate-600 hover:text-brassink py-0.5 border-b-2 border-transparent">Practice cases</a>
     <a href="#/training" data-nav="training" class="nav-link text-sm text-slate-600 hover:text-brassink py-0.5 border-b-2 border-transparent">Training</a>
     <a href="#/quiz" data-nav="quiz" class="nav-link text-sm text-slate-600 hover:text-brassink py-0.5 border-b-2 border-transparent">Quiz</a>
+    <a href="#/packs" data-nav="packs" class="nav-link text-sm text-slate-600 hover:text-brassink py-0.5 border-b-2 border-transparent">Packs</a>
     <a href="/docs" class="text-xs text-slate-400 hover:text-brassink ml-auto" title="OpenAPI documentation">API docs ↗</a>
   </nav>
 </header>
@@ -386,6 +387,69 @@ const views = {
       </div>
       <p id="quiz-score" class="mt-4 font-display font-semibold text-lg text-deep" role="status"></p>`;
   },
+
+  async packs() {
+    const body = await api('/packs');
+    const success = window._packJustLoaded
+      ? `<div class="mb-6 bg-white border border-green-600 rounded-lg px-5 py-4" role="status">
+           <p class="text-sm font-medium text-green-700">✔ Loaded ${esc(window._packJustLoaded)}.</p>
+           <p class="text-sm text-slate-600 mt-1">The database now holds only this pack — every section below the banner reflects it.</p>
+           <a href="#/categories" class="inline-block mt-3 bg-deep text-white text-sm font-medium rounded-md px-4 py-2 hover:bg-brassink transition-colors">Browse the Reference →</a>
+         </div>`
+      : '';
+    window._packJustLoaded = null;
+    const packCard = (p) => {
+      const active = p.pack_id === body.active_pack_id;
+      return `
+      <section class="bg-white border ${active ? 'border-brass' : 'border-slate-200'} rounded-lg overflow-hidden">
+        <div class="px-5 pt-4 pb-3">
+          <div class="flex items-start justify-between gap-3 flex-wrap">
+            <div>
+              <h2 class="font-display font-semibold text-lg text-deep">${esc(p.pack_name)}</h2>
+              <p class="font-mono text-[11px] text-slate-500 mt-0.5">${esc(p.pack_id)} · v${esc(p.pack_version)} · ${esc(p.domain_type)}</p>
+            </div>
+            <div class="flex items-center gap-2">
+              ${synthPill()}
+              ${active ? `<span class="text-[11px] uppercase tracking-wide font-medium bg-deep text-white rounded-full px-2 py-0.5">Active</span>` : ''}
+            </div>
+          </div>
+          <p class="text-sm text-slate-600 mt-1.5">${esc(p.pack_description)}</p>
+        </div>
+        <dl class="px-5 pb-3">
+          <div class="grid sm:grid-cols-[8.5rem_1fr] gap-x-4 py-2 border-t border-slate-100">
+            <dt class="text-[11px] uppercase tracking-wide text-slate-500 pt-0.5">Intended use</dt>
+            <dd class="text-sm text-ink leading-relaxed">${esc(p.intended_use)}</dd>
+          </div>
+          <div class="grid sm:grid-cols-[8.5rem_1fr] gap-x-4 py-2 border-t border-slate-100">
+            <dt class="text-[11px] uppercase tracking-wide text-slate-500 pt-0.5">Safety notes</dt>
+            <dd class="text-sm text-ink leading-relaxed">${esc(p.safety_notes)}</dd>
+          </div>
+        </dl>
+        <div class="px-5 pb-4">
+          ${active
+            ? `<p class="text-sm text-slate-500">This pack is currently loaded.</p>`
+            : `<button onclick="loadPack('${p.slug}', this)" aria-label="Load the ${esc(p.pack_name)} demo pack"
+                 class="bg-deep text-white text-sm font-medium rounded-md px-4 py-2 hover:bg-brassink transition-colors">
+                 Load demo pack
+               </button>`}
+        </div>
+      </section>`;
+    };
+    return `
+      <h1 class="font-display font-semibold text-2xl text-deep">Content packs</h1>
+      <p class="text-sm text-slate-500 mt-0.5 mb-6 max-w-2xl leading-relaxed">
+        The bundled demo packs. Loading one reseeds the local demo database —
+        the same app then serves an entirely different domain, which is the
+        point of the content-pack architecture. All packs are synthetic,
+        portfolio-demo content only.
+      </p>
+      ${success}
+      <div class="space-y-4">${body.packs.map(packCard).join('')}</div>
+      <p class="text-xs text-slate-500 mt-6">
+        Local demo convenience: only the bundled packs above can be loaded.
+        The command-line workflow (<code class="font-mono">SEED_PATH=… python -m backend.app.seed</code>) still works unchanged.
+      </p>`;
+  },
 };
 
 // -------------- Interactions --------------
@@ -443,6 +507,28 @@ async function submitQuiz() {
   }
   document.getElementById('quiz-score').textContent = `Score: ${res.score} / ${res.total}`;
   document.getElementById('quiz-submit').textContent = 'Check again';
+}
+
+async function loadPack(slug, btn) {
+  btn.disabled = true;
+  btn.textContent = 'Loading…';
+  try {
+    const r = await fetch('/api/v1/packs/select', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ slug }),
+    });
+    if (!r.ok) throw new Error(`API ${r.status}`);
+    const body = await r.json();
+    window._packJustLoaded = body.loaded.pack_name;
+    await loadPackBanner();   // refresh the top banner + tab title
+    await route();            // re-render the packs view with the success state
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = 'Load demo pack';
+    btn.insertAdjacentHTML('afterend',
+      `<p class="text-sm text-red-700 mt-2" role="status">Could not load the pack (${esc(e.message)}). Check that the API is running, then try again.</p>`);
+  }
 }
 
 function wireSearch() {
@@ -515,6 +601,7 @@ async function route() {
     else if (view === 'case')  app.innerHTML = await views.case(param);
     else if (view === 'training') app.innerHTML = await views.training();
     else if (view === 'quiz')  app.innerHTML = await views.quiz();
+    else if (view === 'packs') app.innerHTML = await views.packs();
     else app.innerHTML = `
       <div class="py-16 text-center">
         <p class="text-slate-600">Page not found.</p>

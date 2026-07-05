@@ -10,7 +10,7 @@ code and tests actually show.
 > knowledge domain is data: a validated JSON content pack loaded into SQLite.
 > One FastAPI codebase hosts three complete demo domains — including a fully
 > synthetic cytogenetics/FISH education pack — switched by a single
-> environment variable. It has 87 tests with no mocks, a CI-gated content
+> environment variable. It has 101 tests with no mocks, a CI-gated content
 > validator, and governance metadata so the system itself reports what
 > content is loaded and that it's synthetic-only."
 
@@ -35,7 +35,7 @@ code and tests actually show.
 >
 > Testing runs through one dependency-injection seam: every route gets its
 > database session through a single dependency, and tests override just that
-> with an in-memory SQLite engine. So it's 87 tests running real queries, no
+> with an in-memory SQLite engine. So it's 101 tests running real queries, no
 > mocks, and the dev database is never touched. CI runs the suite plus the
 > validator on every push.
 >
@@ -53,7 +53,7 @@ code and tests actually show.
    by a validator that runs in CI — a content edit that breaks a reference
    fails the build exactly like a code regression.
 3. **One test seam, zero mocks.** Overriding a single `get_session`
-   dependency points 87 tests at an isolated in-memory database running real
+   dependency points 101 tests at an isolated in-memory database running real
    queries. Small surface, high confidence.
 4. **Server-side quiz integrity.** `GET /quiz` strips answers before
    serialization; grading happens in `POST /quiz/submit`. A dedicated test

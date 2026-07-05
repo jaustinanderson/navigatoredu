@@ -22,6 +22,7 @@ FastAPI app (backend/app/main.py)
   ├── routers/training.py    training notes (module-grouped lessons)
   ├── routers/cases.py       practice cases
   ├── routers/quiz.py        questions + server-side scoring
+  ├── routers/packs.py       allowlisted local-demo pack browser/selector
   ▼
 SQLModel session (db.py)  ──►  SQLite (data/navigatoredu.db)
                                     ▲
@@ -98,6 +99,31 @@ metadata is only as current as the last seed, which is the property we want:
 the app describes the loaded database, and re-seeding is the deliberate act
 that updates it.
 
+### The Content Pack Browser (local-demo selector)
+
+`routers/packs.py` + `pack_registry.py` let a reviewer flip between the
+bundled domains from the UI — the content-pack architecture made visible in
+one click. Design boundaries, all deliberate:
+
+- **Hard-coded allowlist.** `pack_registry.REGISTRY` maps three slugs to
+  bundled seed files. A submitted slug is only ever used as a dictionary
+  key — never as a path fragment — so no request can make the server read
+  an arbitrary file. There is no scanning, no upload, and no user-supplied
+  path anywhere in the feature.
+- **No filesystem information leaves the server.** `GET /api/v1/packs`
+  returns slugs plus each pack's own governance metadata (read live from
+  the pack file, so the listing can't drift from the content). Unknown
+  slugs get a 404 that reflects nothing back.
+- **Reseed is the switch.** `POST /packs/select` calls the same
+  clear-then-load `seed()` the CLI uses, through the same injected session,
+  so tests exercise it against isolated databases and the metadata endpoint
+  always names exactly what's loaded.
+- **Intentionally not an admin feature.** A general content-management
+  surface would need authentication, audit, and storage design — out of
+  scope for a single-process portfolio demo, and diluting its signal. The
+  browser demonstrates the architecture; the `SEED_PATH` CLI remains the
+  canonical loading path outside the browser.
+
 ## Validation lifecycle
 
 `backend/app/validate_pack.py` makes the pack format a real, enforced
@@ -153,6 +179,8 @@ the page source.
 | GET    | `/api/v1/disclaimers`     | Safety/synthetic-content notices |
 | GET    | `/api/v1/training`        | Training notes, ordered by module + lesson |
 | GET    | `/api/v1/pack-metadata`   | Active content pack's governance metadata |
+| GET    | `/api/v1/packs`           | Allowlisted bundled demo packs + which is active |
+| POST   | `/api/v1/packs/select`    | Reseed the local demo DB from an allowlisted pack |
 | GET    | `/api/v1/cases`           | Practice cases (answers omitted) |
 | GET    | `/api/v1/cases/{id}`      | Full case incl. guided steps + outcome |
 | GET    | `/api/v1/quiz`            | Questions (answers omitted); `?category=` |
@@ -205,7 +233,7 @@ the corpus grows, is SQLite FTS5 — noted in the code where it would go.
   validator pass-through of generated packs, `--force` semantics, CLI exit
   codes — entirely in temp directories, so the suite never leaves a
   generated pack in `data/`.
-- **87 tests**, all green in under a second, no services or secrets
+- **101 tests**, all green in under a second, no services or secrets
   required — which is what keeps the CI workflow short.
 
 ## Deployment and dev workflow

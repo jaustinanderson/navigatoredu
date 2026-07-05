@@ -100,7 +100,7 @@ validity, clinical use, or clinical expertise.
   `Depends(get_session)`. Tests override that single dependency with an
   in-memory SQLite engine seeded from the same pack format — real queries
   end-to-end, and the development database is never touched.
-- **87 tests** across API behavior (including the security-relevant
+- **101 tests** across API behavior (including the security-relevant
   properties: quiz answers never serialized on GET, scoring server-side),
   pack switching, validator behavior (broken-pack fixtures built by mutating
   a copy of a real pack), and the authoring command (all file I/O in temp
@@ -123,6 +123,8 @@ validity, clinical use, or clinical expertise.
 | v07 | Per-pack governance metadata, `PackMetadata` table, metadata endpoint + UI banner | 57 |
 | v08 | `new_pack` authoring scaffolder: valid, safe-by-default skeletons | 87 |
 | v09 | Portfolio polish: documentation, positioning, interview preparation | 87 |
+| v10 | Frontend reviewer-experience polish; clear-then-load seeding fix | 91 |
+| v11 | Content Pack Browser: allowlisted local-demo pack selector | 101 |
 
 The arc is intentional: build the product, prove the abstraction
 (`SEED_PATH`), enforce the contract (validator), stress it with a hard domain
@@ -136,7 +138,7 @@ easy path (authoring). Test count grew with every functional milestone.
 | REST API design | Versioned prefix, list/detail response shaping, correct 400/404 usage |
 | Data modeling | Seven related tables with FKs; deliberate JSON-column trade-off, documented |
 | Security thinking | Quiz answers never leave the server; server-side scoring; HTML-escaped rendering |
-| Testing discipline | 87 tests on isolated in-memory DBs via dependency override — no mocks |
+| Testing discipline | 101 tests on isolated in-memory DBs via dependency override — no mocks |
 | Data pipelines | Idempotent seed script; human-reviewable JSON as source of truth; CLI validator gating CI; scaffolder for safe-by-default authoring |
 | Content governance | Required provenance/intended-use metadata, validated in CI; active pack queryable at runtime |
 | Safe domain modeling | A sensitive domain hosted with every safety boundary in content and metadata, none in code |

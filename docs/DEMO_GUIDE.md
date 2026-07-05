@@ -18,6 +18,15 @@ pip install -r requirements.txt
 
 ## Switching packs
 
+Fastest path while demoing: open **Packs** in the nav and click **Load demo
+pack** — the app reseeds from the chosen bundled pack, shows a success
+state, and every section re-skins. Use it right after showing the Reference
+page: the before/after is the whole architecture argument in one click.
+
+The command-line equivalents below still work unchanged and are what you'd
+use outside the browser (scripts, containers, packs not in the bundled
+allowlist).
+
 The seed script clears existing content before loading, so switching packs
 is just a reseed — the database always holds exactly one pack and two
 domains can never mix.

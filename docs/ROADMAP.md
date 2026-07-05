@@ -13,15 +13,15 @@ navigation for the quiz, and clearer active-pack presentation. Success
 criterion: the screenshots checklist can be re-captured and every view looks
 deliberate.
 
-## v11 — Content-pack browser / demo selector
+## ~~v11 — Content-pack browser / demo selector~~ (shipped)
 
-An in-app way to see which packs exist and switch between them for demos.
-Likely shape: a read-only endpoint listing the packs found in `data/`
-(reusing the validator to badge each as valid/invalid), plus a small demo
-page. Actual switching still happens by reseeding — the selector documents
-and launches that honestly rather than pretending to hot-swap; hot
-switching would require per-pack databases or namespacing and is out of
-scope until something needs it.
+Shipped as the Content Pack Browser: `GET /api/v1/packs` lists the three
+bundled packs from a hard-coded allowlist (metadata read live from each
+pack file), `POST /api/v1/packs/select` reseeds the local demo database
+through the same clear-then-load path the CLI uses, and a Packs page in the
+frontend shows the manifest of each pack with a Load button. Deliberately
+not shipped: filesystem scanning, uploads, or user-supplied paths — the
+selector is a local-demo convenience, not an admin surface.
 
 ## v12 — Richer search and filtering
 
