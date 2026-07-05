@@ -23,12 +23,16 @@ frontend shows the manifest of each pack with a Load button. Deliberately
 not shipped: filesystem scanning, uploads, or user-supplied paths — the
 selector is a local-demo convenience, not an admin surface.
 
-## v12 — Richer search and filtering
+## ~~Richer search and filtering~~ (shipped in v13)
 
-Move free-text search from linear scan to SQLite FTS5 (the upgrade path
-named in the code since v02), add tag and difficulty filters to the items
-endpoint, and surface them in the UI. Success criterion: search behavior is
-covered by tests and the linear-scan code path is fully retired.
+Shipped: free-text search moved from linear scan to SQLite FTS5 (the upgrade
+path named in the code since v02), with the index rebuilt on every seed so
+pack switches can never serve stale results; `?tag=` and `?difficulty=`
+filters on the items endpoint, surfaced as chips in the Reference UI with an
+active-filter bar and Clear. The linear-scan path is fully retired (one
+documented fallback: a never-seeded database returns no matches rather than
+erroring). Actual version numbers drifted from this plan: v12 became the
+reviewer landing polish, so search landed as v13.
 
 ## v13 — Exportable learning reports
 

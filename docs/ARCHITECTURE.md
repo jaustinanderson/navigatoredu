@@ -83,7 +83,8 @@ A pack's life:
    after an edit converges the database, and switching packs is a single
    reseed. The pack's governance metadata lands in a single-row
    `PackMetadata` table (fixed `id=1`), so the metadata endpoint can never
-   name a pack whose content is mixed with a stale one.
+   name a pack whose content is mixed with a stale one. As its final step,
+   seeding rebuilds the FTS5 search index from exactly what was loaded.
 5. **Serve** — the app reports the loaded pack at
    `GET /api/v1/pack-metadata` and in the UI banner.
 
@@ -174,7 +175,7 @@ the page source.
 | Method | Route                     | Purpose |
 |--------|---------------------------|---------|
 | GET    | `/api/v1/categories`      | All categories |
-| GET    | `/api/v1/items`           | Reference items; `?category=`, `?q=` filters |
+| GET    | `/api/v1/items`           | Reference items; `?q=` (FTS5), `?tag=`, `?difficulty=`, `?category=` |
 | GET    | `/api/v1/items/{id}`      | Full item incl. markdown body |
 | GET    | `/api/v1/disclaimers`     | Safety/synthetic-content notices |
 | GET    | `/api/v1/training`        | Training notes, ordered by module + lesson |
@@ -212,9 +213,26 @@ List-valued fields (`tags`, `options`, `guided_steps`, `related_item_ids`)
 are stored as **JSON columns**. At this scale that is the honest choice:
 simpler than join tables, still queryable, and trivially migratable later.
 
-Search is hybrid: category filtering happens in SQL; free-text matching over
-title/summary/tags happens in Python after the query. The upgrade path, if
-the corpus grows, is SQLite FTS5 — noted in the code where it would go.
+Free-text search is **SQLite FTS5** (`backend/app/search.py`): a virtual
+table over title, summary, body text, and tags, queried through
+`GET /items?q=` with bm25 rank ordering, token + trailing-prefix matching,
+and case-insensitivity from the unicode61 tokenizer. User input is
+phrase-quoted token by token, so FTS query operators in user input are
+inert. Tag filtering is exact JSON-array membership evaluated in SQL
+(`json_each`); difficulty and category are column equality. Filters combine
+as AND.
+
+The index is **rebuilt from scratch at the end of every seed**. Seeding is
+the only content write path (CLI, `SEED_PATH`, and the pack browser all call
+the same `seed()`), so rebuild-at-seed keeps search exactly in sync with the
+active pack with no trigger machinery — stale search results across pack
+switches are structurally impossible. One documented safety fallback: on a
+database that has never been seeded (so the FTS table doesn't exist), search
+returns no matches instead of erroring; there is no second search
+implementation. This replaced the original in-Python linear scan — the
+upgrade path named in the code since v02 — and it is still local demo
+search over synthetic packs, not production search infrastructure (no
+ranking tuning, no highlighting).
 
 ## Test strategy
 
@@ -233,7 +251,7 @@ the corpus grows, is SQLite FTS5 — noted in the code where it would go.
   validator pass-through of generated packs, `--force` semantics, CLI exit
   codes — entirely in temp directories, so the suite never leaves a
   generated pack in `data/`.
-- **101 tests**, all green in under a second, no services or secrets
+- **124 tests**, all green in under a second, no services or secrets
   required — which is what keeps the CI workflow short.
 
 ## Deployment and dev workflow
@@ -266,14 +284,14 @@ path:
 | Choice | Why now | Upgrade path |
 |--------|---------|--------------|
 | JSON columns for list fields | Simpler than join tables; still queryable | Proper join tables if relational queries over lists are needed |
-| Linear-scan text search | Corpus is small; code stays obvious | SQLite FTS5 |
+| ~~Linear-scan text search~~ | Shipped the upgrade path in v13: FTS5, rebuilt per seed | Ranking tuning / highlighting if search becomes a product surface |
 | Hand-rolled validation | Clearer errors, zero deps at six collections | JSON Schema if the format grows |
 | No-build-step frontend | One-command run story; emphasis on backend | React + build if UI depth becomes the point |
 | SQLite | Zero-config, perfect for a reviewer-runnable demo | Postgres via a connection-string change (JSON columns work on both) |
 | No auth / user state | Out of scope; every service dilutes the signal | `QuizAttempt` table + persisted submissions would add progress tracking without touching existing routes |
 
 Extension points, in the order they'd likely land: UI polish, an in-app pack
-selector, FTS-backed search, exportable learning reports, a deployment
+selector and FTS search (both shipped), exportable learning reports, a deployment
 target — see [ROADMAP.md](ROADMAP.md). Adding a new *domain* requires no
 code at all: scaffold with `new_pack`, author, validate, point `SEED_PATH`
 at it.

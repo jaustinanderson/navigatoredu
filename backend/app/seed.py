@@ -19,6 +19,7 @@ from pathlib import Path
 from sqlmodel import Session, SQLModel, delete
 
 from .db import create_tables, engine
+from .search import rebuild_fts
 from .models import (
     Category,
     Disclaimer,
@@ -102,6 +103,11 @@ def seed(session: Session, seed_path: Path | None = None) -> dict[str, int]:
     if meta:
         session.add(PackMetadata(id=1, **{f: meta[f] for f in METADATA_FIELDS}))
         counts[METADATA_KEY] = 1
+
+    # Rebuild the FTS5 search index from exactly what was just loaded. Seeding
+    # is the only content write path, so this keeps search perfectly in sync
+    # with the active pack across CLI seeds and pack-browser switches alike.
+    counts["fts_indexed"] = rebuild_fts(session)
 
     session.commit()
     return counts

@@ -27,6 +27,45 @@
 <style>
   /* Visible keyboard focus everywhere, without adding noise for mouse users. */
   :focus-visible { outline: 2px solid #8a6420; outline-offset: 2px; border-radius: 4px; }
+
+  /* Facet chips (tag + difficulty filters) are a small explicit CSS
+     component. Every visual property is set here, statically, in every
+     state — rest, hover, focus, selected — so chip rendering cannot depend
+     on runtime-generated utility classes or their relative order in the
+     stylesheet. Selection state is keyed off aria-pressed, which paint()
+     already maintains for accessibility. */
+  .facet-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.65rem;
+    padding: 0.25rem 0.75rem;
+    border: 1px solid #cbd5e1;          /* slate-300 */
+    border-radius: 9999px;
+    background-color: #ffffff;
+    color: #475569;                     /* slate-600 */
+    opacity: 1;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    cursor: pointer;
+    transition: color .15s, background-color .15s, border-color .15s;
+  }
+  .facet-chip--mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .facet-chip:hover {
+    border-color: #b98a2f;              /* brass */
+    color: #8a6420;                     /* brassink */
+  }
+  .facet-chip:focus-visible {
+    border-color: #b98a2f;
+    color: #8a6420;
+  }
+  .facet-chip[aria-pressed="true"],
+  .facet-chip[aria-pressed="true"]:hover,
+  .facet-chip[aria-pressed="true"]:focus-visible {
+    background-color: #12314f;          /* deep */
+    border-color: #12314f;
+    color: #ffffff;
+  }
+  @media (prefers-reduced-motion: reduce) { .facet-chip { transition: none; } }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { transition: none !important; animation: none !important; }
   }
@@ -68,7 +107,7 @@ const api = (path) => fetch('/api/v1' + path).then(r => {
 });
 
 // --- Minimal markdown renderer (headers, bold, italics, lists, paragraphs) ---
-function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function md(src){
   const lines = esc(src).split('\n');
   let html = '', inList = false, inOl = false;
@@ -106,7 +145,24 @@ function plainPreview(src, max = 140) {
   return text.length > max ? esc(text.slice(0, max)) + '…' : esc(text);
 }
 
-const tagPill  = t => `<span class="text-[11px] font-mono bg-slate-100 text-slate-600 rounded px-1.5 py-0.5">${t}</span>`;
+// Tags come from pack JSON: keep only non-empty trimmed strings, dedupe
+// case-insensitively (first spelling wins). Rendering blank or duplicate
+// chips is a data bug surfacing in the UI — normalize once, everywhere.
+function normalizeTags(tags) {
+  const seen = new Set(), out = [];
+  for (const raw of tags || []) {
+    if (typeof raw !== 'string') continue;
+    const t = raw.trim();
+    if (!t) continue;
+    const key = t.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(t);
+  }
+  return out;
+}
+
+const tagPill  = t => `<span class="text-[11px] font-mono bg-slate-100 text-slate-600 rounded px-1.5 py-0.5">${esc(t)}</span>`;
 const diffPill = d => `<span class="text-[11px] uppercase tracking-wide font-medium text-brassink">${d}</span>`;
 const synthPill = () =>
   `<span class="inline-flex items-center gap-1 text-[11px] uppercase tracking-wide font-medium bg-slate-100 text-slate-600 rounded-full px-2 py-0.5">
@@ -341,8 +397,36 @@ const views = {
       <p class="text-sm text-slate-500 mt-0.5 mb-4">Search across every item, or filter by category.</p>
 
       <label for="search" class="sr-only">Search reference items</label>
-      <input id="search" type="search" placeholder="Search titles, summaries, and tags…"
+      <input id="search" type="search" placeholder="Search titles, summaries, body text, and tags…"
         class="w-full border border-slate-300 rounded-md px-3 py-2 mb-3 text-sm bg-white placeholder:text-slate-400 focus:outline-none focus:border-brass"/>
+
+      ${(() => {
+        // Difficulty row: normalized, blanks dropped; row hidden if empty.
+        const diffs = [...new Set(items.map(i => (typeof i.difficulty === 'string' ? i.difficulty.trim() : '')))]
+          .filter(Boolean).sort();
+        if (!diffs.length) return '';
+        return `<div class="flex flex-wrap items-center gap-1.5 mb-1.5" role="group" aria-label="Filter by difficulty">
+          <span class="text-[11px] uppercase tracking-wide text-slate-500 mr-0.5">Difficulty</span>
+          ${diffs.map(d => `<button data-difficulty="${esc(d)}" class="facet-chip" aria-pressed="false">${esc(d)}</button>`).join('')}
+        </div>`;
+      })()}
+      ${(() => {
+        // Tag row: normalizeTags trims, drops empty/whitespace, dedupes
+        // case-insensitively. Row hidden entirely if no usable tags — no
+        // placeholder pills. The visible label lives in the button body.
+        const freq = {};
+        items.forEach(i => normalizeTags(i.tags).forEach(t => {
+          const key = t.toLowerCase();
+          freq[key] = freq[key] ? { n: freq[key].n + 1, label: freq[key].label } : { n: 1, label: t };
+        }));
+        const top = Object.keys(freq).sort((a, b) => freq[b].n - freq[a].n).slice(0, 12);
+        if (!top.length) return '';
+        return `<div class="flex flex-wrap items-center gap-1.5 mb-2" role="group" aria-label="Filter by tag">
+          <span class="text-[11px] uppercase tracking-wide text-slate-500 mr-0.5">Tags</span>
+          ${top.map(k => `<button data-tag="${esc(freq[k].label)}" class="facet-chip facet-chip--mono" aria-pressed="false">${esc(freq[k].label)}</button>`).join('')}
+        </div>`;
+      })()}
+      <div id="active-filters" class="mb-3"></div>
       <div id="search-results"></div>
 
       <div class="flex flex-wrap gap-1.5 mb-6" role="group" aria-label="Filter by category">
@@ -359,7 +443,7 @@ const views = {
               ${byCat(c.id).length ? byCat(c.id).map(i => linkCard('#/item/' + i.id, `
                 <p class="font-medium text-deep">${i.title}</p>
                 <p class="text-sm text-slate-500 mt-1">${i.summary}</p>
-                <div class="flex flex-wrap gap-1.5 mt-2.5 items-center">${diffPill(i.difficulty)} ${i.tags.map(tagPill).join('')}</div>
+                <div class="flex flex-wrap gap-1.5 mt-2.5 items-center">${diffPill(i.difficulty)} ${normalizeTags(i.tags).map(tagPill).join('')}</div>
               `, i.title)).join('')
               : `<p class="text-sm text-slate-500 sm:col-span-2">No items in this category yet.</p>`}
             </div>
@@ -374,7 +458,7 @@ const views = {
         <a href="#/categories" class="text-slate-500 hover:text-brassink">← Reference</a>
       </nav>
       <h1 class="font-display font-semibold text-2xl text-deep mt-3">${i.title}</h1>
-      <div class="flex flex-wrap gap-1.5 mt-2 items-center">${diffPill(i.difficulty)} ${i.tags.map(tagPill).join('')}</div>
+      <div class="flex flex-wrap gap-1.5 mt-2 items-center">${diffPill(i.difficulty)} ${normalizeTags(i.tags).map(tagPill).join('')}</div>
       <article class="mt-5 bg-white border border-slate-200 rounded-lg p-6 leading-relaxed">${md(i.body_md)}</article>`;
   },
 
@@ -636,24 +720,69 @@ async function loadPack(slug, btn) {
 }
 
 function wireSearch() {
+  // Combined q + tag + difficulty filtering, all served by GET /items.
   const box = document.getElementById('search');
   if (!box) return;
+  const state = { q: '', tag: null, difficulty: null };
+  const out = document.getElementById('search-results');
+  const activeBar = document.getElementById('active-filters');
+
+  const paint = () => {
+    document.querySelectorAll('.facet-chip').forEach(chip => {
+      const on = (chip.dataset.tag && chip.dataset.tag === state.tag)
+              || (chip.dataset.difficulty && chip.dataset.difficulty === state.difficulty);
+      // Selection styling is entirely CSS-driven via [aria-pressed="true"]
+      // (see the .facet-chip component in <head>). paint() only updates the
+      // accessibility state — no utility-class toggling to conflict.
+      chip.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    const parts = [];
+    if (state.q.trim()) parts.push(`search: “${esc(state.q.trim())}”`);
+    if (state.tag) parts.push(`tag: ${esc(state.tag)}`);
+    if (state.difficulty) parts.push(`difficulty: ${esc(state.difficulty)}`);
+    activeBar.innerHTML = parts.length
+      ? `<span class="text-xs text-slate-600">Active filters — ${parts.join(' · ')}</span>
+         <button id="clear-filters" class="text-xs text-brassink underline ml-2">Clear all</button>`
+      : '';
+    const clear = document.getElementById('clear-filters');
+    if (clear) clear.addEventListener('click', () => {
+      state.q = ''; state.tag = null; state.difficulty = null;
+      box.value = '';
+      refresh();
+    });
+  };
+
+  const refresh = async () => {
+    paint();
+    if (!state.q.trim() && !state.tag && !state.difficulty) { out.innerHTML = ''; return; }
+    const params = new URLSearchParams();
+    if (state.q.trim()) params.set('q', state.q.trim());
+    if (state.tag) params.set('tag', state.tag);
+    if (state.difficulty) params.set('difficulty', state.difficulty);
+    const results = await api('/items?' + params.toString());
+    out.innerHTML = results.length
+      ? `<p class="text-xs text-slate-500 mb-2">${results.length} result${results.length === 1 ? '' : 's'}:</p>
+         <div class="mb-6 space-y-2">${results.map(i => linkCard('#/item/' + i.id,
+          `<p class="font-medium text-deep">${i.title}</p>
+           <p class="text-sm text-slate-500 mt-0.5">${i.summary}</p>
+           <div class="flex flex-wrap gap-1.5 mt-2 items-center">${diffPill(i.difficulty)} ${normalizeTags(i.tags).map(tagPill).join('')}</div>`, i.title)).join('')}</div>`
+      : `<div class="mb-6">${emptyState('No items match the active filters.',
+           'Try clearing a filter, or a shorter search term.')}</div>`;
+  };
+
   let t;
   box.addEventListener('input', () => {
     clearTimeout(t);
-    t = setTimeout(async () => {
-      const out = document.getElementById('search-results');
-      if (!box.value.trim()) { out.innerHTML = ''; return; }
-      const items = await api('/items?q=' + encodeURIComponent(box.value.trim()));
-      out.innerHTML = items.length
-        ? `<p class="text-xs text-slate-500 mb-2">${items.length} result${items.length === 1 ? '' : 's'}:</p>
-           <div class="mb-6 space-y-2">${items.map(i => linkCard('#/item/' + i.id,
-            `<p class="font-medium text-deep">${i.title}</p>
-             <p class="text-sm text-slate-500 mt-0.5">${i.summary}</p>`, i.title)).join('')}</div>`
-        : `<div class="mb-6">${emptyState(`No items match “${esc(box.value)}”.`,
-             'Try a shorter term, or a tag shown on any item card.')}</div>`;
-    }, 200);
+    t = setTimeout(() => { state.q = box.value; refresh(); }, 200);
   });
+  document.querySelectorAll('.facet-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      if (chip.dataset.tag) state.tag = state.tag === chip.dataset.tag ? null : chip.dataset.tag;
+      if (chip.dataset.difficulty) state.difficulty = state.difficulty === chip.dataset.difficulty ? null : chip.dataset.difficulty;
+      refresh();
+    });
+  });
+  paint();
 }
 
 function wireFilters() {
@@ -668,6 +797,7 @@ function wireFilters() {
       c.classList.toggle('border-deep', on);
       c.classList.toggle('bg-white', !on);
       c.classList.toggle('text-slate-600', !on);
+      c.classList.toggle('border-slate-300', !on);
     });
     const target = chip.dataset.filter;
     document.querySelectorAll('[data-cat-section]').forEach(sec => {

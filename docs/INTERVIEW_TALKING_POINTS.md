@@ -10,7 +10,7 @@ code and tests actually show.
 > knowledge domain is data: a validated JSON content pack loaded into SQLite.
 > One FastAPI codebase hosts three complete demo domains — including a fully
 > synthetic cytogenetics/FISH education pack — switched by a single
-> environment variable. It has 101 tests with no mocks, a CI-gated content
+> environment variable. It has 124 tests with no mocks, a CI-gated content
 > validator, and governance metadata so the system itself reports what
 > content is loaded and that it's synthetic-only."
 
@@ -35,7 +35,7 @@ code and tests actually show.
 >
 > Testing runs through one dependency-injection seam: every route gets its
 > database session through a single dependency, and tests override just that
-> with an in-memory SQLite engine. So it's 101 tests running real queries, no
+> with an in-memory SQLite engine. So it's 124 tests running real queries, no
 > mocks, and the dev database is never touched. CI runs the suite plus the
 > validator on every push.
 >
@@ -53,7 +53,7 @@ code and tests actually show.
    by a validator that runs in CI — a content edit that breaks a reference
    fails the build exactly like a code regression.
 3. **One test seam, zero mocks.** Overriding a single `get_session`
-   dependency points 101 tests at an isolated in-memory database running real
+   dependency points 124 tests at an isolated in-memory database running real
    queries. Small surface, high confidence.
 4. **Server-side quiz integrity.** `GET /quiz` strips answers before
    serialization; grading happens in `POST /quiz/submit`. A dedicated test
@@ -73,7 +73,7 @@ code and tests actually show.
    domains is a single reseed; content is human-reviewable JSON, diff-able
    in a PR.
 9. **Deliberate, documented trade-offs.** JSON columns over join tables,
-   linear-scan search, hand-rolled validation, no-build frontend — each is
+   hand-rolled validation, no-build frontend — each is
    the honest choice at this scale, each has a named upgrade path.
 10. **Incremental delivery discipline.** Nine milestones, each shipped with
     tests and docs and green CI; test count grew from 14 to 87 across them.
@@ -94,8 +94,9 @@ code and tests actually show.
 **2. "What trade-offs did you make, and why?"**
 > "Four main ones, all documented in the repo with their upgrade paths. JSON
 > columns instead of join tables for list-valued fields — simpler and still
-> queryable at this scale. Linear-scan text search instead of FTS5 — the
-> corpus is small and the code stays obvious. Hand-rolled validation instead
+> queryable at this scale. Search started as a linear scan and was upgraded
+> to SQLite FTS5 in v13 once the feature justified it — shipping the named
+> upgrade path on schedule is itself the point. Hand-rolled validation instead
 > of JSON Schema — at six collections it reads clearer and produces
 > friendlier errors for content authors. And a no-build-step frontend — it
 > keeps the run story to one command and puts the emphasis on the backend and
@@ -103,8 +104,9 @@ code and tests actually show.
 
 **3. "How would you scale this?"**
 > "Postgres is a connection-string change — SQLModel abstracts the rest and
-> the JSON columns work on both. Search upgrades to SQLite FTS5 or an
-> external index. User state starts with a `QuizAttempt` table persisting
+> the JSON columns work on both. Search is already on SQLite FTS5, rebuilt
+> per seed; the next step there would be an external index if the corpus
+> outgrew one process. User state starts with a `QuizAttempt` table persisting
 > submissions, which adds progress tracking without touching existing routes.
 > The important point is that the current design blocks none of these — the
 > trade-offs were chosen to be reversible."

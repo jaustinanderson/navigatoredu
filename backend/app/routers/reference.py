@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import text as sa_text
 from sqlmodel import Session, select
 
 from ..db import get_session
 from ..models import Category, Disclaimer, PackMetadata, ReferenceItem
+from ..search import search_item_ids
 
 router = APIRouter(prefix="/api/v1", tags=["reference"])
 
@@ -18,23 +20,42 @@ def list_categories(session: Session = Depends(get_session)):
 def list_items(
     category: str | None = None,
     q: str | None = None,
+    tag: str | None = None,
+    difficulty: str | None = None,
     session: Session = Depends(get_session),
 ):
+    """Reference items, filterable by category, tag, difficulty, and search.
+
+    Filters combine as AND: `q` narrows by FTS5 full-text search over
+    title/summary/body/tags (token + trailing-prefix matching,
+    case-insensitive), `tag` by exact tag membership, `difficulty` and
+    `category` by column equality. Response shape is unchanged from the
+    pre-FTS version. Unknown filter values simply match nothing; an
+    empty/whitespace `q` is treated as absent.
+    """
     stmt = select(ReferenceItem)
     if category:
         stmt = stmt.where(ReferenceItem.category_id == category)
+    if difficulty:
+        stmt = stmt.where(ReferenceItem.difficulty == difficulty)
+    if tag:
+        # Exact membership in the JSON tags array, evaluated in SQL.
+        stmt = stmt.where(
+            sa_text(
+                "EXISTS (SELECT 1 FROM json_each(referenceitem.tags) je "
+                "WHERE je.value = :tag)"
+            ).bindparams(tag=tag)
+        )
     items = session.exec(stmt).all()
 
-    # Text search across title/summary/tags. In-Python matching is fine at
-    # this scale; SQLite FTS5 is the upgrade path if the corpus grows.
     if q:
-        needle = q.lower()
-        items = [
-            i for i in items
-            if needle in i.title.lower()
-            or needle in i.summary.lower()
-            or any(needle in t for t in i.tags)
-        ]
+        ranked = search_item_ids(session, q)
+        if ranked is not None:  # None = no usable tokens, treat as no filter
+            position = {item_id: n for n, item_id in enumerate(ranked)}
+            items = sorted(
+                (i for i in items if i.id in position),
+                key=lambda i: position[i.id],
+            )
     return [i.model_dump(exclude=LIST_FIELDS_EXCLUDE) for i in items]
 
 

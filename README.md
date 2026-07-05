@@ -28,7 +28,7 @@ variable, with governance metadata and content validation enforced in CI.
   self-assessment over one coherent data model — and content-driven systems
   need their content held to the same rigor as code.
 - **Skills shown:** REST API design, relational data modeling, test-driven
-  development (101 tests, no mocks), data validation and governance, CI/CD
+  development (124 tests, no mocks), data validation and governance, CI/CD
   basics, Docker, and safe modeling of a sensitive domain using synthetic
   content.
 
@@ -80,8 +80,8 @@ clinical capability.
 | Area | What's here |
 |------|-------------|
 | Backend | **FastAPI**, versioned `/api/v1` routers, dependency-injected sessions |
-| Data | **SQLModel / SQLite**; six related tables; JSON columns for list fields with a documented FTS5 upgrade path |
-| Testing | **Pytest** — 101 tests on isolated in-memory DBs via one DI override; no mocks |
+| Data | **SQLModel / SQLite**; six related tables; JSON columns for list fields; **FTS5 full-text search** over reference items, rebuilt on every seed |
+| Testing | **Pytest** — 124 tests on isolated in-memory DBs via one DI override; no mocks |
 | CI | **GitHub Actions** — full suite + content-pack validation on every push/PR |
 | Ops | **Docker** (non-root image) + compose volume and healthcheck |
 | Content pipeline | **Content-pack validator** (`validate_pack`) gating CI; **SEED_PATH**-based pack switching; **authoring command** (`new_pack`) scaffolding valid, safe-by-default packs |
@@ -175,6 +175,8 @@ step proves. The canonical order:
    immediately.
 3. **Reference** — the entire domain has changed with zero code changes.
    This is the moment to judge: the content-pack architecture made visible.
+   Search is FTS5-backed (try a partial word — prefix matching works), and
+   tag/difficulty chips narrow results server-side.
 4. **A practice case** — guided steps reveal one at a time; answer material
    is omitted from list endpoints and fetched on demand.
 5. **Quiz → check answers** — scoring happens server-side; correct answers
@@ -207,7 +209,7 @@ walkthrough (including CLI switching and a screenshot checklist) is in
 ## Tests
 
 ```bash
-python -m pytest        # 101 tests
+python -m pytest        # 124 tests
 ```
 
 Tests run against an **isolated in-memory SQLite database** seeded from the
