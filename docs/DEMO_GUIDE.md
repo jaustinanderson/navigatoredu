@@ -22,6 +22,23 @@ uvicorn backend.app.main:app --reload
 Open <http://127.0.0.1:8000>. (Deployed a copy via the Render blueprint?
 The demo works identically at the hosted URL.)
 
+## Presenting a hosted demo? Smoke-check it first
+
+Before any screen-share against a deployed URL, run the smoke check — it
+takes seconds and turns "I hope the free-tier instance is awake" into a
+printed checklist:
+
+```bash
+python scripts/smoke_deploy.py --base-url https://YOUR-RENDER-URL --expected-pack-id cytofish_synthetic
+```
+
+It verifies the instance is alive, serving the expected pack, declaring
+its synthetic-only posture, and answering the API endpoints the demo path
+uses (including a stateless quiz-report round-trip). Exit code 0 means
+present with confidence; anything else tells you exactly which beat of the
+demo would have failed. No local checkout handy? Run the **Hosted demo
+smoke check** workflow from the repo's Actions tab instead.
+
 ## The 2-minute demo
 
 One argument, made visually: *the entire domain is data*.
@@ -66,7 +83,7 @@ order as the in-app Reviewer guide:
    as a feature.
 6. **`/docs`** — the same API, self-documenting; the frontend is just one
    consumer.
-7. **Close on the tests** — 137 pytest tests with no mocks, a content
+7. **Close on the tests** — 159 pytest tests with no mocks, a content
    validator gating CI, and 25 Playwright browser tests including an
    axe-core accessibility audit (serious/critical fail the build) and five
    keyboard-only journeys. "The badge is green" is a claim about the repo,

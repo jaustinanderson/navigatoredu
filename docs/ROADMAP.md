@@ -2,7 +2,7 @@
 
 The milestone plan, kept as a living record: sections were written as plans
 and struck through as they shipped, with honest notes where reality drifted
-from the plan. **As of v21 the sequence is complete — the project is a
+from the plan. **As of v22 the sequence is complete — the project is a
 finished portfolio demo.** Each milestone kept the project's constraints:
 beginner-manageable, reviewer-runnable in one command, all content
 synthetic, tests and docs shipped with every change.
@@ -126,6 +126,19 @@ browser, API docs, and a green browser-test report), a
 GitHub-only readers, a recruiter-friendly case-study opening, and demo-guide
 2-minute/5-minute paths. No app, backend, or test changes; all 137 pytest
 and 25 browser tests unchanged and passing.
+
+## ~~v22 — Hosted-demo smoke checks~~ (shipped)
+
+Deployment verification as its own layer: `scripts/smoke_deploy.py`
+(standard library only) runs a pass/fail checklist against a deployed
+instance — alive, expected pack, `synthetic_only` declared, content
+endpoints serving, OpenAPI advertising the report feature, and a stateless
+quiz-report round-trip — with `--expected-pack-id` to pin the domain and a
+nonzero exit on any failure. A manual `workflow_dispatch` workflow
+(`hosted-smoke.yml`) runs it from GitHub with no secrets and deploys
+nothing, keeping the no-CD stance. Unit tests fake the HTTP boundary, so
+pytest stays offline; no product features, no schema changes, no frontend
+changes.
 
 ## ~~Project retrospective~~ (shipped in v16)
 

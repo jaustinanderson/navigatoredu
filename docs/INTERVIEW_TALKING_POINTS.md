@@ -10,7 +10,7 @@ code and tests actually show.
 > knowledge domain is data: a validated JSON content pack loaded into SQLite.
 > One FastAPI codebase hosts three complete demo domains — including a fully
 > synthetic cytogenetics/FISH education pack — switched by a single
-> environment variable. It has 137 tests with no mocks, a CI-gated content
+> environment variable. It has 159 tests with no mocks, a CI-gated content
 > validator, and governance metadata so the system itself reports what
 > content is loaded and that it's synthetic-only."
 
@@ -35,7 +35,7 @@ code and tests actually show.
 >
 > Testing runs through one dependency-injection seam: every route gets its
 > database session through a single dependency, and tests override just that
-> with an in-memory SQLite engine. So it's 137 tests running real queries, no
+> with an in-memory SQLite engine. So it's 159 tests running real queries, no
 > mocks, and the dev database is never touched. CI runs the suite plus the
 > validator on every push.
 >
@@ -53,8 +53,8 @@ code and tests actually show.
    by a validator that runs in CI — a content edit that breaks a reference
    fails the build exactly like a code regression.
 3. **One test seam, zero mocks.** Overriding a single `get_session`
-   dependency points 137 tests at an isolated in-memory database running real
-   queries. Small surface, high confidence.
+   dependency points the API tests at an isolated in-memory database running
+   real queries. Small surface, high confidence.
 4. **Server-side quiz integrity.** `GET /quiz` strips answers before
    serialization; grading happens in `POST /quiz/submit`. A dedicated test
    verifies answers never reach the client.
@@ -75,9 +75,9 @@ code and tests actually show.
 9. **Deliberate, documented trade-offs.** JSON columns over join tables,
    hand-rolled validation, no-build frontend — each is
    the honest choice at this scale, each has a named upgrade path.
-10. **Incremental delivery discipline.** Nine milestones, each shipped with
-    tests and docs and green CI; test count grew from 14 to 87 across them.
-    The commit history is itself evidence.
+10. **Incremental delivery discipline.** Twenty-two milestones, each shipped
+    with tests and docs and green CI; pytest count grew from 14 to 159, with
+    25 browser tests layered on top. The commit history is itself evidence.
 
 ## Five likely questions, with strong answers
 
@@ -205,8 +205,10 @@ Things **not** to say (they overclaim and an interviewer will notice):
 > Designed and built a full-stack learning platform (Python/FastAPI, SQLite,
 > REST) with a content-pack architecture hosting three swappable demo
 > domains; enforced content contracts via a CI-gated validator and governance
-> metadata; 87-test pytest suite on isolated databases with no mocks;
-> containerized with Docker.
+> metadata; 159-test pytest suite on isolated databases with no mocks, plus
+> Playwright browser, accessibility, and keyboard-journey tests in CI;
+> containerized with Docker with a deployment blueprint and hosted-demo
+> smoke checks.
 
 ## If asked "what is this project, really?"
 

@@ -12,14 +12,15 @@ library, training modules, guided practice cases, server-scored quizzes —
 where **the entire knowledge domain is one validated JSON file**. Load a
 different file and the same codebase becomes a different product: three
 complete demo domains ship in the repo, including a fully synthetic
-cytogenetics/FISH education pack. Everything is covered by 137 backend
+cytogenetics/FISH education pack. Everything is covered by 159 backend
 tests (no mocks), 25 real-browser tests including an accessibility audit
 and keyboard-only journeys, a content validator that gates CI, a Docker
-build check, and a one-file deployment blueprint. All content is synthetic;
-nothing is suitable for clinical or operational use — and that boundary is
-machine-enforced, not just promised.
+build check, a one-file deployment blueprint, and a hosted-demo smoke
+check that proves a deployed instance is alive and synthetic-only. All
+content is synthetic; nothing is suitable for clinical or operational
+use — and that boundary is machine-enforced, not just promised.
 
-It was built in twenty-one sequential milestones, each delivered with
+It was built in twenty-two sequential milestones, each delivered with
 tests, documentation, and CI green, so the repository history itself
 demonstrates incremental, disciplined delivery.
 
@@ -123,7 +124,7 @@ validity, clinical use, or clinical expertise.
   `Depends(get_session)`. Tests override that single dependency with an
   in-memory SQLite engine seeded from the same pack format — real queries
   end-to-end, and the development database is never touched.
-- **137 tests** across API behavior (including the security-relevant
+- **159 tests** across API behavior (including the security-relevant
   properties: quiz answers never serialized on GET, scoring server-side),
   pack switching, validator behavior (broken-pack fixtures built by mutating
   a copy of a real pack), and the authoring command (all file I/O in temp
@@ -158,6 +159,7 @@ validity, clinical use, or clinical expertise.
 | v19 | Keyboard-only journeys: main tasks proven completable without a mouse | 137 pytest + 21 browser |
 | v20 | Reviewer guide: in-app 3–5 minute evaluation walkthrough with tested CTAs | 137 pytest + 25 browser |
 | v21 | Final portfolio polish: README restructure, screenshot refresh, Reviewer Guide doc | 137 pytest + 25 browser |
+| v22 | Hosted-demo smoke checks: deployment verification script + manual workflow — the portfolio demo is externally verifiable | 159 pytest + 25 browser |
 
 The arc is intentional: build the product, prove the abstraction
 (`SEED_PATH`), enforce the contract (validator), stress it with a hard domain
@@ -175,7 +177,7 @@ every functional milestone.
 | REST API design | Versioned prefix, list/detail response shaping, correct 400/404 usage |
 | Data modeling | Seven related tables with FKs; deliberate JSON-column trade-off, documented |
 | Security thinking | Quiz answers never leave the server; server-side scoring; HTML-escaped rendering |
-| Testing discipline | 137 tests on isolated in-memory DBs via dependency override — no mocks |
+| Testing discipline | 159 tests on isolated in-memory DBs via dependency override — no mocks |
 | Data pipelines | Idempotent seed script; human-reviewable JSON as source of truth; CLI validator gating CI; scaffolder for safe-by-default authoring |
 | Content governance | Required provenance/intended-use metadata, validated in CI; active pack queryable at runtime |
 | Safe domain modeling | A sensitive domain hosted with every safety boundary in content and metadata, none in code |
@@ -221,9 +223,13 @@ pretending they don't exist.
 
 ## Status and future work
 
-As of v21 the project is a **complete portfolio demo**: every planned
-milestone shipped, and the final pass was presentation polish rather than
-features. [ROADMAP.md](ROADMAP.md) records the full shipped arc and a short
+As of v22 the project is a **complete portfolio demo**: every planned
+milestone shipped, closing with presentation polish (v21) and hosted-demo
+smoke checks (v22) — so the demo is not just runnable but *externally
+verifiable*: anyone can point `scripts/smoke_deploy.py` (or the manual
+GitHub Actions workflow) at a deployed URL and get a pass/fail checklist
+proving it is alive, serving the expected pack, and synthetic-only.
+[ROADMAP.md](ROADMAP.md) records the full shipped arc and a short
 list of possible future work (richer authoring tooling, a maintained hosted
 demo, typed API client generation, and — only after substantially stronger
 guardrails — an AI/RAG study assistant).

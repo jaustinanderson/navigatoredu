@@ -68,7 +68,7 @@ status across all three jobs (`test`, `docker-build`, `browser-test`):
 
 | Proof | Where it lives |
 |-------|----------------|
-| **137 pytest tests, no mocks** | `tests/` — isolated in-memory DBs through one dependency-injection seam |
+| **159 pytest tests, no mocks** | `backend/tests/` — API tests on isolated in-memory DBs through one dependency-injection seam; deploy-smoke unit tests fake only the HTTP boundary |
 | **25 Playwright browser tests** | `tests/browser/` — computed-style chip assertions, search/filter behavior, pack switching, report download verified file-in-hand |
 | **Accessibility audit in CI** | axe-core, full default ruleset, five views; serious/critical violations fail the build |
 | **Keyboard-only journeys** | five tests completing the main tasks with real Tab/Enter/Space events — no mouse, no programmatic focus |
@@ -101,8 +101,9 @@ This project is built to be read by employers. It maps to real work in:
 - **Data-backed UI/API workflows** — versioned REST endpoints with deliberate
   list/detail response shaping; the frontend and Swagger docs both consume
   the same API.
-- **Test-driven development** — 137 pytest tests against isolated in-memory
-  databases through one dependency-injection seam; real queries, zero mocks.
+- **Test-driven development** — 159 pytest tests; API tests run against
+  isolated in-memory databases through one dependency-injection seam — real
+  queries, zero mocks.
 - **Content-pack architecture** — the load-bearing idea behind white-label
   products, LMS platforms, and documentation systems: identify the invariant
   structure beneath a domain and keep it out of the code.
@@ -129,7 +130,7 @@ clinical capability.
 |------|-------------|
 | Backend | **FastAPI**, versioned `/api/v1` routers, dependency-injected sessions |
 | Data | **SQLModel / SQLite**; six related tables; JSON columns for list fields; **FTS5 full-text search** over reference items, rebuilt on every seed |
-| Testing | **Pytest** — 137 tests on isolated in-memory DBs via one DI override; no mocks |
+| Testing | **Pytest** — 159 tests; API tests on isolated in-memory DBs via one DI override, no mocks |
 | CI | **GitHub Actions** — pytest + pack validation, Docker build check, and Playwright browser tests including an **axe-core accessibility audit** (fails on serious/critical), on every push/PR |
 | Ops | **Docker** (non-root image, PORT-aware) + compose volume and healthcheck; **Render blueprint** for deploy-it-yourself hosting |
 | Content pipeline | **Content-pack validator** (`validate_pack`) gating CI; **SEED_PATH**-based pack switching; **authoring command** (`new_pack`) scaffolding valid, safe-by-default packs |
@@ -193,6 +194,32 @@ ephemeral; the app re-seeds `SEED_PATH` on every start, so UI pack switches
 last until the next restart — expected demo behavior), and **no continuous
 deployment** (CI includes a Docker *build check* only; `autoDeploy` is off
 in the blueprint).
+
+## Hosted demo verification
+
+Deployed a copy (or about to screen-share one)? Prove it's alive,
+synthetic-only, and serving the expected API in one command — the smoke
+script is standard-library Python, so it runs anywhere:
+
+```bash
+python scripts/smoke_deploy.py --base-url https://YOUR-RENDER-URL
+```
+
+Optionally pin which pack the instance must be serving:
+
+```bash
+python scripts/smoke_deploy.py --base-url https://YOUR-RENDER-URL --expected-pack-id cytofish_synthetic
+```
+
+It prints a pass/fail checklist (home page, pack metadata and its
+`synthetic_only` declaration, categories, items, the OpenAPI schema, and a
+stateless quiz-report round-trip) and exits nonzero on any failure. The
+same checks can be run from GitHub with no local setup: the **Hosted demo
+smoke check** workflow (`.github/workflows/hosted-smoke.yml`) is a manual
+`workflow_dispatch` — Actions tab → run it with your URL. It deploys
+nothing and needs no secrets. The script's own unit tests run in the
+regular pytest suite with the HTTP boundary faked, so `pytest` stays
+offline.
 
 ## Demo the CytoFISH pack
 
@@ -293,12 +320,14 @@ technical demo, plus CLI pack switching.
 ## Tests
 
 ```bash
-python -m pytest        # 137 tests
+python -m pytest        # 159 tests
 ```
 
-Tests run against an **isolated in-memory SQLite database** seeded from the
-same pack format, injected by overriding the one `get_session` dependency —
-real queries, zero mocks, and the development database is never touched.
+API tests run against an **isolated in-memory SQLite database** seeded from
+the same pack format, injected by overriding the one `get_session`
+dependency — real queries, zero mocks, and the development database is
+never touched. The hosted-demo smoke script's unit tests inject a fake HTTP
+transport, so the whole suite runs offline.
 
 ### Browser tests (Playwright)
 

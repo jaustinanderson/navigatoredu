@@ -134,10 +134,20 @@ keyboard-only journey tests, and v20 the in-app Reviewer guide with its
 own tested CTAs. v21 closed the project with presentation polish only:
 README restructure, screenshot refresh, and a GitHub-readable mirror of
 the Reviewer guide ([REVIEWER_GUIDE.md](REVIEWER_GUIDE.md)) — no app,
-backend, or test changes. Final state: 137 pytest tests, 25 browser tests,
-three validated packs, CI green across `test`, `docker-build`, and
-`browser-test`. The bug stories below remain the most useful part of this
-document.
+backend, or test changes. v22 added the one proof still missing after all
+of that: **deployment verification**. pytest proves the logic, the browser
+suite proves the UI, the accessibility and keyboard suites prove the
+experience, and `docker-build` proves the image — but every one of those
+runs against code, in CI. None can prove that the URL a reviewer is about
+to open — deployed from a fork, on an ephemeral free tier, possibly weeks
+ago — is alive, serving the expected pack, and still declaring its
+synthetic-only posture. `scripts/smoke_deploy.py` (plus a manual
+`workflow_dispatch` workflow) closes that last gap with a read-only
+checklist against the live instance; its unit tests fake the HTTP boundary
+so the ordinary suite stays offline. Final state: 159 pytest tests, 25
+browser tests, three validated packs, CI green across `test`,
+`docker-build`, and `browser-test`, and a deployment-confidence layer on
+top. The bug stories below remain the most useful part of this document.
 
 ## 3. Bugs and debugging stories
 
@@ -335,7 +345,7 @@ legitimate only when you can name the property the code correctly upholds.
 **"Tell me about the project."**
 - A learning platform where the whole domain is a validated JSON content
   pack; three synthetic domains run on one codebase, switched by one
-  variable or one click. 137 tests, no mocks; validator and Docker build in
+  variable or one click. 159 tests, no mocks; validator and Docker build in
   CI; stateless exportable reports; deploy blueprint included.
 
 **"Tell me about a bug you fixed."**

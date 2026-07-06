@@ -280,8 +280,10 @@ ranking tuning, no highlighting).
   validator pass-through of generated packs, `--force` semantics, CLI exit
   codes — entirely in temp directories, so the suite never leaves a
   generated pack in `data/`.
-- **137 tests**, all green in under a second, no services or secrets
-  required — which is what keeps the CI workflow short.
+- **159 tests**, all green in about a second, no services, network, or
+  secrets required — which is what keeps the CI workflow short. (The v22
+  deploy-smoke unit tests belong to this suite too: they exercise
+  `scripts/smoke_deploy.py` through an injected fake HTTP transport.)
 
 ### Accessibility audit (browser layer)
 
@@ -368,12 +370,15 @@ SQLite file persists across restarts; a compose healthcheck polls
 `/api/v1/categories`. `SEED_PATH` selects the pack; reset the volume
 (`docker compose down -v`) when switching.
 
-**CI:** `.github/workflows/ci.yml` — two jobs on every push and PR. `test`:
-checkout → Python 3.12 with pip caching → install → `pytest -v` →
+**CI:** `.github/workflows/ci.yml` — three jobs on every push and PR.
+`test`: checkout → Python 3.12 with pip caching → install → `pytest -v` →
 `validate_pack` against every shipped pack. `docker-build`: builds the image
 from a clean checkout and smoke-tests it (curl against `/api/v1/categories`
 and `/api/v1/pack-metadata` in the running container) — a packaging proof,
 deliberately not deployment: no push, no registry, no secrets.
+`browser-test`: the Playwright suite (behavior, accessibility audit,
+keyboard journeys) against a self-started instance — see "Test strategy"
+above.
 
 **Deployment option (Render):** `render.yaml` is a declarative blueprint a
 reviewer can deploy from a fork in the browser — free tier, no CLI, no
@@ -387,6 +392,27 @@ persistence beyond the demo SQLite file (ephemeral free-tier disks simply
 re-seed on restart, which is the same clear-then-load behavior the app has
 everywhere). Deployment readiness here is evidence the container story is
 real — not an invitation to treat a synthetic demo as production.
+
+**Hosted smoke checks (deployment verification, v22):** every check layer
+above proves something about the *code*: pytest proves the logic, the
+browser suite proves the UI, `docker-build` proves the image packages. None
+of them can prove that a specific deployed URL — spun up from a fork, on an
+ephemeral free tier, possibly weeks ago — is still alive, still serving the
+expected pack, and still declaring its synthetic-only posture.
+`scripts/smoke_deploy.py` is that last layer: a standard-library-only
+script that runs a read-only checklist against a live instance (home page,
+`/api/v1/pack-metadata` including the `synthetic_only` flag and an optional
+`--expected-pack-id` pin, categories, items, the OpenAPI schema advertising
+the report endpoint, and one stateless empty-payload `POST
+/api/v1/quiz/report` round-trip), prints pass/fail per check, and exits
+nonzero on any failure. It writes nothing to the target — the report
+endpoint is stateless by design, which is what makes a smoke POST safe.
+A manual `workflow_dispatch` workflow
+(`.github/workflows/hosted-smoke.yml`) runs the same script from GitHub
+with a URL input and no secrets; it deploys nothing, preserving the
+project's no-CD stance. The script's transport is one injectable `fetch`
+callable, so its unit tests run in the ordinary pytest suite with the HTTP
+boundary faked — CI never needs network access to a live deployment.
 
 **Milestone workflow:** the project is developed in sequential milestones,
 each starting from a fresh clone of the pushed repo, delivered with tests

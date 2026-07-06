@@ -1,0 +1,40 @@
+# Manual hosted-demo smoke check.
+#
+# Deployment verification, not CI: run this by hand (Actions tab → Hosted
+# demo smoke check → Run workflow) after deploying the Render blueprint, or
+# any time you want proof a hosted instance is alive, synthetic-only, and
+# serving the expected API. It deploys nothing, needs no secrets, and only
+# reads from the URL you give it (plus one stateless empty-report POST).
+name: Hosted demo smoke check
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "Deployed instance URL, e.g. https://your-demo.onrender.com"
+        required: true
+        type: string
+      expected_pack_id:
+        description: "Optional: fail unless this pack is active (e.g. cytofish_synthetic)"
+        required: false
+        type: string
+        default: ""
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # The script is standard-library only — no pip install needed.
+      - name: Run smoke checks
+        run: |
+          args=(--base-url "${{ inputs.base_url }}")
+          if [ -n "${{ inputs.expected_pack_id }}" ]; then
+            args+=(--expected-pack-id "${{ inputs.expected_pack_id }}")
+          fi
+          python scripts/smoke_deploy.py "${args[@]}"
