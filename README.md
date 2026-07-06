@@ -17,25 +17,68 @@ variable, with governance metadata and content validation enforced in CI.
 
 ## What this is, in 30 seconds
 
-> **Reviewing this project?** Run it and open **Reviewer guide** in the top
-> navigation (`#/guide`) — an in-app 3–5 minute walkthrough with the demo
-> path, the technical details worth noticing, the safety boundaries, and
-> one-click jumps into every section.
-
 - **What:** a reference-library / training-module / practice-case / quiz web
   app whose content is entirely data — a JSON "content pack" loaded into
-  SQLite by an idempotent seed script.
-- **Why:** to demonstrate, concretely, that structure and content can be
-  fully separated: swapping one file re-skins the whole product with zero
-  code changes.
-- **The problem it solves:** specialized fields need learning tools that
-  combine searchable reference material, scenario practice, and
-  self-assessment over one coherent data model — and content-driven systems
-  need their content held to the same rigor as code.
-- **Skills shown:** REST API design, relational data modeling, test-driven
-  development (137 tests, no mocks), data validation and governance, CI/CD
-  basics, Docker, and safe modeling of a sensitive domain using synthetic
-  content.
+  SQLite by an idempotent seed script. One FastAPI + SQLite + vanilla-JS
+  codebase; three complete demo domains.
+- **The problem it demonstrates:** content-driven systems usually treat
+  content as an afterthought — unvalidated, unversioned, coupled to code.
+  Here the content is held to a governed, CI-enforced contract while the
+  code encodes only structure.
+- **Why the content-pack architecture matters:** identifying the invariant
+  structure beneath a domain and keeping it out of the code is the
+  load-bearing idea behind LMS platforms, white-label products, and
+  documentation systems. This repo makes it concrete: switching packs
+  re-skins every page of the product with zero code changes.
+- **What to click first:** run the app and open **Reviewer guide** in the
+  top navigation (`#/guide`) — an in-app 3–5 minute walkthrough. Not running
+  anything? [docs/REVIEWER_GUIDE.md](docs/REVIEWER_GUIDE.md) is the same
+  guide, readable right here on GitHub.
+
+![Home page with the CytoFISH synthetic pack active](screenshots/home-cytofish-pack.png)
+
+## Reviewer quick path
+
+The whole evaluation, in order — 2–3 minutes in the running app:
+
+1. **Start at the [Reviewer guide](docs/REVIEWER_GUIDE.md)** (`#/guide` in
+   the app) — what the app is, what to try, what to notice, and the safety
+   boundaries, with one-click jumps into every section.
+2. **Try Reference search and filtering** — type a partial word (FTS5 prefix
+   matching), then narrow with tag and difficulty chips; filtering is
+   server-side.
+3. **Open a Practice case** — guided steps reveal one at a time; answer
+   material is deliberately absent from list endpoints.
+4. **Take the Quiz and download the report** — scoring is server-side
+   (correct answers never appear in the page source), and the report is a
+   self-contained printable HTML file generated statelessly.
+5. **Switch content packs** on the Packs page — one click reseeds the demo
+   database and the entire visible domain changes. This is the moment the
+   architecture proves itself.
+6. **Open the API docs** at `/docs` — the frontend is just one consumer of
+   the same versioned API.
+7. **Read the [Case Study](docs/PORTFOLIO_CASE_STUDY.md) and
+   [Retrospective](docs/RETROSPECTIVE.md)** — why it was built this way, and
+   the debugging stories behind it.
+
+## Technical proof, at a glance
+
+Every row is enforced by CI on every push — the badge above is the live
+status across all three jobs (`test`, `docker-build`, `browser-test`):
+
+| Proof | Where it lives |
+|-------|----------------|
+| **137 pytest tests, no mocks** | `tests/` — isolated in-memory DBs through one dependency-injection seam |
+| **25 Playwright browser tests** | `tests/browser/` — computed-style chip assertions, search/filter behavior, pack switching, report download verified file-in-hand |
+| **Accessibility audit in CI** | axe-core, full default ruleset, five views; serious/critical violations fail the build |
+| **Keyboard-only journeys** | five tests completing the main tasks with real Tab/Enter/Space events — no mouse, no programmatic focus |
+| **Content validated like code** | `validate_pack` gates all three packs — structure, references, quiz sanity, governance metadata |
+| **Docker build** | non-root image built and smoke-tested in CI on every push |
+| **Deployment option** | [`render.yaml`](render.yaml) blueprint — deploy a fork from the browser, no CLI |
+
+And the boundary, stated as often as it is enforced: **all content is
+synthetic; nothing here is suitable for real-world, operational, or
+clinical use.**
 
 ## Portfolio value
 
@@ -58,7 +101,7 @@ This project is built to be read by employers. It maps to real work in:
 - **Data-backed UI/API workflows** — versioned REST endpoints with deliberate
   list/detail response shaping; the frontend and Swagger docs both consume
   the same API.
-- **Test-driven development** — 87 pytest tests against isolated in-memory
+- **Test-driven development** — 137 pytest tests against isolated in-memory
   databases through one dependency-injection seam; real queries, zero mocks.
 - **Content-pack architecture** — the load-bearing idea behind white-label
   products, LMS platforms, and documentation systems: identify the invariant
@@ -231,9 +274,9 @@ step proves. The canonical order:
 The home page also states what the project demonstrates, what is
 intentionally out of scope (no clinical use, no PHI, no uploads, no
 auth/AI), and the tech stack — so a reviewer gets positioning, safety
-posture, and demo path without opening a single doc. The full multi-pack
-walkthrough (including CLI switching and a screenshot checklist) is in
-[docs/DEMO_GUIDE.md](docs/DEMO_GUIDE.md).
+posture, and demo path without opening a single doc. Presenting live?
+[docs/DEMO_GUIDE.md](docs/DEMO_GUIDE.md) has a 2-minute demo and a 5-minute
+technical demo, plus CLI pack switching.
 
 ## Data model
 
@@ -271,6 +314,8 @@ tests run the accessibility audit below (now including the Reviewer guide
 page), five run the keyboard-only journeys, and three pin the Reviewer
 guide's structure, CTA links, and keyboard operability — twenty-five
 browser tests total.
+
+![Playwright report: accessibility, keyboard, chip, and filter suites green](screenshots/accessibility-browser-tests.png)
 
 ### Keyboard-only journeys
 
@@ -325,22 +370,27 @@ the bundled synthetic packs.
 
 ## Screenshots and docs
 
-- [screenshots/](screenshots/) — captured views of all three packs;
-  [screenshots/README.md](screenshots/README.md) is the capture checklist
+- [screenshots/](screenshots/) — captured views of the final product
+  (Reviewer guide, search + filters, quiz report, pack browser, API docs,
+  and the browser-test report); [screenshots/README.md](screenshots/README.md)
+  lists what each shows
+- [docs/REVIEWER_GUIDE.md](docs/REVIEWER_GUIDE.md) — the in-app Reviewer
+  guide, mirrored for reading on GitHub without running the app
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — system design, data flow,
   lifecycles, and trade-offs
 - [docs/PORTFOLIO_CASE_STUDY.md](docs/PORTFOLIO_CASE_STUDY.md) — the project
   as a professional case study
 - [docs/RETROSPECTIVE.md](docs/RETROSPECTIVE.md) — the project as an
-  engineering story: v01–v15 narrative, the three major bugs and how they
-  were diagnosed, and the lessons that changed the architecture
+  engineering story: the milestone narrative, the three major bugs and how
+  they were diagnosed, and the lessons that changed the architecture
 - [docs/INTERVIEW_TALKING_POINTS.md](docs/INTERVIEW_TALKING_POINTS.md) —
   concise interview preparation for this project
 - [docs/CONTENT_AUTHORING.md](docs/CONTENT_AUTHORING.md) — pack schema and
   the create → validate → seed → run workflow
-- [docs/DEMO_GUIDE.md](docs/DEMO_GUIDE.md) — local walkthrough of all three
-  packs and what to screenshot
-- [docs/ROADMAP.md](docs/ROADMAP.md) — realistic next milestones
+- [docs/DEMO_GUIDE.md](docs/DEMO_GUIDE.md) — 2-minute and 5-minute demo
+  paths, pack switching, and presenter narration
+- [docs/ROADMAP.md](docs/ROADMAP.md) — the shipped milestone arc and
+  possible future work
 
 ## License
 

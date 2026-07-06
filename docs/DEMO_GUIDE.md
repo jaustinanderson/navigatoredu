@@ -1,140 +1,104 @@
 # NavigatorEdu — Demo Guide
 
-A step-by-step script for demonstrating NavigatorEdu locally, including how to
-switch between the three content packs and what to capture for a portfolio
-walkthrough.
+A presenter's script for demonstrating NavigatorEdu live — before an
+interview, on a screen-share, or over someone's shoulder. Two paths: a
+**2-minute demo** (the architecture argument and nothing else) and a
+**5-minute technical demo** (the full reviewer path with narration).
 
-Each pack is loaded by seeding the database from a different JSON file via the
-`SEED_PATH` environment variable. The application code never changes — only the
-content does. The home page and top banner display the **active content pack**
-so it is always clear which domain is loaded.
-
-As of v20, the app has an in-app **Reviewer guide** (`#/guide`, in the top
-navigation) — if you're handing the demo to someone else, or short on time,
-start there: it carries the walkthrough below in condensed form, the
-technical details to notice, the safety boundaries, and one-click jumps
-into every section. The scripted path in this document remains the fuller
-presenter version.
-
-As of v15, the repo carries a Render blueprint (`render.yaml`) — if you've
-deployed a copy, the demo works identically at the hosted URL; otherwise the
-local run remains the primary path.
-
-As of v14, the quiz offers **Download report** after checking answers — a
-printable, self-contained HTML summary generated statelessly from the
-submitted answers. It makes a great closing beat: check a quiz, download,
-open the file, and point at the footer line "Generated locally from
-submitted answers; not stored" — scope control as a feature.
-
-As of v13, Reference search is FTS5-backed with tag and difficulty filter
-chips — during the Reference beat, type a partial word (prefix matching) and
-click a tag chip to show server-side filtering; the active-filter bar and
-"Clear all" make the state obvious.
-
-As of v12, the home page is a self-guiding reviewer landing: a hero with
-three calls to action, the on-screen **Reviewer walkthrough** (six steps,
-each with a "Notice:" line saying what that step proves), a "What this
-demonstrates" grid, an "Intentionally out of scope" card, and the tech
-stack. When demoing live, you can simply follow the home page top to
-bottom — the narration below adds the spoken framing.
+Both paths align with the in-app **Reviewer guide** (`#/guide`, in the top
+navigation; mirrored in [REVIEWER_GUIDE.md](REVIEWER_GUIDE.md)) — if you're
+handing the demo to someone else rather than presenting, just point them
+there.
 
 ## One-time setup
 
 ```bash
 python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-```
-
-## Switching packs
-
-Fastest path while demoing: open **Packs** in the nav and click **Load demo
-pack** — the app reseeds from the chosen bundled pack, shows a success
-state, and every section re-skins. Use it right after showing the Reference
-page: the before/after is the whole architecture argument in one click.
-
-The command-line equivalents below still work unchanged and are what you'd
-use outside the browser (scripts, containers, packs not in the bundled
-allowlist).
-
-The seed script clears existing content before loading, so switching packs
-is just a reseed — the database always holds exactly one pack and two
-domains can never mix.
-
-### Default — Tidewatch Guild (celestial navigation)
-
-```bash
 python -m backend.app.seed
 uvicorn backend.app.main:app --reload
 ```
 
-### ArchiveGuild (historical-archive apprenticeship)
+Open <http://127.0.0.1:8000>. (Deployed a copy via the Render blueprint?
+The demo works identically at the hosted URL.)
+
+## The 2-minute demo
+
+One argument, made visually: *the entire domain is data*.
+
+1. **Home** (15s) — "This is a learning platform. The banner and this
+   manifest card tell you which content pack is loaded — right now, a
+   fictional celestial-navigation domain — and that everything is
+   synthetic."
+2. **Reference** (20s) — "Categories, searchable items, filters. Remember
+   what this content looks like."
+3. **Packs → load CytoFISH → back to Reference** (45s) — "One click
+   reseeded the database from a different JSON pack. Same code, same
+   routes, same UI — an entirely different domain, here a synthetic
+   cytogenetics education pack. Nothing about the models, API, or frontend
+   encodes a domain."
+4. **Close** (20s) — "The pack is validated in CI like code: structure,
+   references, quiz sanity, and governance metadata including a mandatory
+   synthetic-only declaration. That's the project: content held to the same
+   contract discipline as code."
+
+## The 5-minute technical demo
+
+The 2-minute demo, plus the capabilities and the proof. Follow the same
+order as the in-app Reviewer guide:
+
+1. **Home** — point out the active-pack manifest card (served by
+   `GET /api/v1/pack-metadata`) and the synthetic-only banner.
+2. **Packs → load CytoFISH** — one click reseeds through the same
+   clear-then-load path the CLI uses; only bundled, allowlisted packs, no
+   uploads.
+3. **Reference: search + filters** — type a partial word (*pro* finds
+   *probe* — FTS5 prefix matching), then click a tag chip and a difficulty
+   chip. Filtering is server-side; the active-filter bar and "Clear all"
+   keep state obvious. Mention: the FTS index is rebuilt on every reseed,
+   so pack switches can never serve stale results.
+4. **A practice case** — reveal guided steps one at a time; answer material
+   is deliberately absent from list endpoints and fetched on demand.
+5. **Quiz → Check answers → Download report** — scoring is server-side
+   (view page source: no correct answers). The report is a self-contained
+   printable HTML file, generated statelessly from the submitted answers —
+   point at the footer line "generated locally, not stored": scope control
+   as a feature.
+6. **`/docs`** — the same API, self-documenting; the frontend is just one
+   consumer.
+7. **Close on the tests** — 137 pytest tests with no mocks, a content
+   validator gating CI, and 25 Playwright browser tests including an
+   axe-core accessibility audit (serious/critical fail the build) and five
+   keyboard-only journeys. "The badge is green" is a claim about the repo,
+   not my laptop.
+
+## Switching packs from the command line
+
+The UI selector covers live demos; the CLI is the canonical path outside
+the browser. Seeding clears existing content first, so the database always
+holds exactly one pack:
 
 ```bash
+# Default — Tidewatch Guild (celestial navigation)
+python -m backend.app.seed
+
+# ArchiveGuild (historical-archive apprenticeship)
 SEED_PATH=data/seed_archiveguild.json python -m backend.app.seed
-SEED_PATH=data/seed_archiveguild.json uvicorn backend.app.main:app --reload
-```
 
-### CytoFISH Navigator (synthetic FISH/cytogenetics education)
-
-```bash
+# CytoFISH Navigator (synthetic FISH/cytogenetics education)
 SEED_PATH=data/seed_cytofish_synthetic.json python -m backend.app.seed
-SEED_PATH=data/seed_cytofish_synthetic.json uvicorn backend.app.main:app --reload
 ```
 
-> Note: passing `SEED_PATH` to `uvicorn` as well matters only on the very first
-> request to a fresh database, when the app auto-seeds if it finds no data. If
-> you seeded explicitly first (as above), the database is already populated and
-> the app serves whatever is in it.
-
-Then open <http://127.0.0.1:8000>. Confirm the banner and home page name the
-pack you loaded, and check <http://127.0.0.1:8000/api/v1/pack-metadata> to see
-the raw metadata.
-
-## Demo narration (the 90-second version)
-
-(A tighter 60-second variant lives in the README's "60-second demo script"
-section; this one adds the pack-switching payoff.)
-
-1. **Open the home page.** Point out the "Active content pack" card and the
-   banner — the app tells you which domain is loaded and restates that it is
-   synthetic-only.
-2. **Browse Reference → an item.** Show categorized, searchable content with
-   markdown bodies.
-3. **Open a practice case.** Reveal steps one at a time to show the guided
-   reveal, ending in the outcome.
-4. **Take the quiz, submit.** Emphasize that answers are scored server-side and
-   never appear in the page source.
-5. **Switch packs** (reseed with a different `SEED_PATH`, restart, refresh).
-   Same app, same routes, completely different domain — this is the payoff
-   shot.
-
-## Screenshots to capture for a portfolio walkthrough
-
-Capture each at ~1280px width. To show content-agnosticism, capture the first
-one for **all three packs**; the rest can use whichever pack reads best
-(CytoFISH is the most impressive for a technical audience).
-
-| File | View | What it demonstrates |
-|------|------|----------------------|
-| `home-tidewatch.png` | Home (`#/`) with Tidewatch loaded | Active-pack card + banner |
-| `home-archiveguild.png` | Home with ArchiveGuild loaded | Same UI, different pack |
-| `home-cytofish.png` | Home with CytoFISH loaded | Same UI, specialized domain |
-| `reference-cytofish.png` | Categories with a search in progress | Search + taxonomy |
-| `item-detail.png` | A reference item | Markdown content rendering |
-| `practice-case.png` | A case with two steps revealed | Guided reveal UX |
-| `training.png` | Training modules page | Module-grouped lessons |
-| `quiz-cytofish-results.png` | Quiz after "Check answers" | Server-side scoring + explanations |
-| `pack-metadata.png` | `/api/v1/pack-metadata` JSON, or `/docs` | Governance metadata exposed via API |
-
-An animated GIF of switching packs (home page before/after a reseed) is the
-single most convincing artifact for this project — it shows the whole
-content-agnostic thesis in one loop.
+Restart `uvicorn` with the same `SEED_PATH` if you're relying on
+first-request auto-seeding; after an explicit seed the app simply serves
+whatever is in the database. Confirm the banner names the pack you loaded,
+and check <http://127.0.0.1:8000/api/v1/pack-metadata> for the raw
+governance metadata.
 
 ## Bonus beat: scaffold a brand-new pack live
 
-For a technical audience, showing the *authoring* story lands well — it proves
-the content-agnostic thesis isn't just three prepared files but a repeatable
-workflow.
+For a technical audience, the *authoring* story proves the content-agnostic
+thesis isn't three prepared files but a repeatable workflow:
 
 ```bash
 # 1. Scaffold a valid, safe-by-default pack in one command.
@@ -148,13 +112,18 @@ SEED_PATH=data/seed_demo_pack.json python -m backend.app.seed
 SEED_PATH=data/seed_demo_pack.json uvicorn backend.app.main:app --reload
 ```
 
-Open <http://127.0.0.1:8000>: the banner and home card name the new
-`Demo Pack`, and every section renders the placeholder starter records. The
-narration: *"A new domain starts from a valid, governed skeleton — I only
-replace the TODO records; I never rebuild the contract."* Delete the throwaway
-file afterward (`rm data/seed_demo_pack.json`) so it doesn't get committed.
+The narration: *"A new domain starts from a valid, governed skeleton — I
+only replace the TODO records; I never rebuild the contract."* Delete the
+throwaway file afterward (`rm data/seed_demo_pack.json`). Full workflow and
+schema: [CONTENT_AUTHORING.md](CONTENT_AUTHORING.md).
 
-Full authoring workflow and schema: [CONTENT_AUTHORING.md](CONTENT_AUTHORING.md).
+## Screenshots
+
+The repository ships a curated set in [../screenshots/](../screenshots/)
+with descriptions in [screenshots/README.md](../screenshots/README.md). If
+you re-capture after UI changes, match that list: capture at ~1280 px
+width with the CytoFISH pack loaded, and keep the file names stable so
+README and docs references stay valid.
 
 ## Safety reminder for the CytoFISH pack
 

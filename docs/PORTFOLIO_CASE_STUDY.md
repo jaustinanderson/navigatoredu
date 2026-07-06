@@ -1,16 +1,39 @@
 # NavigatorEdu — Portfolio Case Study
 
 *A professional case study of the project: what it is, why it was built this
-way, and what it demonstrates. For interview preparation specifically, see
-[INTERVIEW_TALKING_POINTS.md](INTERVIEW_TALKING_POINTS.md).*
+way, and what it demonstrates. For a 3–5 minute hands-on evaluation path,
+see the [Reviewer Guide](REVIEWER_GUIDE.md); for interview preparation
+specifically, see [INTERVIEW_TALKING_POINTS.md](INTERVIEW_TALKING_POINTS.md).*
+
+## The 60-second version
+
+NavigatorEdu is a full-stack learning platform — searchable reference
+library, training modules, guided practice cases, server-scored quizzes —
+where **the entire knowledge domain is one validated JSON file**. Load a
+different file and the same codebase becomes a different product: three
+complete demo domains ship in the repo, including a fully synthetic
+cytogenetics/FISH education pack. Everything is covered by 137 backend
+tests (no mocks), 25 real-browser tests including an accessibility audit
+and keyboard-only journeys, a content validator that gates CI, a Docker
+build check, and a one-file deployment blueprint. All content is synthetic;
+nothing is suitable for clinical or operational use — and that boundary is
+machine-enforced, not just promised.
+
+It was built in twenty-one sequential milestones, each delivered with
+tests, documentation, and CI green, so the repository history itself
+demonstrates incremental, disciplined delivery.
+
+The engineering arc, in one line per act: prove the **content-pack
+architecture** (one codebase, three domains, zero code changes to switch);
+give it real capabilities (**FTS5 search** with composable filters,
+**exportable stateless quiz reports**, a **deployment option**); then prove
+it holds up (**Playwright browser tests**, an **axe-core accessibility
+audit** that fails the build on serious violations, **keyboard-only journey
+tests**); and finally make it effortless to evaluate (an in-app **Reviewer
+guide** with tested links, mirrored in the [Reviewer Guide](REVIEWER_GUIDE.md)
+doc).
 
 ## Context
-
-NavigatorEdu is a portfolio project: a full-stack learning platform built to
-be read and evaluated by employers, not shipped to users. It was developed in
-nine sequential milestones, each delivered with tests, documentation, and CI
-green, so the repository history itself demonstrates incremental,
-disciplined delivery.
 
 The product shape is deliberately familiar — a reference library, training
 modules, guided practice cases, and a quiz engine — because that shape recurs
@@ -43,9 +66,9 @@ Constraints were chosen up front and kept:
   anyone can clone, seed, and run in under a minute.
 - **All content synthetic.** No real organizations, people, records, or
   procedures anywhere — enforced mechanically, not just promised.
-- **No overbuilding.** Every trade-off (JSON columns, hand-rolled validation,
-  hand-rolled validation) is the honest choice at this scale, with the
-  upgrade path named in the code or docs.
+- **No overbuilding.** Every trade-off (JSON columns, hand-rolled
+  validation, a no-build-step frontend) is the honest choice at this scale,
+  with the upgrade path named in the code or docs.
 - **Documentation is a first-class deliverable.** README, architecture
   notes, authoring guide, demo guide, and this case study ship with the code.
 
@@ -134,14 +157,16 @@ validity, clinical use, or clinical expertise.
 | v18 | axe-core accessibility audit in CI (fails on serious/critical); contrast fixes it forced | 137 pytest + 16 browser |
 | v19 | Keyboard-only journeys: main tasks proven completable without a mouse | 137 pytest + 21 browser |
 | v20 | Reviewer guide: in-app 3–5 minute evaluation walkthrough with tested CTAs | 137 pytest + 25 browser |
+| v21 | Final portfolio polish: README restructure, screenshot refresh, Reviewer Guide doc | 137 pytest + 25 browser |
 
 The arc is intentional: build the product, prove the abstraction
 (`SEED_PATH`), enforce the contract (validator), stress it with a hard domain
 (CytoFISH), make governance explicit (metadata), then make the safe path the
 easy path (authoring) — and finally make the whole thing effortless to
-*evaluate*: automated accessibility and keyboard coverage, and a reviewer
-guide inside the product itself. Test count grew with every functional
-milestone.
+*evaluate*: automated accessibility and keyboard coverage, a reviewer
+guide inside the product itself, and a presentation pass so the repository
+reads clearly in a reviewer's first three minutes. Test count grew with
+every functional milestone.
 
 ## What this demonstrates professionally
 
@@ -194,9 +219,11 @@ show how the builder thinks when the plan stops working.
 Naming limitations yourself, with a rationale, is a stronger signal than
 pretending they don't exist.
 
-## Future roadmap
+## Status and future work
 
-Kept realistic and incremental — see [ROADMAP.md](ROADMAP.md) for the full
-plan (UI polish, an in-app pack selector, richer search, exportable learning
-reports, a deployment option, and — only after substantially stronger
+As of v21 the project is a **complete portfolio demo**: every planned
+milestone shipped, and the final pass was presentation polish rather than
+features. [ROADMAP.md](ROADMAP.md) records the full shipped arc and a short
+list of possible future work (richer authoring tooling, a maintained hosted
+demo, typed API client generation, and — only after substantially stronger
 guardrails — an AI/RAG study assistant).

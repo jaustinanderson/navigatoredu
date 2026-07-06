@@ -1,17 +1,20 @@
 # NavigatorEdu — Roadmap
 
-Realistic, incremental next milestones. Each keeps the project's constraints:
-beginner-manageable, reviewer-runnable in one command, all content synthetic,
-tests and docs shipped with every change. Versions continue the existing
-milestone sequence (v09 was portfolio polish).
+The milestone plan, kept as a living record: sections were written as plans
+and struck through as they shipped, with honest notes where reality drifted
+from the plan. **As of v21 the sequence is complete — the project is a
+finished portfolio demo.** Each milestone kept the project's constraints:
+beginner-manageable, reviewer-runnable in one command, all content
+synthetic, tests and docs shipped with every change.
 
-## v10 — UI polish
+## ~~v10 — UI polish~~ (shipped)
 
 Tighten the frontend without adding a build step: consistent spacing and
 typography, loading and empty states, small-screen layout fixes, keyboard
-navigation for the quiz, and clearer active-pack presentation. Success
-criterion: the screenshots checklist can be re-captured and every view looks
-deliberate.
+navigation for the quiz, and clearer active-pack presentation. Shipped as
+the frontend reviewer-experience milestone (plus the clear-then-load
+seeding fix that manual review surfaced — story A in the
+[RETROSPECTIVE](RETROSPECTIVE.md)).
 
 ## ~~v11 — Content-pack browser / demo selector~~ (shipped)
 
@@ -111,6 +114,19 @@ the page's own review surfaced. Covered by three new browser tests
 (nav reachability, structure + every CTA href, keyboard-only CTA
 activation) plus a fifth axe scan — 25 browser tests total.
 
+## ~~v21 — Final portfolio polish and screenshot refresh~~ (shipped)
+
+The closing milestone, deliberately feature-free: make the repository
+maximally readable in a reviewer's first three minutes. Shipped: a
+restructured README (what/why up top, a "Reviewer quick path", a
+technical-proof table), a full screenshot refresh representing the final
+product (Reviewer guide, FTS search + filters, quiz report download, pack
+browser, API docs, and a green browser-test report), a
+[REVIEWER_GUIDE.md](REVIEWER_GUIDE.md) mirroring the in-app guide for
+GitHub-only readers, a recruiter-friendly case-study opening, and demo-guide
+2-minute/5-minute paths. No app, backend, or test changes; all 137 pytest
+and 25 browser tests unchanged and passing.
+
 ## ~~Project retrospective~~ (shipped in v16)
 
 Shipped: [RETROSPECTIVE.md](RETROSPECTIVE.md) — the v01–v15 engineering
@@ -129,10 +145,28 @@ builds and smoke-tests the image on every push — a build check, not CD
 exist; hosting one is the reader's single click. Version drift continues:
 planned as v14, shipped as v15.
 
-## Later — AI/RAG study assistant (only after stronger guardrails)
+## Possible future work
+
+The current version is a complete portfolio demo — nothing below is needed
+for it to serve its purpose, and none of it is planned. If the project ever
+grew beyond a portfolio piece, the realistic next steps, roughly in order
+of value:
+
+- **Richer authoring tooling** — a `--seed` smoke-check flag and a pack
+  linting/preview mode to shorten the author's loop.
+- **A maintained hosted demo** — the Render blueprint exists; keeping one
+  live URL (with an uptime badge) would remove the last click for reviewers.
+- **Typed API client generation from OpenAPI** — catch response-shape drift
+  and demonstrate schema-driven integration.
+- **Engine/content repository split** — the platform as a package, packs as
+  content repos; the natural structural step at real scale.
+- **Screen-reader UX passes** — the one accessibility layer still manual,
+  documented as such since v18.
+
+### AI/RAG study assistant (only after stronger guardrails)
 
 An assistant that answers questions strictly from the loaded pack's content
-is the obvious eventual feature — and deliberately not next. Prerequisites
+is the obvious eventual feature — and deliberately unbuilt. Prerequisites
 before it would be responsible to build:
 
 - Retrieval strictly scoped to pack content, with citations to the source

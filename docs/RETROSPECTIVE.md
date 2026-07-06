@@ -125,6 +125,20 @@ CMD), `SEED_PATH` documented for pack selection at deploy time, and a CI
 `docker-build` job that builds and smoke-tests the image on every push — a
 build check, deliberately not CD.
 
+**Closing note (v16–v21).** This document was written at v16 as the
+v01–v15 story; the milestones after it turned from building to proving and
+presenting. v17 added the Playwright browser suite (the direct answer to
+the chip incident), v18 the axe-core accessibility audit — which promptly
+and correctly failed its own author's contrast choices — v19 the
+keyboard-only journey tests, and v20 the in-app Reviewer guide with its
+own tested CTAs. v21 closed the project with presentation polish only:
+README restructure, screenshot refresh, and a GitHub-readable mirror of
+the Reviewer guide ([REVIEWER_GUIDE.md](REVIEWER_GUIDE.md)) — no app,
+backend, or test changes. Final state: 137 pytest tests, 25 browser tests,
+three validated packs, CI green across `test`, `docker-build`, and
+`browser-test`. The bug stories below remain the most useful part of this
+document.
+
 ## 3. Bugs and debugging stories
 
 ### A. The stale-seed / pack-drift bug
