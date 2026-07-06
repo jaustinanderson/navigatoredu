@@ -15,6 +15,13 @@ variable, with governance metadata and content validation enforced in CI.
 > system itself: each pack must declare `synthetic_only: true` in governance
 > metadata that the validator checks on every CI run.
 
+## Live demo
+
+**Live app:** https://navigatoredu.onrender.com  
+**Start here:** https://navigatoredu.onrender.com/#/guide
+
+The hosted demo is running the synthetic CytoFISH content pack. It contains no PHI, no real patient data, and is for educational/portfolio review only.
+
 ## What this is, in 30 seconds
 
 - **What:** a reference-library / training-module / practice-case / quiz web
