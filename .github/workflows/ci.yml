@@ -4,6 +4,9 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -14,9 +17,10 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
+          cache-dependency-path: requirements-dev.txt
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
+      - name: Install development dependencies
+        run: pip install -r requirements-dev.txt
 
       - name: Run tests
         run: python -m pytest -v
@@ -62,9 +66,10 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
+          cache-dependency-path: requirements-dev.txt
 
-      - name: Install Python dependencies
-        run: pip install -r requirements.txt
+      - name: Install Python development dependencies
+        run: pip install -r requirements-dev.txt
 
       - uses: actions/setup-node@v6
         with:
