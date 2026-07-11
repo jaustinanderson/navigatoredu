@@ -14,10 +14,13 @@ NavigatorEdu is a content-driven learning-platform portfolio project. Contributi
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install -r requirements.txt
+python -m pip install -r requirements-dev.txt
 python -m backend.app.seed
 uvicorn backend.app.main:app --reload
 ```
+
+On Windows PowerShell, activate the environment with
+`.venv\Scripts\Activate.ps1`.
 
 Run the main validation and test commands before opening a pull request:
 
@@ -28,7 +31,14 @@ python -m backend.app.validate_pack data/seed_cytofish_synthetic.json
 python -m pytest -q
 ```
 
-Use the repository's documented Playwright workflow for browser and accessibility tests.
+Install the locked Node development dependencies and Playwright browser before
+running the browser and accessibility layer:
+
+```bash
+npm ci
+npx playwright install --with-deps chromium
+npm run test:browser
+```
 
 ## Change Workflow
 

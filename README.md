@@ -149,9 +149,13 @@ clinical capability.
 
 ## Run it locally
 
+Prerequisites: Python 3.12. Node.js 22 is needed only for the optional browser
+test suite; Docker is optional.
+
 ```bash
-python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
+python -m venv .venv
+source .venv/bin/activate   # Windows PowerShell: .venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
 python -m backend.app.seed        # builds data/navigatoredu.db from seed.json
 uvicorn backend.app.main:app --reload
 ```
@@ -327,6 +331,7 @@ technical demo, plus CLI pack switching.
 ## Tests
 
 ```bash
+python -m pip install -r requirements-dev.txt
 python -m pytest        # 159 tests
 ```
 
@@ -393,7 +398,7 @@ independently audited. Those are scoped follow-ups, not claims of
 completeness.
 
 ```bash
-npm install
+npm ci
 npx playwright install --with-deps chromium
 npm run test:browser
 ```
@@ -430,4 +435,6 @@ the bundled synthetic packs.
 
 ## License
 
-Portfolio/education demo. All content fictional and synthetic.
+This repository is available under the [MIT License](LICENSE). All bundled demo
+content is fictional and synthetic, and nothing is suitable for clinical or
+operational use.

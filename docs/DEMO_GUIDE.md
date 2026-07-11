@@ -13,8 +13,9 @@ there.
 ## One-time setup
 
 ```bash
-python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
+python -m venv .venv
+source .venv/bin/activate   # Windows PowerShell: .venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
 python -m backend.app.seed
 uvicorn backend.app.main:app --reload
 ```

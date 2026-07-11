@@ -359,10 +359,15 @@ is the cheapest accessibility investment in the codebase.
 
 ## Deployment and dev workflow
 
-**Local:** venv → `pip install -r requirements.txt` →
+**Local app:** venv → `pip install -r requirements.txt` →
 `python -m backend.app.seed` → `uvicorn backend.app.main:app --reload`.
 Lifespan startup creates tables and auto-seeds an empty database, so the
 first run works even without the explicit seed step.
+
+**Development/test:** install `requirements-dev.txt`, which includes the
+runtime requirements plus pytest and Starlette's current `httpx2` test-client
+transport. Runtime and test-only dependencies stay separate, so the Docker
+image does not ship pytest or an HTTP test client.
 
 **Docker:** single-stage image on `python:3.12-slim`, running as a non-root
 user. `docker-compose.yml` mounts a named volume at `/app/data` so the
@@ -371,7 +376,8 @@ SQLite file persists across restarts; a compose healthcheck polls
 (`docker compose down -v`) when switching.
 
 **CI:** `.github/workflows/ci.yml` — three jobs on every push and PR.
-`test`: checkout → Python 3.12 with pip caching → install → `pytest -v` →
+`test`: checkout → Python 3.12 with pip caching → install development
+requirements → `pytest -v` →
 `validate_pack` against every shipped pack. `docker-build`: builds the image
 from a clean checkout and smoke-tests it (curl against `/api/v1/categories`
 and `/api/v1/pack-metadata` in the running container) — a packaging proof,
