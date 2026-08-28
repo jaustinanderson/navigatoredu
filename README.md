@@ -75,7 +75,7 @@ status across all three jobs (`test`, `docker-build`, `browser-test`):
 
 | Proof | Where it lives |
 |-------|----------------|
-| **159 pytest tests, no mocks** | `backend/tests/` — API tests on isolated in-memory DBs through one dependency-injection seam; deploy-smoke unit tests fake only the HTTP boundary |
+| **161 pytest tests, no mocks** | `backend/tests/` — API tests on isolated in-memory DBs through one dependency-injection seam; deploy-smoke unit tests fake only the HTTP boundary |
 | **25 Playwright browser tests** | `tests/browser/` — computed-style chip assertions, search/filter behavior, pack switching, report download verified file-in-hand |
 | **Accessibility audit in CI** | axe-core, full default ruleset, five views; serious/critical violations fail the build |
 | **Keyboard-only journeys** | five tests completing the main tasks with real Tab/Enter/Space events — no mouse, no programmatic focus |
@@ -108,7 +108,7 @@ This project is built to be read by employers. It maps to real work in:
 - **Data-backed UI/API workflows** — versioned REST endpoints with deliberate
   list/detail response shaping; the frontend and Swagger docs both consume
   the same API.
-- **Test-driven development** — 159 pytest tests; API tests run against
+- **Test-driven development** — 161 pytest tests; API tests run against
   isolated in-memory databases through one dependency-injection seam — real
   queries, zero mocks.
 - **Content-pack architecture** — the load-bearing idea behind white-label
@@ -137,7 +137,7 @@ clinical capability.
 |------|-------------|
 | Backend | **FastAPI**, versioned `/api/v1` routers, dependency-injected sessions |
 | Data | **SQLModel / SQLite**; six related tables; JSON columns for list fields; **FTS5 full-text search** over reference items, rebuilt on every seed |
-| Testing | **Pytest** — 159 tests; API tests on isolated in-memory DBs via one DI override, no mocks |
+| Testing | **Pytest** — 161 tests; API tests on isolated in-memory DBs via one DI override, no mocks |
 | CI | **GitHub Actions** — pytest + pack validation, Docker build check, and Playwright browser tests including an **axe-core accessibility audit** (fails on serious/critical), on every push/PR |
 | Ops | **Docker** (non-root image, PORT-aware) + compose volume and healthcheck; **Render blueprint** for deploy-it-yourself hosting |
 | Content pipeline | **Content-pack validator** (`validate_pack`) gating CI; **SEED_PATH**-based pack switching; **authoring command** (`new_pack`) scaffolding valid, safe-by-default packs |
@@ -211,6 +211,12 @@ in the blueprint).
 Deployed a copy (or about to screen-share one)? Prove it's alive,
 synthetic-only, and serving the expected API in one command — the smoke
 script is standard-library Python, so it runs anywhere:
+
+Render free-tier instances may be asleep when the check begins. The home-page
+probe therefore makes up to three bounded attempts before the rest of the
+checklist runs. A warm instance normally finishes in seconds; a cold start can
+take about a minute. Exhausted retries are reported as a clean failed check,
+not a traceback.
 
 ```bash
 python scripts/smoke_deploy.py --base-url https://YOUR-RENDER-URL
@@ -332,7 +338,7 @@ technical demo, plus CLI pack switching.
 
 ```bash
 python -m pip install -r requirements-dev.txt
-python -m pytest        # 159 tests
+python -m pytest        # 161 tests
 ```
 
 API tests run against an **isolated in-memory SQLite database** seeded from

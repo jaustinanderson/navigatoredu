@@ -144,10 +144,12 @@ ago — is alive, serving the expected pack, and still declaring its
 synthetic-only posture. `scripts/smoke_deploy.py` (plus a manual
 `workflow_dispatch` workflow) closes that last gap with a read-only
 checklist against the live instance; its unit tests fake the HTTP boundary
-so the ordinary suite stays offline. Final state: 159 pytest tests, 25
-browser tests, three validated packs, CI green across `test`,
-`docker-build`, and `browser-test`, and a deployment-confidence layer on
-top. The bug stories below remain the most useful part of this document.
+so the ordinary suite stays offline. v22 shipped with 159 pytest tests; two
+cold-start retry tests added during maintenance bring the current state to
+161 pytest tests, alongside 25 browser tests, three validated packs, CI
+green across `test`, `docker-build`, and `browser-test`, and a
+deployment-confidence layer on top. The bug stories below remain the most
+useful part of this document.
 
 ## 3. Bugs and debugging stories
 
@@ -345,7 +347,7 @@ legitimate only when you can name the property the code correctly upholds.
 **"Tell me about the project."**
 - A learning platform where the whole domain is a validated JSON content
   pack; three synthetic domains run on one codebase, switched by one
-  variable or one click. 159 tests, no mocks; validator and Docker build in
+  variable or one click. 161 tests, no mocks; validator and Docker build in
   CI; stateless exportable reports; deploy blueprint included.
 
 **"Tell me about a bug you fixed."**

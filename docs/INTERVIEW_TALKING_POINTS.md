@@ -10,7 +10,7 @@ code and tests actually show.
 > knowledge domain is data: a validated JSON content pack loaded into SQLite.
 > One FastAPI codebase hosts three complete demo domains — including a fully
 > synthetic cytogenetics/FISH education pack — switched by a single
-> environment variable. It has 159 tests with no mocks, a CI-gated content
+> environment variable. It has 161 tests with no mocks, a CI-gated content
 > validator, and governance metadata so the system itself reports what
 > content is loaded and that it's synthetic-only."
 
@@ -35,7 +35,7 @@ code and tests actually show.
 >
 > Testing runs through one dependency-injection seam: every route gets its
 > database session through a single dependency, and tests override just that
-> with an in-memory SQLite engine. So it's 159 tests running real queries, no
+> with an in-memory SQLite engine. So it's 161 tests running real queries, no
 > mocks, and the dev database is never touched. CI runs the suite plus the
 > validator on every push.
 >
@@ -76,7 +76,7 @@ code and tests actually show.
    hand-rolled validation, no-build frontend — each is
    the honest choice at this scale, each has a named upgrade path.
 10. **Incremental delivery discipline.** Twenty-two milestones, each shipped
-    with tests and docs and green CI; pytest count grew from 14 to 159, with
+    with tests and docs and green CI; pytest count grew from 14 to 161, with
     25 browser tests layered on top. The commit history is itself evidence.
 
 ## Five likely questions, with strong answers
@@ -205,7 +205,7 @@ Things **not** to say (they overclaim and an interviewer will notice):
 > Designed and built a full-stack learning platform (Python/FastAPI, SQLite,
 > REST) with a content-pack architecture hosting three swappable demo
 > domains; enforced content contracts via a CI-gated validator and governance
-> metadata; 159-test pytest suite on isolated databases with no mocks, plus
+> metadata; 161-test pytest suite on isolated databases with no mocks, plus
 > Playwright browser, accessibility, and keyboard-journey tests in CI;
 > containerized with Docker with a deployment blueprint and hosted-demo
 > smoke checks.

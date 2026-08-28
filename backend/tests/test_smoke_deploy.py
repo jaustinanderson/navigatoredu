@@ -9,7 +9,14 @@ import urllib.error
 
 import pytest
 
-from scripts.smoke_deploy import fetch, main, normalize_base_url, run_checks
+from scripts.smoke_deploy import (
+    WAKE_ATTEMPTS,
+    WAKE_RETRY_DELAY_SECONDS,
+    fetch,
+    main,
+    normalize_base_url,
+    run_checks,
+)
 
 BASE = "https://demo.example.test"
 
@@ -109,6 +116,61 @@ class TestHealthyDeployment:
 
 
 class TestFailureModes:
+    def test_home_timeout_then_success_is_retried(self):
+        healthy = make_fake_fetch()
+        home_outcomes = iter([
+            TimeoutError("cold-start read timed out"),
+            (200, "text/html", b"<html><title>NavigatorEdu</title></html>"),
+        ])
+        home_calls = []
+        sleeps = []
+
+        def cold_then_ready(url, method="GET", body=None, content_type=None):
+            if url == BASE + "/":
+                home_calls.append(url)
+                outcome = next(home_outcomes)
+                if isinstance(outcome, Exception):
+                    raise outcome
+                return outcome
+            return healthy(url, method=method, body=body,
+                           content_type=content_type)
+
+        checks = by_name(run_checks(
+            BASE,
+            fetch_fn=cold_then_ready,
+            sleep_fn=sleeps.append,
+        ))
+
+        ok, detail = checks["home page returns 200 and names NavigatorEdu"]
+        assert ok is True
+        assert "after 2 attempts" in detail
+        assert len(home_calls) == 2
+        assert sleeps == [WAKE_RETRY_DELAY_SECONDS]
+
+    def test_home_timeout_exhausts_bounded_retry_without_crashing(self):
+        healthy = make_fake_fetch()
+        home_calls = []
+        sleeps = []
+
+        def always_cold(url, method="GET", body=None, content_type=None):
+            if url == BASE + "/":
+                home_calls.append(url)
+                raise TimeoutError("cold-start read timed out")
+            return healthy(url, method=method, body=body,
+                           content_type=content_type)
+
+        checks = by_name(run_checks(
+            BASE,
+            fetch_fn=always_cold,
+            sleep_fn=sleeps.append,
+        ))
+
+        ok, detail = checks["home page returns 200 and names NavigatorEdu"]
+        assert ok is False
+        assert f"after {WAKE_ATTEMPTS} attempts" in detail
+        assert len(home_calls) == WAKE_ATTEMPTS
+        assert sleeps == [WAKE_RETRY_DELAY_SECONDS] * (WAKE_ATTEMPTS - 1)
+
     def test_home_page_500_fails_only_that_check(self):
         fake = make_fake_fetch({"/": (500, "text/html", b"boom")})
         checks = by_name(run_checks(BASE, fetch_fn=fake))
@@ -184,7 +246,8 @@ class TestFailureModes:
                                 ("/", "/api/v1/pack-metadata", "/api/v1/categories",
                                  "/api/v1/items", "/openapi.json",
                                  "/api/v1/quiz/report")})
-        results = run_checks(BASE, fetch_fn=fake)
+        results = run_checks(BASE, fetch_fn=fake,
+                             sleep_fn=lambda _seconds: None)
         assert results and all(ok is False for _, ok, _ in results)
         assert all("unreachable" in d for _, _, d in results
                    if "metadata response" not in d)
@@ -204,7 +267,7 @@ class TestMain:
 
     def test_exit_nonzero_on_failure(self, monkeypatch, capsys):
         self._patch_fetch(monkeypatch,
-                          make_fake_fetch({"/": (503, "text/html", b"down")}))
+                          make_fake_fetch({"/": (500, "text/html", b"down")}))
         rc = main(["--base-url", BASE])
         out = capsys.readouterr().out
         assert rc == 1
