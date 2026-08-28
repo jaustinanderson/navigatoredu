@@ -23,10 +23,15 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import time
 import urllib.error
 import urllib.request
 
 TIMEOUT_SECONDS = 20
+WAKE_ATTEMPTS = 3
+WAKE_RETRY_DELAY_SECONDS = 5
+RETRYABLE_WAKE_STATUSES = frozenset({502, 503, 504})
+NETWORK_ERRORS = (urllib.error.URLError, TimeoutError)
 USER_AGENT = "navigatoredu-smoke-deploy/1.0"
 
 
@@ -41,7 +46,8 @@ def fetch(url: str, method: str = "GET", body: bytes | None = None,
 
     HTTP error statuses are returned, not raised, so checks can report the
     actual status code. Network-level failures (DNS, refused, TLS, timeout)
-    raise urllib.error.URLError for the caller to turn into a failed check.
+    raise ``urllib.error.URLError`` or ``TimeoutError`` for the caller to turn
+    into a failed check.
     """
     request = urllib.request.Request(url, data=body, method=method)
     request.add_header("User-Agent", USER_AGENT)
@@ -55,8 +61,13 @@ def fetch(url: str, method: str = "GET", body: bytes | None = None,
         return e.code, e.headers.get("Content-Type", ""), e.read()
 
 
+def _network_error_reason(error: BaseException) -> str:
+    """Return a stable human-readable reason for URL and socket failures."""
+    return str(getattr(error, "reason", error))
+
+
 def run_checks(base_url: str, expected_pack_id: str | None = None,
-               fetch_fn=None) -> list[tuple[str, bool, str]]:
+               fetch_fn=None, sleep_fn=None) -> list[tuple[str, bool, str]]:
     """Run every smoke check against a normalized base URL.
 
     Returns a list of (check name, passed, detail). Checks that depend on a
@@ -64,8 +75,13 @@ def run_checks(base_url: str, expected_pack_id: str | None = None,
     explanatory detail when that response was unusable, so the checklist
     always has the same shape. `fetch_fn` exists so tests can inject a fake
     transport; resolved at call time so monkeypatching module `fetch` works.
+    The home-page check retries only network failures and common cold-start
+    gateway statuses, giving a sleeping free-tier deployment a bounded chance
+    to wake before the remaining checks run. `sleep_fn` keeps that retry path
+    deterministic in tests.
     """
     fetch = fetch_fn if fetch_fn is not None else globals()["fetch"]
+    sleep = sleep_fn if sleep_fn is not None else time.sleep
     results: list[tuple[str, bool, str]] = []
 
     def check(name: str, passed: bool, detail: str) -> None:
@@ -74,17 +90,33 @@ def run_checks(base_url: str, expected_pack_id: str | None = None,
     def get(path: str):
         return fetch(base_url + path)
 
-    # -- Home page ---------------------------------------------------------
-    try:
-        status, _, body = get("/")
-        text = body.decode("utf-8", errors="replace")
+    # -- Home page / bounded cold-start wake-up ----------------------------
+    for attempt in range(1, WAKE_ATTEMPTS + 1):
+        try:
+            status, _, body = get("/")
+            text = body.decode("utf-8", errors="replace")
+        except NETWORK_ERRORS as e:
+            if attempt < WAKE_ATTEMPTS:
+                sleep(WAKE_RETRY_DELAY_SECONDS)
+                continue
+            check("home page returns 200 and names NavigatorEdu", False,
+                  f"unreachable after {attempt} attempts: "
+                  f"{_network_error_reason(e)}")
+            break
+
+        if status in RETRYABLE_WAKE_STATUSES and attempt < WAKE_ATTEMPTS:
+            sleep(WAKE_RETRY_DELAY_SECONDS)
+            continue
+
+        branded = "NavigatorEdu" in text
+        detail = f"status {status}"
+        if attempt > 1:
+            detail += f" after {attempt} attempts"
+        if not branded:
+            detail += "; 'NavigatorEdu' not found"
         check("home page returns 200 and names NavigatorEdu",
-              status == 200 and "NavigatorEdu" in text,
-              f"status {status}"
-              + ("" if "NavigatorEdu" in text else "; 'NavigatorEdu' not found"))
-    except urllib.error.URLError as e:
-        check("home page returns 200 and names NavigatorEdu", False,
-              f"unreachable: {e.reason}")
+              status == 200 and branded, detail)
+        break
 
     # -- Pack metadata (governance posture) --------------------------------
     meta = None
@@ -97,9 +129,9 @@ def run_checks(base_url: str, expected_pack_id: str | None = None,
         check("/api/v1/pack-metadata returns 200 JSON",
               meta is not None,
               f"status {status}" + ("" if meta is not None else "; not JSON"))
-    except urllib.error.URLError as e:
+    except NETWORK_ERRORS as e:
         check("/api/v1/pack-metadata returns 200 JSON", False,
-              f"unreachable: {e.reason}")
+              f"unreachable: {_network_error_reason(e)}")
 
     required_fields = ("pack_id", "pack_name", "pack_version", "domain_type")
     if meta is not None:
@@ -141,8 +173,9 @@ def run_checks(base_url: str, expected_pack_id: str | None = None,
                   f"status {status}, "
                   + (f"{len(payload)} returned" if isinstance(payload, list)
                      else "no JSON list"))
-        except urllib.error.URLError as e:
-            check(name, False, f"unreachable: {e.reason}")
+        except NETWORK_ERRORS as e:
+            check(name, False,
+                  f"unreachable: {_network_error_reason(e)}")
 
     # -- API schema advertises the report feature --------------------------
     try:
@@ -157,9 +190,9 @@ def run_checks(base_url: str, expected_pack_id: str | None = None,
               ok,
               f"status {status}"
               + ("" if ok else "; path not advertised"))
-    except urllib.error.URLError as e:
+    except NETWORK_ERRORS as e:
         check("/openapi.json returns 200 and includes /api/v1/quiz/report",
-              False, f"unreachable: {e.reason}")
+              False, f"unreachable: {_network_error_reason(e)}")
 
     # -- The one write-shaped call: stateless by design ---------------------
     name = "POST /api/v1/quiz/report (empty answers) returns the HTML report"
@@ -175,8 +208,8 @@ def run_checks(base_url: str, expected_pack_id: str | None = None,
         check(name, ok,
               f"status {status}, content-type {ctype or '(none)'}"
               + ("" if ok else "; report language not found"))
-    except urllib.error.URLError as e:
-        check(name, False, f"unreachable: {e.reason}")
+    except NETWORK_ERRORS as e:
+        check(name, False, f"unreachable: {_network_error_reason(e)}")
 
     return results
 

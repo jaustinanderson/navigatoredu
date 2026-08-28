@@ -25,9 +25,10 @@ The demo works identically at the hosted URL.)
 
 ## Presenting a hosted demo? Smoke-check it first
 
-Before any screen-share against a deployed URL, run the smoke check — it
-takes seconds and turns "I hope the free-tier instance is awake" into a
-printed checklist:
+Before any screen-share against a deployed URL, run the smoke check. A warm
+instance normally finishes in seconds; a sleeping Render free-tier instance
+can take about a minute while the bounded home-page wake retries run. Either
+way, it turns "I hope the instance is awake" into a printed checklist:
 
 ```bash
 python scripts/smoke_deploy.py --base-url https://YOUR-RENDER-URL --expected-pack-id cytofish_synthetic
@@ -84,7 +85,7 @@ order as the in-app Reviewer guide:
    as a feature.
 6. **`/docs`** — the same API, self-documenting; the frontend is just one
    consumer.
-7. **Close on the tests** — 159 pytest tests with no mocks, a content
+7. **Close on the tests** — 161 pytest tests with no mocks, a content
    validator gating CI, and 25 Playwright browser tests including an
    axe-core accessibility audit (serious/critical fail the build) and five
    keyboard-only journeys. "The badge is green" is a claim about the repo,

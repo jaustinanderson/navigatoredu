@@ -280,7 +280,7 @@ ranking tuning, no highlighting).
   validator pass-through of generated packs, `--force` semantics, CLI exit
   codes — entirely in temp directories, so the suite never leaves a
   generated pack in `data/`.
-- **159 tests**, all green in about a second, no services, network, or
+- **161 tests**, all green in seconds, no services, network, or
   secrets required — which is what keeps the CI workflow short. (The v22
   deploy-smoke unit tests belong to this suite too: they exercise
   `scripts/smoke_deploy.py` through an injected fake HTTP transport.)

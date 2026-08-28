@@ -12,7 +12,7 @@ library, training modules, guided practice cases, server-scored quizzes —
 where **the entire knowledge domain is one validated JSON file**. Load a
 different file and the same codebase becomes a different product: three
 complete demo domains ship in the repo, including a fully synthetic
-cytogenetics/FISH education pack. Everything is covered by 159 backend
+cytogenetics/FISH education pack. Everything is covered by 161 backend
 tests (no mocks), 25 real-browser tests including an accessibility audit
 and keyboard-only journeys, a content validator that gates CI, a Docker
 build check, a one-file deployment blueprint, and a hosted-demo smoke
@@ -124,7 +124,7 @@ validity, clinical use, or clinical expertise.
   `Depends(get_session)`. Tests override that single dependency with an
   in-memory SQLite engine seeded from the same pack format — real queries
   end-to-end, and the development database is never touched.
-- **159 tests** across API behavior (including the security-relevant
+- **161 tests** across API behavior (including the security-relevant
   properties: quiz answers never serialized on GET, scoring server-side),
   pack switching, validator behavior (broken-pack fixtures built by mutating
   a copy of a real pack), and the authoring command (all file I/O in temp
@@ -177,7 +177,7 @@ every functional milestone.
 | REST API design | Versioned prefix, list/detail response shaping, correct 400/404 usage |
 | Data modeling | Seven related tables with FKs; deliberate JSON-column trade-off, documented |
 | Security thinking | Quiz answers never leave the server; server-side scoring; HTML-escaped rendering |
-| Testing discipline | 159 tests on isolated in-memory DBs via dependency override — no mocks |
+| Testing discipline | 161 tests on isolated in-memory DBs via dependency override — no mocks |
 | Data pipelines | Idempotent seed script; human-reviewable JSON as source of truth; CLI validator gating CI; scaffolder for safe-by-default authoring |
 | Content governance | Required provenance/intended-use metadata, validated in CI; active pack queryable at runtime |
 | Safe domain modeling | A sensitive domain hosted with every safety boundary in content and metadata, none in code |
