@@ -11,9 +11,10 @@ variable, with governance metadata and content validation enforced in CI.
 > **Synthetic-content statement:** every record in this application is
 > fictional, written for this demo. There are no real organizations, people,
 > patients, cases, or operational procedures here, and nothing is suitable for
-> real-world, operational, or clinical use. That statement is enforced by the
-> system itself: each pack must declare `synthetic_only: true` in governance
-> metadata that the validator checks on every CI run.
+> real-world, operational, or clinical use. The validator checks that each
+> pack declares `synthetic_only: true` and supplies the required governance
+> metadata. These structural checks do not establish provenance or detect
+> PHI; content review is required to substantiate the synthetic-content claim.
 
 ## Live demo
 
@@ -75,7 +76,7 @@ status across all three jobs (`test`, `docker-build`, `browser-test`):
 
 | Proof | Where it lives |
 |-------|----------------|
-| **161 pytest tests, no mocks** | `backend/tests/` — API tests on isolated in-memory DBs through one dependency-injection seam; deploy-smoke unit tests fake only the HTTP boundary |
+| **161 pytest tests** | `backend/tests/` — API tests on isolated in-memory DBs through one dependency-injection seam; deploy-smoke unit tests fake only the HTTP boundary |
 | **25 Playwright browser tests** | `tests/browser/` — computed-style chip assertions, search/filter behavior, pack switching, report download verified file-in-hand |
 | **Accessibility audit in CI** | axe-core, full default ruleset, five views; serious/critical violations fail the build |
 | **Keyboard-only journeys** | five tests completing the main tasks with real Tab/Enter/Space events — no mouse, no programmatic focus |
@@ -83,7 +84,7 @@ status across all three jobs (`test`, `docker-build`, `browser-test`):
 | **Docker build** | non-root image built and smoke-tested in CI on every push |
 | **Deployment option** | [`render.yaml`](render.yaml) blueprint — deploy a fork from the browser, no CLI |
 
-And the boundary, stated as often as it is enforced: **all content is
+The project's content boundary remains: **all content is
 synthetic; nothing here is suitable for real-world, operational, or
 clinical use.**
 
@@ -110,13 +111,15 @@ This project is built to be read by employers. It maps to real work in:
   the same API.
 - **Test-driven development** — 161 pytest tests; API tests run against
   isolated in-memory databases through one dependency-injection seam — real
-  queries, zero mocks.
+  queries without mocking database behavior. Deploy-smoke tests fake the
+  HTTP transport.
 - **Content-pack architecture** — the load-bearing idea behind white-label
   products, LMS platforms, and documentation systems: identify the invariant
   structure beneath a domain and keep it out of the code.
 - **Safe synthetic domain modeling** — inventing realistic-shaped but fully
   fictional content, stating its boundaries in disclaimers and metadata, and
-  enforcing the synthetic-only invariant mechanically.
+  validating the required synthetic-only declaration. Content provenance
+  and the absence of real or sensitive material require separate review.
 
 ### Why the CytoFISH pack matters
 
@@ -137,7 +140,7 @@ clinical capability.
 |------|-------------|
 | Backend | **FastAPI**, versioned `/api/v1` routers, dependency-injected sessions |
 | Data | **SQLModel / SQLite**; six related tables; JSON columns for list fields; **FTS5 full-text search** over reference items, rebuilt on every seed |
-| Testing | **Pytest** — 161 tests; API tests on isolated in-memory DBs via one DI override, no mocks |
+| Testing | **Pytest** — 161 tests; API tests use real queries on isolated in-memory DBs; deploy-smoke tests fake the HTTP boundary |
 | CI | **GitHub Actions** — pytest + pack validation, Docker build check, and Playwright browser tests including an **axe-core accessibility audit** (fails on serious/critical), on every push/PR |
 | Ops | **Docker** (non-root image, PORT-aware) + compose volume and healthcheck; **Render blueprint** for deploy-it-yourself hosting |
 | Content pipeline | **Content-pack validator** (`validate_pack`) gating CI; **SEED_PATH**-based pack switching; **authoring command** (`new_pack`) scaffolding valid, safe-by-default packs |
@@ -208,9 +211,9 @@ in the blueprint).
 
 ## Hosted demo verification
 
-Deployed a copy (or about to screen-share one)? Prove it's alive,
-synthetic-only, and serving the expected API in one command — the smoke
-script is standard-library Python, so it runs anywhere:
+Deployed a copy (or about to screen-share one)? Check that it is reachable,
+reports its synthetic-only declaration, and serves the expected API in one
+command. The smoke script uses only the Python standard library:
 
 Render free-tier instances may be asleep when the check begins. The home-page
 probe therefore makes up to three bounded attempts before the rest of the
@@ -343,7 +346,7 @@ python -m pytest        # 161 tests
 
 API tests run against an **isolated in-memory SQLite database** seeded from
 the same pack format, injected by overriding the one `get_session`
-dependency — real queries, zero mocks, and the development database is
+dependency — real queries without mocking database behavior, and the development database is
 never touched. The hosted-demo smoke script's unit tests inject a fake HTTP
 transport, so the whole suite runs offline.
 

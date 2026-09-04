@@ -354,7 +354,7 @@ const views = {
           ${demoCard('Synthetic data safety boundaries',
             'Every pack must declare synthetic_only, intended use, and safety notes; the CytoFISH pack models a sensitive domain with those boundaries in the content itself.')}
           ${demoCard('CI-tested backend behavior',
-            'A pytest suite runs real queries against isolated databases — no mocks — plus pack validation on every push.')}
+            'API tests run real SQLite queries against isolated databases; deploy-smoke tests fake the HTTP transport. Pack validation runs on every push.')}
           ${demoCard('Portfolio-grade documentation',
             'Architecture notes, authoring guide, demo guide, case study, and screenshots ship with the code.')}
         </div>
@@ -379,9 +379,9 @@ const views = {
             <li>· No AI/RAG features</li>
           </ul>
           <p class="text-sm text-slate-600 leading-relaxed mt-3">
-            Each exclusion keeps the demo honest: safety boundaries are
-            enforced mechanically (validator + allowlist), and nothing ships
-            that can't be validated.
+            The validator checks content structure and required declarations;
+            the allowlist limits which packs can be loaded. Content review
+            remains necessary to establish provenance and absence of PHI.
           </p>
         </div>
       </section>
@@ -701,10 +701,10 @@ const views = {
           <p class="text-sm text-slate-700 leading-relaxed mt-3">
             It is <strong>not clinical software</strong>. Every record in
             every pack is fictional and synthetic — no PHI, no real cases,
-            and nothing here is suitable for real-world use. That boundary
-            is enforced mechanically, not just stated: packs must declare
-            <code class="font-mono text-xs">synthetic_only</code> and pass a
-            validator in CI.
+            and nothing here is suitable for real-world use. Packs must declare
+            <code class="font-mono text-xs">synthetic_only: true</code> and pass a
+            validator in CI. These checks validate structure and declarations;
+            they do not establish provenance or detect PHI. Content review remains required.
           </p>
         </div>
       </section>
@@ -738,7 +738,7 @@ const views = {
           ${glance('Docker / Render deployment',
             'Non-root Docker image with a CI build-and-smoke-test job, plus a Render blueprint for browser-only deploy from a fork.')}
           ${glance('Four layers of tests',
-            'pytest (backend, no mocks, isolated in-memory DBs), Playwright behavior tests, an axe-core accessibility audit failing on serious/critical, and keyboard-only journey tests.')}
+            'pytest (API tests use real in-memory SQLite queries; deploy-smoke tests fake the HTTP transport), Playwright behavior tests, an axe-core accessibility audit failing on serious/critical, and keyboard-only journey tests.')}
         </div>
       </section>
 
@@ -746,9 +746,9 @@ const views = {
         <h2 id="guide-safety" class="font-display font-semibold text-lg text-deep mb-3">Safety boundaries</h2>
         <div class="bg-white border border-slate-200 rounded-lg p-5 max-w-2xl">
           <ul class="space-y-1.5 text-sm text-slate-700">
-            <li>· <strong>Synthetic content only</strong> — every pack declares it, the validator enforces it.</li>
+            <li>· <strong>Synthetic content only</strong> — the validator requires the declaration; content review must substantiate it.</li>
             <li>· <strong>No PHI</strong> — no real patients, cases, accession numbers, or protocols anywhere.</li>
-            <li>· <strong>No accounts</strong> — no authentication, no user data to protect or leak.</li>
+            <li>· <strong>No accounts</strong> — no authentication or saved learner profiles.</li>
             <li>· <strong>No persistence of quiz submissions</strong> — scoring and reports are stateless.</li>
             <li>· <strong>No clinical interpretation</strong> — no diagnostic language; education-shaped content only.</li>
           </ul>

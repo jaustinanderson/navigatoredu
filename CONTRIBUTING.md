@@ -64,6 +64,11 @@ A pack must:
 
 Do not weaken the validator merely to make an invalid pack pass. Correct the content or explicitly evolve the contract with tests and documentation.
 
+The validator checks structure and the required `synthetic_only: true`
+declaration. Passing validation does not establish provenance or detect PHI.
+Review the actual content and its origin separately before confirming that a
+pack meets the synthetic-content boundary.
+
 ## Application Rules
 
 - Keep API response shapes deliberate and versioned.
@@ -83,6 +88,12 @@ State:
 - Whether the hosted-demo behavior changed
 - Confirmation that all content remains synthetic
 - Any limitations or deferred work
+
+Keep claims consistent across repository documentation and mirrored in-app
+copy. Describe the tested boundary precisely: API database tests use real
+SQLite queries; deploy-smoke tests fake the HTTP transport. Checking a
+synthetic-only declaration does not prove the underlying content claim, and
+SQLite FTS5 search does not become PostgreSQL-compatible by changing a URL.
 
 ## Scope Control
 

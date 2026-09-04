@@ -12,13 +12,16 @@ library, training modules, guided practice cases, server-scored quizzes —
 where **the entire knowledge domain is one validated JSON file**. Load a
 different file and the same codebase becomes a different product: three
 complete demo domains ship in the repo, including a fully synthetic
-cytogenetics/FISH education pack. Everything is covered by 161 backend
-tests (no mocks), 25 real-browser tests including an accessibility audit
+cytogenetics/FISH education pack. Verification includes 161 pytest tests
+(real SQLite queries for API database tests; fake HTTP transport for
+deploy-smoke tests), 25 real-browser tests including an accessibility audit
 and keyboard-only journeys, a content validator that gates CI, a Docker
 build check, a one-file deployment blueprint, and a hosted-demo smoke
-check that proves a deployed instance is alive and synthetic-only. All
+check that observes reachability, expected API behavior, and the pack's
+synthetic-only declaration. All
 content is synthetic; nothing is suitable for clinical or operational
-use — and that boundary is machine-enforced, not just promised.
+use. The validator checks required declarations and structure; content
+review is needed to substantiate provenance and absence of sensitive material.
 
 It was built in twenty-two sequential milestones, each delivered with
 tests, documentation, and CI green, so the repository history itself
@@ -66,7 +69,8 @@ Constraints were chosen up front and kept:
 - **Beginner-manageable stack.** FastAPI + SQLite + a no-build-step frontend:
   anyone can clone, seed, and run in under a minute.
 - **All content synthetic.** No real organizations, people, records, or
-  procedures anywhere — enforced mechanically, not just promised.
+  procedures may be added. The validator requires the declaration; content
+  review must substantiate it.
 - **No overbuilding.** Every trade-off (JSON columns, hand-rolled
   validation, a no-build-step frontend) is the honest choice at this scale,
   with the upgrade path named in the code or docs.
@@ -98,7 +102,8 @@ Full detail and rationale: [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Safety and synthetic-content approach
 
-The project's safety posture has three layers, all mechanical:
+The project's content controls combine declarations, structural checks,
+and authoring defaults. Separate content review is still required:
 
 1. **Content-level boundaries.** The CytoFISH pack — a safety-sensitive
    domain — contains no PHI, no real cases, no accession numbers, no
@@ -108,8 +113,9 @@ The project's safety posture has three layers, all mechanical:
 2. **Governance metadata.** Every pack must declare `pack_id`, `pack_name`,
    `pack_version`, `pack_description`, `domain_type`, `intended_use`,
    `safety_notes`, and `synthetic_only: true`. The validator fails any pack
-   that omits these or weakens the synthetic-only invariant, and CI runs the
-   validator on every push.
+   that omits these or does not affirm `synthetic_only: true`, and CI runs the
+   validator on every push. This checks a declaration, not its truth; it
+   does not establish provenance or detect PHI.
 3. **Safe-by-default authoring.** The `new_pack` scaffolder generates new
    packs with the safety defaults already in place, so the lowest-effort path
    to a new domain is also the governed one.
@@ -120,7 +126,7 @@ validity, clinical use, or clinical expertise.
 
 ## Testing and validation strategy
 
-- **One seam, no mocks.** Every route receives its DB session via
+- **One database test seam.** Every route receives its DB session via
   `Depends(get_session)`. Tests override that single dependency with an
   in-memory SQLite engine seeded from the same pack format — real queries
   end-to-end, and the development database is never touched.
@@ -129,6 +135,7 @@ validity, clinical use, or clinical expertise.
   pack switching, validator behavior (broken-pack fixtures built by mutating
   a copy of a real pack), and the authoring command (all file I/O in temp
   directories so CI's working tree stays clean).
+  Deploy-smoke tests use a fake HTTP transport to keep those checks offline.
 - **Content validated like code.** A parametrized test sweeps every
   `data/seed*.json` automatically, and CI additionally runs the validator CLI
   against each shipped pack. A content edit that breaks a reference fails the
@@ -177,7 +184,7 @@ every functional milestone.
 | REST API design | Versioned prefix, list/detail response shaping, correct 400/404 usage |
 | Data modeling | Seven related tables with FKs; deliberate JSON-column trade-off, documented |
 | Security thinking | Quiz answers never leave the server; server-side scoring; HTML-escaped rendering |
-| Testing discipline | 161 tests on isolated in-memory DBs via dependency override — no mocks |
+| Testing discipline | 161 pytest tests; API tests use real in-memory SQLite queries via dependency override; deploy-smoke tests fake the HTTP transport |
 | Data pipelines | Idempotent seed script; human-reviewable JSON as source of truth; CLI validator gating CI; scaffolder for safe-by-default authoring |
 | Content governance | Required provenance/intended-use metadata, validated in CI; active pack queryable at runtime |
 | Safe domain modeling | A sensitive domain hosted with every safety boundary in content and metadata, none in code |
@@ -228,7 +235,8 @@ milestone shipped, closing with presentation polish (v21) and hosted-demo
 smoke checks (v22) — so the demo is not just runnable but *externally
 verifiable*: anyone can point `scripts/smoke_deploy.py` (or the manual
 GitHub Actions workflow) at a deployed URL and get a pass/fail checklist
-proving it is alive, serving the expected pack, and synthetic-only.
+checking reachability, the expected pack, and its synthetic-only declaration.
+That checklist does not establish content provenance or detect PHI.
 [ROADMAP.md](ROADMAP.md) records the full shipped arc and a short
 list of possible future work (richer authoring tooling, a maintained hosted
 demo, typed API client generation, and — only after substantially stronger

@@ -146,6 +146,10 @@ fixes one list, not one error per run — and exits 0/1/2 for
 valid/invalid/unreadable, with errors written for content authors
 (`quiz_questions 'q-003': correct_index 7 out of range for 4 options`).
 
+These checks validate structure and required declarations. They do not
+establish that the content is synthetic, detect PHI, or replace review of
+content provenance and intended-use claims.
+
 Enforcement happens twice: a parametrized test sweeps every
 `data/seed*.json` (new packs are picked up automatically), and CI runs the
 validator CLI against each shipped pack on every push. Content regressions
@@ -265,12 +269,12 @@ ranking tuning, no highlighting).
 
 ## Test strategy
 
-- **One seam.** Every route receives its session through
+- **Database test seam.** Every route receives its session through
   `Depends(get_session)`. `backend/tests/conftest.py` overrides that single
   dependency with an **in-memory SQLite** engine (`StaticPool` so all
-  connections share it), seeded from the same pack format — so tests
-  exercise the real query code with zero mocking, and the development
-  database is never touched.
+  connections share it), seeded from the same pack format — so database
+  tests exercise real query code without mocking database behavior, and the
+  development database is never touched.
 - **Coverage by concern.** `test_api.py` covers every endpoint including the
   two security-relevant behaviors (answers never in `GET /quiz`; scoring
   server-side). `test_seed_path.py` proves pack switching. `test_validate_pack.py`
@@ -436,7 +440,7 @@ path:
 | ~~Linear-scan text search~~ | Shipped the upgrade path in v13: FTS5, rebuilt per seed | Ranking tuning / highlighting if search becomes a product surface |
 | Hand-rolled validation | Clearer errors, zero deps at six collections | JSON Schema if the format grows |
 | No-build-step frontend | One-command run story; emphasis on backend | React + build if UI depth becomes the point |
-| SQLite | Zero-config, perfect for a reviewer-runnable demo | Postgres via a connection-string change (JSON columns work on both) |
+| SQLite | Zero-config, perfect for a reviewer-runnable demo | A PostgreSQL migration would require replacing SQLite FTS5 indexing/queries, adapting database configuration, and validating schema, seeding, and query behavior |
 | No auth / user state | Out of scope; every service dilutes the signal | `QuizAttempt` table + persisted submissions would add progress tracking without touching existing routes |
 
 Extension points, in the order they'd likely land: UI polish, an in-app pack

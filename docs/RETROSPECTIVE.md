@@ -17,9 +17,10 @@ models, routes, or frontend encodes a domain; they encode structure, and
 the packs supply everything else.
 
 Every record in every pack is fictional and synthetic. There is no PHI, no
-real patient data, no clinical use, and the system enforces that posture
-mechanically: each pack must declare `synthetic_only: true` in governance
-metadata that a validator checks in CI on every push. This is a
+real patient data, and no clinical use is intended. Each pack must declare
+`synthetic_only: true` in governance metadata that a validator checks in CI
+on every push. Those checks do not establish provenance or detect PHI;
+content review must substantiate the claim. This is a
 portfolio/education demo, and it says so on every surface it has.
 
 The build was deliberately incremental: fifteen milestones, each delivered
@@ -41,7 +42,8 @@ sprawl.
 SQLModel, a seed script, and the first 14 tests — including the decision
 that defined the testing story: every route takes its session from one
 `Depends(get_session)`, and tests override only that, running real queries
-against isolated in-memory databases. No mocks then, no mocks now.
+against isolated in-memory databases without mocking database behavior.
+The later deploy-smoke tests fake the HTTP transport so they run offline.
 
 **v03 — Training modules, Docker, CI, docs.** The project became
 continuously provable: a non-root Dockerfile, compose with a persistent
@@ -71,9 +73,9 @@ laboratory-informatics work while proving the discipline the field demands.
 **v07 — Pack governance metadata.** Every pack must now declare what it is
 and what it's for: id, name, version, domain type, intended use, safety
 notes, and `synthetic_only: true`, validated in CI, stored at seed time in
-a single-row table, and served by `GET /api/v1/pack-metadata`. "Which
-content is live, and is it cleared for real use?" became an enforced,
-queryable fact — the same instinct as dataset datasheets and model cards.
+a single-row table, and served by `GET /api/v1/pack-metadata`. The loaded
+pack and its intended-use declaration became queryable. The metadata does
+not establish provenance or authorize real-world use.
 
 **v08 — Authoring workflow.** `python -m backend.app.new_pack <slug>` emits
 a minimal, fully-wired pack that passes the validator immediately and
@@ -347,7 +349,8 @@ legitimate only when you can name the property the code correctly upholds.
 **"Tell me about the project."**
 - A learning platform where the whole domain is a validated JSON content
   pack; three synthetic domains run on one codebase, switched by one
-  variable or one click. 161 tests, no mocks; validator and Docker build in
+  variable or one click. 161 pytest tests, with real SQLite queries for API
+  database tests and a fake HTTP transport for deploy-smoke tests; validator and Docker build in
   CI; stateless exportable reports; deploy blueprint included.
 
 **"Tell me about a bug you fixed."**
@@ -366,10 +369,11 @@ legitimate only when you can name the property the code correctly upholds.
   artifacts extracted fresh and re-verified before shipping.
 
 **"How did you think about safety?"**
-- Synthetic-only enforced mechanically (validator + CI), boundaries carried
+- Synthetic-only declaration required by the validator in CI, with content
+  review needed to establish provenance and absence of sensitive material; boundaries carried
   in the content and its governance metadata, allowlist-only pack loading,
   server-side quiz scoring, escaped report output with adversarial tests,
-  and statelessness so there's nothing to breach.
+  and stateless scoring and report generation to avoid storing submissions.
 
 **"What tradeoffs did you make?"**
 - SQLite over Postgres, JSON columns over join tables, hand-rolled
@@ -385,6 +389,7 @@ sign-out language anywhere in any pack — the CytoFISH pack models the
 *shape* of a sensitive domain while excluding everything that would make it
 operationally usable. This is not clinical software and is not validated
 for any real-world, operational, or clinical use; it is a
-portfolio/education demonstration, and that statement is enforced by the
-system itself (`synthetic_only: true`, checked in CI), displayed in the UI,
-embedded in every exported report, and repeated here.
+portfolio/education demonstration. The declaration (`synthetic_only: true`)
+is checked in CI, displayed in the UI, embedded in every exported report,
+and repeated here. These checks do not prove provenance or absence of PHI;
+content review is required to substantiate the claim.
