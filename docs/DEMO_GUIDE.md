@@ -85,7 +85,8 @@ order as the in-app Reviewer guide:
    as a feature.
 6. **`/docs`** — the same API, self-documenting; the frontend is just one
    consumer.
-7. **Close on the tests** — 161 pytest tests with no mocks, a content
+7. **Close on the tests** — 161 pytest tests (real SQLite queries for API
+   database tests; fake HTTP transport for deploy-smoke tests), a content
    validator gating CI, and 25 Playwright browser tests including an
    axe-core accessibility audit (serious/critical fail the build) and five
    keyboard-only journeys. "The badge is green" is a claim about the repo,

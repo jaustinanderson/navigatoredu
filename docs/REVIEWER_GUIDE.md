@@ -17,8 +17,9 @@ with it; swapping one re-skins the entire product with zero code changes.
 
 It is **not clinical software**. Every record in every pack is fictional
 and synthetic — no PHI, no real cases, and nothing here is suitable for
-real-world use. That boundary is enforced mechanically, not just stated:
-packs must declare `synthetic_only` and pass a validator in CI.
+real-world use. Packs must declare `synthetic_only: true` and pass a
+validator in CI. These checks validate structure and declarations; they do
+not establish provenance or detect PHI. Content review remains required.
 
 ## What to try first
 
@@ -63,17 +64,18 @@ Run the app first (`README.md` → "Run it locally" — under a minute), then:
 - **Docker / Render deployment** — non-root Docker image with a CI
   build-and-smoke-test job, plus a Render blueprint for browser-only deploy
   from a fork.
-- **Four layers of tests** — pytest (backend, no mocks, isolated in-memory
-  DBs), Playwright behavior tests, an axe-core accessibility audit failing
+- **Four layers of tests** — pytest (API tests use real in-memory SQLite
+  queries; deploy-smoke tests fake the HTTP transport), Playwright behavior
+  tests, an axe-core accessibility audit failing
   on serious/critical, and keyboard-only journey tests.
 
 ## Safety boundaries
 
-- **Synthetic content only** — every pack declares it, the validator
-  enforces it.
+- **Synthetic content only** — the validator requires the declaration;
+  content review must substantiate it.
 - **No PHI** — no real patients, cases, accession numbers, or protocols
   anywhere.
-- **No accounts** — no authentication, no user data to protect or leak.
+- **No accounts** — no authentication or saved learner profiles.
 - **No persistence of quiz submissions** — scoring and reports are
   stateless.
 - **No clinical interpretation** — no diagnostic language; education-shaped

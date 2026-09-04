@@ -1,8 +1,11 @@
 # NavigatorEdu — Interview Talking Points
 
-Concise preparation for discussing this project in interviews. Everything
-here is accurate to the repo — no claim in this document outruns what the
-code and tests actually show.
+Concise preparation for discussing the repository's design and behavior.
+The first-person passages are practice drafts: adapt them to Austin's
+verified contribution and what he can explain or demonstrate. Repository
+ownership, AI-generated implementation, and passing tests do not establish
+personal mastery or sole authorship. Use project-centered wording until
+those contributions are verified, and distinguish AI assistance where relevant.
 
 ## The 30-second version
 
@@ -10,9 +13,10 @@ code and tests actually show.
 > knowledge domain is data: a validated JSON content pack loaded into SQLite.
 > One FastAPI codebase hosts three complete demo domains — including a fully
 > synthetic cytogenetics/FISH education pack — switched by a single
-> environment variable. It has 161 tests with no mocks, a CI-gated content
-> validator, and governance metadata so the system itself reports what
-> content is loaded and that it's synthetic-only."
+> environment variable. It has 161 pytest tests, a CI-gated content
+> validator, and governance metadata reporting the loaded pack and its
+> synthetic-only declaration. API tests use real database queries;
+> deploy-smoke tests use a fake HTTP transport."
 
 ## The 2-minute version
 
@@ -33,11 +37,12 @@ code and tests actually show.
 > that's valid and safe-by-default from the first second, so the easiest way
 > to start a new domain is also the governed one.
 >
-> Testing runs through one dependency-injection seam: every route gets its
-> database session through a single dependency, and tests override just that
-> with an in-memory SQLite engine. So it's 161 tests running real queries, no
-> mocks, and the dev database is never touched. CI runs the suite plus the
-> validator on every push.
+> API database testing runs through one dependency-injection seam: routes get
+> their database session through a single dependency, and tests override that
+> with an in-memory SQLite engine. Those API tests run real queries without
+> mocking database behavior, and the dev database is never touched. The
+> 161-test suite also includes deploy-smoke tests with a fake HTTP transport
+> so it can run offline. CI runs the suite plus the validator on every push.
 >
 > I kept the scope deliberately tight — no auth, no external services, a
 > no-build-step frontend — so a reviewer can clone it and have it running in
@@ -52,9 +57,9 @@ code and tests actually show.
 2. **Data contracts with code-contract rigor.** The pack format is enforced
    by a validator that runs in CI — a content edit that breaks a reference
    fails the build exactly like a code regression.
-3. **One test seam, zero mocks.** Overriding a single `get_session`
+3. **One database test seam.** Overriding a single `get_session`
    dependency points the API tests at an isolated in-memory database running
-   real queries. Small surface, high confidence.
+   real queries. Deploy-smoke tests separately fake the HTTP boundary.
 4. **Server-side quiz integrity.** `GET /quiz` strips answers before
    serialization; grading happens in `POST /quiz/submit`. A dedicated test
    verifies answers never reach the client.
@@ -85,9 +90,10 @@ code and tests actually show.
 > "Every route receives its database session through one FastAPI dependency,
 > `get_session`. That's the seam: the test suite overrides just that
 > dependency with an in-memory SQLite engine seeded from the same content
-> format production uses. So the tests run the real query code end-to-end —
-> nothing is mocked — and the development database is never touched. On top
-> of that, content is tested like code: a parametrized test sweeps every
+> format the application uses. Those API tests run real query code without
+> mocking database behavior, and the development database is never touched.
+> Deploy-smoke tests use a fake HTTP transport to check the script offline.
+> On top of that, content is tested like code: a parametrized test sweeps every
 > shipped pack through the validator, and broken-pack test fixtures are built
 > by mutating a copy of the real pack, so they stay valid as content evolves."
 
@@ -103,13 +109,14 @@ code and tests actually show.
 > data design, which is where I wanted the signal."
 
 **3. "How would you scale this?"**
-> "Postgres is a connection-string change — SQLModel abstracts the rest and
-> the JSON columns work on both. Search is already on SQLite FTS5, rebuilt
-> per seed; the next step there would be an external index if the corpus
-> outgrew one process. User state starts with a `QuizAttempt` table persisting
-> submissions, which adds progress tracking without touching existing routes.
-> The important point is that the current design blocks none of these — the
-> trade-offs were chosen to be reversible."
+> "A PostgreSQL migration would require more than a connection-string
+> change. Search uses SQLite FTS5 virtual tables and query syntax, and
+> seeding rebuilds that index. I would replace the search implementation,
+> adapt database configuration, and validate schema, seeding, and queries
+> against PostgreSQL. That migration has not been implemented or tested.
+> Persistent user progress would be a separate feature with its own data,
+> privacy, and API requirements. I would choose either change only when
+> the use case justified it."
 
 **4. "Why did you use synthetic content instead of a real domain?"**
 > "Two reasons. Practically, it means the engineering can be evaluated
@@ -118,9 +125,10 @@ code and tests actually show.
 > the code encodes structure, not content. And for the cytogenetics pack
 > specifically, synthetic-only is the responsible way to model a
 > safety-sensitive domain — it let me demonstrate familiarity with the shape
-> of that content while enforcing, mechanically, that nothing real and
-> nothing clinical is in there. The validator literally fails any pack that
-> doesn't affirm `synthetic_only: true`."
+> of that content while documenting a strict content boundary. The validator
+> rejects packs that do not affirm `synthetic_only: true`, but checking that
+> declaration cannot prove provenance or detect PHI. Reviewing the content
+> remains necessary to substantiate the claim."
 
 **5. "What would you do differently if you started over?"**
 > "I'd introduce the validator earlier — it landed at milestone five, and
@@ -185,8 +193,9 @@ The honest framing, in one paragraph:
 > to laboratory informatics: that I understand the *shape* of structured
 > content in that field, and that I have the governance instincts the field
 > requires — knowing what to leave out, stating intended use explicitly, and
-> enforcing those boundaries mechanically rather than by promise. It is not a
-> clinical tool, it isn't validated for any real use, and I don't present it
+> checking content structure and required declarations in CI. Provenance
+> and the absence of sensitive material need separate content review. It is
+> not a clinical tool, it isn't validated for any real use, and I don't present it
 > as clinical experience — I present it as evidence of how I'd handle
 > content, provenance, and safety discipline in a regulated environment."
 
@@ -205,8 +214,9 @@ Things **not** to say (they overclaim and an interviewer will notice):
 > Designed and built a full-stack learning platform (Python/FastAPI, SQLite,
 > REST) with a content-pack architecture hosting three swappable demo
 > domains; enforced content contracts via a CI-gated validator and governance
-> metadata; 161-test pytest suite on isolated databases with no mocks, plus
-> Playwright browser, accessibility, and keyboard-journey tests in CI;
+> metadata; 161-test pytest suite with real database queries and a fake HTTP
+> transport for deploy-smoke tests, plus Playwright browser, accessibility,
+> and keyboard-journey tests in CI;
 > containerized with Docker with a deployment blueprint and hosted-demo
 > smoke checks.
 

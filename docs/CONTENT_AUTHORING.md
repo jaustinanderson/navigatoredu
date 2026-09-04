@@ -130,7 +130,7 @@ content — then keep it green as you edit.
 The scaffolder does not leave safety to chance. Every generated pack starts
 with:
 
-- `synthetic_only: true` — the governance invariant the validator enforces.
+- `synthetic_only: true` — the declaration the validator requires.
 - `intended_use` stating **educational demonstration only** — not for
   real-world, operational, clinical, diagnostic, or decision-making use.
 - `safety_notes` stating **no real records, no real cases, no real
@@ -141,6 +141,10 @@ with:
 You are free to strengthen this language for a sensitive domain (see the
 CytoFISH pack for the pattern), but you cannot weaken `synthetic_only` below
 `true` without failing validation.
+
+These defaults and checks validate the declaration, not the truth of the
+content claim. They do not establish provenance or detect PHI; review the
+actual content and its origin before release.
 
 ## Keeping content synthetic and safe
 
@@ -168,9 +172,10 @@ data contract with the same rigor as a code contract:
   A pack cannot ship without declaring what it is, what it's for, and that it
   is synthetic-only.
 - **The validator is the gate.** Structure, references, quiz sanity, and the
-  `synthetic_only` invariant are all enforced — and CI runs the validator on
-  every shipped pack on every push, so a bad content edit fails the build just
-  like a code regression.
+  required `synthetic_only: true` declaration are checked — and CI runs the
+  validator on every shipped pack on every push, so an edit that violates
+  those checks fails the build. Content review covers claims these checks
+  cannot establish.
 - **The scaffolder makes the safe path the easy path.** The lowest-effort way
   to start a pack is also the one that begins valid and safe-by-default, so
   authors add content on top of a green, governed baseline instead of
