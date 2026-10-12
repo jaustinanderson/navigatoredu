@@ -821,12 +821,21 @@ async function submitQuiz() {
   document.getElementById('quiz-score').textContent = '';
   document.getElementById('quiz-report-slot').replaceChildren();
   form.querySelectorAll('.result').forEach(p => p.textContent = '');
+  form.querySelectorAll('fieldset[data-qid]').forEach(fs => {
+    fs.classList.remove('border-green-600', 'border-red-400');
+    fs.classList.add('border-slate-200');
+  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+  let rejected = false;
   try {
     const response = await fetch('/api/v1/quiz/submit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ answers }),
+      signal: controller.signal,
     });
+    rejected = response.status === 400 || response.status === 422;
     if (!response.ok) throw new Error('Scoring response unavailable');
     const res = await response.json();
     if (!current()) return;
@@ -851,10 +860,13 @@ async function submitQuiz() {
       <span class="text-xs text-slate-600 ml-1.5">printable HTML · generated locally, not stored</span>`;
   } catch (e) {
     if (current()) {
-      hint.textContent = 'Could not confirm scoring. The server may have processed the request. Your answers are kept; retrying only recalculates this unsaved quiz.';
+      hint.textContent = rejected
+        ? 'This quiz submission was rejected. Reopen the Quiz to load its current questions before trying again.'
+        : 'Could not confirm scoring. The server may have processed the request. Your answers are kept; retrying only recalculates this unsaved quiz.';
       button.textContent = 'Try again';
     }
   } finally {
+    clearTimeout(timeout);
     if (current()) button.disabled = false;
   }
 }
