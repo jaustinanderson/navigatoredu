@@ -792,14 +792,17 @@ function revealStep(btn) {
 }
 
 async function submitQuiz() {
+  const form = document.getElementById('quiz-form');
+  const button = document.getElementById('quiz-submit');
+  if (!form || !button || button.disabled) return;
   const hint = document.getElementById('quiz-hint');
   hint.textContent = '';
   const answers = {};
   const unanswered = [];
   for (const q of window._quiz) {
-    const fs = document.querySelector(`fieldset[data-qid="${q.id}"]`);
+    const fs = form.querySelector(`fieldset[data-qid="${q.id}"]`);
     fs.classList.remove('border-red-400');
-    const sel = document.querySelector(`input[name="${q.id}"]:checked`);
+    const sel = form.querySelector(`input[name="${q.id}"]:checked`);
     if (!sel) { unanswered.push(fs); continue; }
     answers[q.id] = Number(sel.value);
   }
@@ -809,29 +812,51 @@ async function submitQuiz() {
     unanswered[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
     return;
   }
-  const res = await fetch('/api/v1/quiz/submit', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ answers }),
-  }).then(r => r.json());
-  for (const r of res.results) {
-    const fs = document.querySelector(`fieldset[data-qid="${r.question_id}"]`);
-    fs.classList.remove('border-slate-200', 'border-red-400');
-    fs.classList.add(r.correct ? 'border-green-600' : 'border-red-400');
-    const p = fs.querySelector('.result');
-    p.innerHTML = r.correct
-      ? `<span class="font-medium text-green-700">✔ Correct.</span> ${r.explanation}`
-      : `<span class="font-medium text-red-700">✘ Not quite.</span> ${r.explanation}`;
+  const attempt = form._quizAttempt = (form._quizAttempt || 0) + 1;
+  const current = () => form.isConnected &&
+    document.getElementById('quiz-form') === form && form._quizAttempt === attempt;
+  button.disabled = true;
+  button.textContent = 'Checking…';
+  hint.textContent = 'Checking your answers…';
+  document.getElementById('quiz-score').textContent = '';
+  document.getElementById('quiz-report-slot').replaceChildren();
+  form.querySelectorAll('.result').forEach(p => p.textContent = '');
+  try {
+    const response = await fetch('/api/v1/quiz/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ answers }),
+    });
+    if (!response.ok) throw new Error('Scoring response unavailable');
+    const res = await response.json();
+    if (!current()) return;
+    for (const r of res.results) {
+      const fs = form.querySelector(`fieldset[data-qid="${r.question_id}"]`);
+      fs.classList.remove('border-slate-200', 'border-red-400');
+      fs.classList.add(r.correct ? 'border-green-600' : 'border-red-400');
+      const p = fs.querySelector('.result');
+      p.innerHTML = r.correct
+        ? `<span class="font-medium text-green-700">✔ Correct.</span> ${r.explanation}`
+        : `<span class="font-medium text-red-700">✘ Not quite.</span> ${r.explanation}`;
+    }
+    document.getElementById('quiz-score').textContent = `Score: ${res.score} / ${res.total}`;
+    document.getElementById('quiz-submit').textContent = 'Check again';
+    hint.textContent = '';
+    window._lastQuizAnswers = answers;
+    document.getElementById('quiz-report-slot').innerHTML = `
+      <button onclick="downloadQuizReport(this)"
+        class="border border-deep text-deep text-sm font-medium rounded-md px-4 py-2 hover:border-brassink hover:text-brassink transition-colors">
+        Download report
+      </button>
+      <span class="text-xs text-slate-600 ml-1.5">printable HTML · generated locally, not stored</span>`;
+  } catch (e) {
+    if (current()) {
+      hint.textContent = 'Could not confirm scoring. The server may have processed the request. Your answers are kept; retrying only recalculates this unsaved quiz.';
+      button.textContent = 'Try again';
+    }
+  } finally {
+    if (current()) button.disabled = false;
   }
-  document.getElementById('quiz-score').textContent = `Score: ${res.score} / ${res.total}`;
-  document.getElementById('quiz-submit').textContent = 'Check again';
-  window._lastQuizAnswers = answers;
-  document.getElementById('quiz-report-slot').innerHTML = `
-    <button onclick="downloadQuizReport(this)"
-      class="border border-deep text-deep text-sm font-medium rounded-md px-4 py-2 hover:border-brassink hover:text-brassink transition-colors">
-      Download report
-    </button>
-    <span class="text-xs text-slate-600 ml-1.5">printable HTML · generated locally, not stored</span>`;
 }
 
 async function loadPack(slug, btn) {

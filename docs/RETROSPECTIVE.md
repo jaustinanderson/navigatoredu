@@ -1,5 +1,22 @@
 # NavigatorEdu — Project Retrospective
 
+## Local quiz submission recovery proposal (October 12, 2026)
+
+Synthetic HTTP/server failures previously escaped submission without retry
+feedback. A local proposal now retains selected answers, prevents overlapping
+submissions, and gates every result/error by the originating form's latest
+attempt. Navigation cannot let an old result overwrite a newer quiz view.
+Unknown outcomes are labeled honestly: the server may have processed the
+request. Retry only recalculates this stateless score; the current submission
+endpoint reads questions and returns results without saving an attempt.
+
+Validation: the original server-error recovery regression fails; all three new
+synthetic browser regressions pass, as do all 28 browser/accessibility/keyboard
+cases and 180 backend tests. No API, schema, dependency, learner persistence,
+hosted service or clinical content changed. Claude agreed to the bounded
+approach, without inspecting this implementation or granting code acceptance.
+The proposal remains local and unpublished pending exact-diff review.
+
 *The project as an engineering story: how the architecture evolved across
 fifteen milestones, what broke along the way, how each problem was
 diagnosed, and what the incidents taught. Written for reviewers who want to
