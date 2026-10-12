@@ -5,6 +5,34 @@ fifteen milestones, what broke along the way, how each problem was
 diagnosed, and what the incidents taught. Written for reviewers who want to
 see judgment, not just features.*
 
+## Local quiz submission recovery proposal (October 12, 2026)
+
+Synthetic HTTP/server failures previously escaped submission without retry
+feedback. A local proposal now retains selected answers, prevents overlapping
+submissions from the same quiz view, and gates every result/error by the
+originating form's latest attempt. Navigation cannot let an old result
+overwrite a newer quiz view.
+Unknown outcomes are labeled honestly: the server may have processed the
+request. Retry only recalculates this stateless score; the current submission
+endpoint reads questions and returns results without saving an attempt.
+
+The original server-error regression fails on the base commit. Head 39dc1572
+passed three new regressions, 28 total browser cases and 180 backend tests;
+Claude reviewed that exact head and gave source PASS with Low corrections.
+The subsequent local correction resets old grading borders, bounds stalled
+requests to 15 seconds and distinguishes known 400/422 rejection from unknown
+outcomes. It passes seven focused and 32 total browser/accessibility/keyboard
+cases, 181 backend tests on the maintenance base (including repeated scoring without database writes),
+and JavaScript syntax/safety checks. No API, schema, dependency, learner
+persistence, hosted service or clinical content changed. Claude subsequently
+gave source PASS for corrected head 0db25b10; that is not publication or
+merge approval. The delivery candidate remains local and unpublished.
+
+For delivery, the same quiz application/test patch is isolated onto current
+main without the separate dependency or smoke-CLI changes. That delivery tree
+passes 162 backend tests; the count differs because unrelated CLI regressions
+are excluded. Application/test bytes match the source-PASS quiz checkpoint.
+
 ## 1. Executive summary
 
 NavigatorEdu is a synthetic educational content-pack platform: a FastAPI +
