@@ -97,6 +97,17 @@ class TestQuiz:
         r = client.post("/api/v1/quiz/submit", json={"answers": {"bogus": 0}})
         assert r.status_code == 400
 
+    def test_retry_recalculates_without_database_writes(self, client, engine):
+        with engine.connect() as connection:
+            before = connection.connection.driver_connection.total_changes
+        payload = {"answers": {"q-001": 1, "q-002": 0}}
+        first = client.post("/api/v1/quiz/submit", json=payload)
+        second = client.post("/api/v1/quiz/submit", json=payload)
+        assert first.status_code == second.status_code == 200
+        assert first.json() == second.json()
+        with engine.connect() as connection:
+            assert connection.connection.driver_connection.total_changes == before
+
 
 class TestTraining:
     def test_returns_all_notes(self, client):
